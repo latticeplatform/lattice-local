@@ -1,0 +1,25 @@
+services:
+  db:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: postgresql
+    environment:
+      POSTGRES_USER: inventory
+      POSTGRES_PASSWORD: inventory123
+      POSTGRES_DB: inventory
+    command: ["postgres", "-c", "config_file=/etc/postgresql.conf"]
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-db-data:/var/lib/postgresql/data
+      - ./pg_hba.conf:/etc/postgresql/pg_hba.conf
+      - ./postgresql.conf:/etc/postgresql.conf
+    networks:
+      - backend
+
+volumes:
+  postgres-db-data:
+
+networks:
+  backend:
