@@ -1,0 +1,28 @@
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    container_name: clickhouse
+    ports:
+      - "8123:8123"   # HTTP interface (used by sink connector)
+      - "9000:9000"   # Native TCP protocol
+    environment:
+      CLICKHOUSE_DB: clickhouseconsumer
+      CLICKHOUSE_USER: clickhouseconsumer
+      CLICKHOUSE_PASSWORD: "clickhouseconsumer123"
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+    networks:
+      - backend
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+
+volumes:
+  clickhouse-data:
+
+networks:
+  backend:
+    external: true
+    name: kafka-infrastructure_kafka_default
