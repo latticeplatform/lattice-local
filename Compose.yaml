@@ -2,6 +2,8 @@ services:
     controller-1:
       image: apache/kafka:4.2.0
       container_name: controller-1
+      networks:
+        - kafka_default
       environment:
         KAFKA_NODE_ID: 1
         KAFKA_PROCESS_ROLES: controller
@@ -14,6 +16,8 @@ services:
     controller-2:
       image: apache/kafka:4.2.0
       container_name: controller-2
+      networks:
+        - kafka_default
       environment:
         KAFKA_NODE_ID: 2
         KAFKA_PROCESS_ROLES: controller
@@ -26,6 +30,8 @@ services:
     controller-3:
       image: apache/kafka:4.2.0
       container_name: controller-3
+      networks:
+        - kafka_default
       environment:
         KAFKA_NODE_ID: 3
         KAFKA_PROCESS_ROLES: controller
@@ -38,8 +44,10 @@ services:
     broker-1:
       image: apache/kafka:4.2.0
       container_name: broker-1
+      networks:
+        - kafka_default
       ports:
-        - 29092:9092
+        - "29092:9092"
       environment:
         KAFKA_NODE_ID: 4
         KAFKA_PROCESS_ROLES: broker
@@ -59,8 +67,10 @@ services:
     broker-2:
       image: apache/kafka:4.2.0
       container_name: broker-2
+      networks:
+        - kafka_default
       ports:
-        - 39092:9092
+        - "39092:9092"
       environment:
         KAFKA_NODE_ID: 5
         KAFKA_PROCESS_ROLES: broker
@@ -80,8 +90,10 @@ services:
     broker-3:
       image: apache/kafka:4.2.0
       container_name: broker-3
+      networks:
+        - kafka_default
       ports:
-        - 49092:9092
+        - "49092:9092"
       environment:
         KAFKA_NODE_ID: 6
         KAFKA_PROCESS_ROLES: broker
@@ -97,14 +109,19 @@ services:
         - controller-1
         - controller-2
         - controller-3
+
     kafka-connect:
-      image: quay.io/debezium/connect:3.4.0.Final
+      build:
+        context: .
+        dockerfile: Dockerfile
       container_name: kafka-connect
+      networks:
+        - kafka_default
       ports:
-        - 8083:8083
+        - "8083:8083"
       environment:
         BOOTSTRAP_SERVERS: broker-1:19092,broker-2:19092,broker-3:19092
-  #primarly used for when you have a cluster of kafka connect instances
+        #primarly used for when you have a cluster of kafka connect instances
         #used for storing the config of the connectors
         CONFIG_STORAGE_TOPIC: connect_configs
         #used for storing the offsets of the connectors
@@ -123,4 +140,4 @@ services:
         - broker-2
         - broker-3
 networks:
-  backend:
+  kafka_default:

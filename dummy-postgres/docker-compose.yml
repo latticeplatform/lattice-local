@@ -23,3 +23,5 @@ volumes:
 
 networks:
   backend:
+    external: true
+    name: kafka-infrastructure_kafka_default
