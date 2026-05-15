@@ -19,6 +19,24 @@ curl -X POST http://localhost:8083/connectors -H "Content-Type: application/json
 }'
 ```
 
+## SQL DB Structure
+```mermaid
+    erDiagram
+        PRODUCTS {
+            id INT PK
+            sku VARCHAR(255)
+            quantity_on_hand INT
+        }
+        
+        ORDERS {
+            id INT PK
+            product_id INT FK
+            quantity INT
+        }
+        
+        PRODUCTS ||--o{ ORDERS : has_many
+```
+
 ## Deleting a connector
 ```bash
 curl -X DELETE http://localhost:8083/connectors/fulfillment-connector
@@ -50,7 +68,7 @@ psql "postgresql://inventory:inventory123@localhost:5432/inventory"
 
 ### Example table changes
 ```sql
-INSERT INTO products (sku, quantity_on_hand) VALUES (1, 100000);
+INSERT INTO products (sku, quantity_on_hand) VALUES ('teast', 100000);
 ```
 
 ```sql
