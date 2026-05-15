@@ -19,6 +19,10 @@ curl -X POST http://localhost:8083/connectors -H "Content-Type: application/json
 }'
 ```
 
+## Deleting a connector
+```bash
+curl -X DELETE http://localhost:8083/connectors/fulfillment-connector
+```
 
 # Useful commands
 
