@@ -141,3 +141,4 @@ services:
         - broker-3
 networks:
   kafka_default:
+    name: kafka-infrastructure_kafka_default
