@@ -1,0 +1,125 @@
+.page {
+  padding: 40px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+  text-align: left;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sectionHeader h2 {
+  margin: 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--social-bg);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.cardName {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-h);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.badge {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 99px;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+.stateRow {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dot[data-state='RUNNING']    { background: #4ade80; }
+.dot[data-state='PAUSED']     { background: #fb923c; }
+.dot[data-state='FAILED']     { background: #f87171; }
+.dot[data-state='UNASSIGNED'] { background: var(--slate); }
+
+.pluginClass {
+  font-size: 13px;
+  color: var(--text);
+  font-family: var(--mono);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.refreshButton {
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.refreshButton:hover {
+  border-color: var(--accent-border);
+  color: var(--accent);
+}
+
+.empty {
+  font-size: 14px;
+  color: var(--text);
+  padding: 24px;
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.error {
+  color: #f87171;
+  border: 1px solid #f87171;
+}

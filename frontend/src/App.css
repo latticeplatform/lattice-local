@@ -1,0 +1,60 @@
+#center {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  place-content: center;
+  place-items: center;
+  flex-grow: 1;
+
+  @media (max-width: 1024px) {
+    padding: 32px 20px 24px;
+    gap: 18px;
+  }
+}
+
+
+#pages {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  width: 100%;
+  gap: 16px;
+}
+
+
+#navbutton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+#navbutton .button {
+  width: 8rem;
+  height: 8rem;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--accent);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  transition: background 150ms ease, border-color 150ms ease;
+}
+
+#navbutton .button:hover {
+  border-color: var(--accent-border);
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+#navbutton .button:active {
+  transform: scale(0.95);
+}
+
+#navbutton .title {
+  font-size: 18px;
+  color: var(--text-h);
+  margin: 0;
+}
