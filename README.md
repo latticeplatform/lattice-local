@@ -207,8 +207,8 @@ curl http://localhost:8083/connectors/fulfillment-connector/status | jq
 
 ## Useful API Endpoints
 
-| Endpoint | Description |
-|---|---|
-| `http://localhost:8083/connectors` | List / manage connectors |
-| `http://localhost:8083/connector-plugins` | List available plugins |
-| `http://localhost:8083/connector-plugins/{plugin-name}/config` | Plugin config schema |
+| Endpoint                                                       | Description              |
+|----------------------------------------------------------------|--------------------------|
+| `http://localhost:8083/connectors`                             | List / manage connectors |
+| `http://localhost:8083/connector-plugins`                      | List available plugins   |
+| `http://localhost:8083/connector-plugins/{plugin-name}/config` | Plugin config schema     |
