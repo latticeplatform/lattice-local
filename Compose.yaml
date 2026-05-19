@@ -110,9 +110,12 @@ services:
         - controller-2
         - controller-3
 
-    connect:
-      image: debezium/connect:3.4.3.Final
-      container_name: connect-debezium
+
+    kafka-connect:
+      build:
+        context: .
+        dockerfile: Dockerfile
+      container_name: kafka-connect
       ports:
         - 8083:8083
       environment:
@@ -121,7 +124,7 @@ services:
         CONFIG_STORAGE_TOPIC: connect_configs
         OFFSET_STORAGE_TOPIC: connect_offsets
         ENABLE_APICURIO_CONVERTERS: "true"
-      depends_on: [apicurio, controller-1, controller-2, controller-3, broker-1, broker-2, broker-3]
+      depends_on: [apicurio, broker-1, broker-2, broker-3]
 
     apicurio:
       image: apicurio/apicurio-registry:3.0.3
