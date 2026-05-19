@@ -1,7 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
 import './App.css'
 import NavButton from "./components/NavButton.tsx";
-import CollectPage from "./components/CollectPage.tsx";
+import CollectPage from "./components/collect/CollectPage.tsx";
 import { TiFlowSwitch } from "react-icons/ti";
 import { FaPlug } from "react-icons/fa6";
 import { FaArrowRightToBracket } from "react-icons/fa6";

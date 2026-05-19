@@ -2,13 +2,13 @@ import type { FC } from "react";
 import type { IconType } from "react-icons";
 import { NavLink } from "react-router-dom";
 
-interface INavButtonProps {
+interface NavButtonProps {
   title: string;
   icon: IconType;
   path: string;
 }
 
-const NavButton: FC<INavButtonProps> = ({ title, icon: Icon, path }) => {
+const NavButton: FC<NavButtonProps> = ({ title, icon: Icon, path }) => {
   return (
     <div id='navbutton'>
       <span className='title'>{title}</span>

@@ -3,6 +3,7 @@ import React, {
   useContext,
   useState,
   useCallback,
+  useMemo,
   type FC,
   type PropsWithChildren,
 } from 'react';
@@ -37,8 +38,10 @@ export const ToastProvider: FC<PropsWithChildren> = ({ children }) => {
     setTimeout(() => dismiss(id), DURATION_MS);
   }, [dismiss]);
 
+  const value = useMemo(() => ({ push }), [push]);
+
   return (
-    <ToastContext value={{ push }}>
+    <ToastContext value={value}>
       {children}
       <div className="toast-stack">
         {toasts.map(toast => (
@@ -48,7 +51,7 @@ export const ToastProvider: FC<PropsWithChildren> = ({ children }) => {
             style={{ '--toast-duration': `${DURATION_MS}ms` } as React.CSSProperties}
           >
             <span className="toast-message">{toast.message}</span>
-            <button className="toast-dismiss" onClick={() => dismiss(toast.id)} aria-label="Dismiss">✕</button>
+            <button type="button" className="toast-dismiss" onClick={() => dismiss(toast.id)} aria-label="Dismiss">✕</button>
           </div>
         ))}
       </div>

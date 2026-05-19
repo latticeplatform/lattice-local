@@ -21,6 +21,15 @@ router.get("/connectors", async (_req, res) => {
 });
 
 // POST /connectors -> Create a new connector
+router.post("/connectors", async (req, res) => {
+  try {
+    const { data } = await axios.post(`${CONNECT_URL}/connectors`, req.body);
+    res.status(201).json(data);
+  } catch {
+    res.status(502).json({ error: "Failed to reach Kafka Connect" });
+  }
+});
+
 // GET /connectors/{name} -> Get a connector by name
 // DELETE /connectors/{name} -> Delete a connector by name
 // PUT /connectors/{name}/config -> Update a connector by name
@@ -37,7 +46,29 @@ router.get("/connector-plugins", async (_req, res) => {
   }
 });
 
-// GET /connector-plugins/{plugin-type}/config -> Get a connector plugin configuration by name
+// GET /connector-plugins/{plugin-type}/config -> Get config definition for a plugin
+router.get("/connector-plugins/:pluginClass/config", async (req, res) => {
+  try {
+    const { data } = await axios.get(
+      `${CONNECT_URL}/connector-plugins/${req.params.pluginClass}/config`
+    );
+    res.json(data);
+  } catch {
+    res.status(502).json({ error: "Failed to reach Kafka Connect" });
+  }
+});
+
 // PUT /connector-plugins/{plugin-type}/config/validate -> Validate a connector configuration
+router.put("/connector-plugins/:pluginClass/config/validate", async (req, res) => {
+  try {
+    const { data } = await axios.put(
+      `${CONNECT_URL}/connector-plugins/${req.params.pluginClass}/config/validate`,
+      req.body
+    );
+    res.json(data);
+  } catch {
+    res.status(502).json({ error: "Failed to reach Kafka Connect" });
+  }
+});
 
 export default router;

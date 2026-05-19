@@ -27,3 +27,35 @@ export interface ConnectorPlugin {
   type: 'source' | 'sink' | 'transformation' | 'predicate' | 'converter';
   version: string;
 }
+
+export type ConfigFieldType =
+  | 'STRING' | 'INT' | 'SHORT' | 'LONG' | 'DOUBLE'
+  | 'BOOLEAN' | 'LIST' | 'CLASS' | 'PASSWORD';
+
+export interface ConfigDefinition {
+  name: string;
+  type: ConfigFieldType;
+  required: boolean;
+  default_value: string | null;
+  importance: 'HIGH' | 'MEDIUM' | 'LOW';
+  documentation: string;
+  group: string | null;
+  display_name: string;
+  order: number;
+}
+
+export interface ValidationFieldResult {
+  definition: ConfigDefinition;
+  value: {
+    name: string;
+    value: string | null;
+    errors: string[];
+    visible: boolean;
+  };
+}
+
+export interface ValidationResult {
+  name: string;
+  error_count: number;
+  configs: ValidationFieldResult[];
+}
