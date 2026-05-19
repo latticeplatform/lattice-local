@@ -24,4 +24,4 @@ volumes:
 networks:
   backend:
     external: true
-    name: kafka-infrastructure_kafka_default
+    name: docker_kafka_default
