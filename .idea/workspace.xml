@@ -4,9 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1cd1916a-92f8-4b35-9d8e-a8edb628648d" name="Changes" comment="Added backend network to kafka compose file">
+    <list default="true" id="1cd1916a-92f8-4b35-9d8e-a8edb628648d" name="Changes" comment="Parameterized ClickHouse Kafka connector version and directory in Dockerfile">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Compose.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Compose.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -14,7 +15,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="10" />
+    <option name="cachedIndexableFilesCount" value="12" />
     <option name="fileBasedEmbeddingIndicesEnabled" value="true" />
   </component>
   <component name="Git.Settings">
@@ -49,6 +50,7 @@
   &quot;keyToString&quot;: {
     &quot;Docker.Compose.yaml.kafka-connect: Compose Deployment.executor&quot;: &quot;Run&quot;,
     &quot;Docker.Compose.yaml: Compose Deployment.executor&quot;: &quot;Run&quot;,
+    &quot;Docker.Dockerfile.executor&quot;: &quot;Run&quot;,
     &quot;Docker.dummy-clickhouse: Compose Deployment.executor&quot;: &quot;Run&quot;,
     &quot;Docker.dummy-postgres/Dockerfile.executor&quot;: &quot;Run&quot;,
     &quot;Docker.dummy-postgres: Compose Deployment.executor&quot;: &quot;Run&quot;,
@@ -79,7 +81,7 @@
     ]
   }
 }</component>
-  <component name="RunManager" selected="Docker.Compose.yaml: Compose Deployment">
+  <component name="RunManager" selected="Docker.dummy-postgres: Compose Deployment">
     <configuration name="Compose.yaml: Compose Deployment" type="docker-deploy" factoryName="docker-compose.yml" temporary="true" server-name="Docker">
       <deployment type="docker-compose.yml">
         <settings>
@@ -88,15 +90,10 @@
       </deployment>
       <method v="2" />
     </configuration>
-    <configuration name="Compose.yaml.kafka-connect: Compose Deployment" type="docker-deploy" factoryName="docker-compose.yml" temporary="true" server-name="Docker">
-      <deployment type="docker-compose.yml">
+    <configuration name="Dockerfile" type="docker-deploy" factoryName="dockerfile" temporary="true" server-name="Docker">
+      <deployment type="dockerfile">
         <settings>
-          <option name="services">
-            <list>
-              <option value="kafka-connect" />
-            </list>
-          </option>
-          <option name="sourceFilePath" value="Compose.yaml" />
+          <option name="sourceFilePath" value="Dockerfile" />
         </settings>
       </deployment>
       <method v="2" />
@@ -132,19 +129,19 @@
       <method v="2" />
     </configuration>
     <list>
+      <item itemvalue="Docker.Dockerfile" />
       <item itemvalue="Docker.dummy-postgres/Dockerfile" />
-      <item itemvalue="Docker.Compose.yaml.kafka-connect: Compose Deployment" />
       <item itemvalue="Docker.Compose.yaml: Compose Deployment" />
       <item itemvalue="Docker.dummy-clickhouse: Compose Deployment" />
       <item itemvalue="Docker.dummy-postgres: Compose Deployment" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Docker.Compose.yaml: Compose Deployment" />
         <item itemvalue="Docker.dummy-postgres: Compose Deployment" />
         <item itemvalue="Docker.dummy-clickhouse: Compose Deployment" />
+        <item itemvalue="Docker.Compose.yaml: Compose Deployment" />
+        <item itemvalue="Docker.Dockerfile" />
         <item itemvalue="Docker.dummy-postgres/Dockerfile" />
-        <item itemvalue="Docker.Compose.yaml.kafka-connect: Compose Deployment" />
       </list>
     </recent_temporary>
   </component>
@@ -165,6 +162,8 @@
       <workItem from="1778809850159" duration="56640000" />
       <workItem from="1778982469046" duration="11589000" />
       <workItem from="1778995616822" duration="5648000" />
+      <workItem from="1779168444924" duration="9086000" />
+      <workItem from="1779212010397" duration="12723000" />
     </task>
     <task id="LOCAL-00001" summary="Added backend network to kafka compose file">
       <option name="closed" value="true" />

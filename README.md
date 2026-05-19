@@ -58,31 +58,67 @@ curl -X DELETE http://localhost:8083/connectors/fulfillment-connector
 
 ## ClickHouse Sink Connector
 
-### Add the connector
+### Add the connector for products
 ```bash
 curl -X POST http://localhost:8083/connectors \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "fulfillment-sink-clickhouse",
+    "name": "fulfillment-products-sink-clickhouse",
+    "config": {
+      "connector.class": "com.clickhouse.kafka.connect.ClickHouseSinkConnector",
+      "tasks.max": "1",
+      "topics": "fulfillment.public.products",
+      "hostname": "clickhouse",
+      "port": "8123",
+      "ssl": "false",
+      "database": "clickhouseconsumer",
+      "username": "clickhouseconsumer",
+      "password": "clickhouseconsumer123",
+      "exactlyOnce": "false",
+      "schema.evolution": "none",
+      "topic2TableMap": "fulfillment.public.products=fulfillment_products",
+      "key.converter": "io.apicurio.registry.utils.converter.AvroConverter",
+      "key.converter.apicurio.registry.url": "http://apicurio:8080/apis/registry/v2",
+      "value.converter": "io.apicurio.registry.utils.converter.AvroConverter",
+      "value.converter.apicurio.registry.url": "http://apicurio:8080/apis/registry/v2",
+      "transforms": "unwrap",
+      "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+      "transforms.unwrap.delete.handling.mode": "rewrite",
+      "transforms.unwrap.add.fields": "op,source.ts_ms:source_ts_ms"
+    }
+  }'
+```
+
+### Add the connector for orders
+```bash
+curl -X POST http://localhost:8083/connectors \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "fulfillment-orders-sink-clickhouse",
     "config": {
       "connector.class": "com.clickhouse.kafka.connect.ClickHouseSinkConnector",
       "tasks.max": "1",
       "topics": "fulfillment.public.orders",
       "hostname": "clickhouse",
       "port": "8123",
+      "ssl": "false",
       "database": "clickhouseconsumer",
       "username": "clickhouseconsumer",
       "password": "clickhouseconsumer123",
-      "schema.evolution": "alter",
       "exactlyOnce": "false",
-      "value.converter": "org.apache.kafka.connect.json.JsonConverter",
-      "value.converter.schemas.enable": "false",
-      "schemas.enable": "false",
-      "transforms": "extractPayload",
-      "transforms.extractPayload.type": "org.apache.kafka.connect.transforms.ExtractField$Value",
-      "transforms.extractPayload.field": "payload"
+      "schema.evolution": "none",
+      "topic2TableMap": "fulfillment.public.products=fulfillment_orders",
+      "key.converter": "io.apicurio.registry.utils.converter.AvroConverter",
+      "key.converter.apicurio.registry.url": "http://apicurio:8080/apis/registry/v2",
+      "value.converter": "io.apicurio.registry.utils.converter.AvroConverter",
+      "value.converter.apicurio.registry.url": "http://apicurio:8080/apis/registry/v2",
+      "transforms": "unwrap",
+      "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+      "transforms.unwrap.delete.handling.mode": "rewrite",
+      "transforms.unwrap.add.fields": "op,source.ts_ms:source_ts_ms"
     }
   }'
+
 ```
 
 ### Delete the connector
@@ -102,36 +138,35 @@ docker exec -it clickhouse clickhouse-client \
   --database clickhouseconsumer
 ```
 
-### Create tables
-
+### Create table for products
 ```sql
-CREATE TABLE IF NOT EXISTS `fulfillment.public.products` (
-                                                             before      Nullable(JSON),
-    after       Nullable(JSON),
-    source      JSON,
-    op          String,
-    ts_ms       Nullable(Int64),
-    ts_us       Nullable(Int64),
-    ts_ns       Nullable(Int64),
-    transaction Nullable(JSON)
-    )
-    ENGINE = MergeTree
-    ORDER BY tuple();
+CREATE TABLE IF NOT EXISTS clickhouseconsumer.fulfillment_products
+(
+    id Int32,
+    sku String,
+    quantity_on_hand Int32,
+    __op LowCardinality(String),
+    __source_ts_ms Int64,
+    __deleted Nullable(String)
+)
+    ENGINE = ReplacingMergeTree(__source_ts_ms)
+ORDER BY id;
+
 ```
+### Create table for orders
 
 ```sql
-CREATE TABLE IF NOT EXISTS `fulfillment.public.orders` (
-                                                           before      Nullable(String),
-    after       Nullable(String),
-    source      Nullable(String),
-    transaction Nullable(String),
-    op          Nullable(String),
-    ts_ms       Nullable(Int64),
-    ts_us       Nullable(Int64),
-    ts_ns       Nullable(Int64)
-    )
-    ENGINE = MergeTree
-    ORDER BY tuple();
+CREATE TABLE clickhouseconsumer.fulfillment_orders
+(
+    id Int32,
+    product_id Int32,
+    quantity Int32,
+    __op LowCardinality(String),
+    __source_ts_ms Int64,
+    __deleted Nullable(String)
+)
+    ENGINE = ReplacingMergeTree(__source_ts_ms)
+ORDER BY id;
 ```
 
 ---
