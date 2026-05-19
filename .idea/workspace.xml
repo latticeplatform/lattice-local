@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1cd1916a-92f8-4b35-9d8e-a8edb628648d" name="Changes" comment="Added backend network to kafka compose file">
-      <change beforePath="$PROJECT_DIR$/Compose.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Compose.yaml" afterDir="false" />
-    </list>
+    <list default="true" id="1cd1916a-92f8-4b35-9d8e-a8edb628648d" name="Changes" comment="Added backend network to kafka compose file" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -140,8 +138,8 @@
     <recent_temporary>
       <list>
         <item itemvalue="Docker.Compose.yaml: Compose Deployment" />
-        <item itemvalue="Docker.dummy-clickhouse: Compose Deployment" />
         <item itemvalue="Docker.dummy-postgres: Compose Deployment" />
+        <item itemvalue="Docker.dummy-clickhouse: Compose Deployment" />
         <item itemvalue="Docker.dummy-postgres/Dockerfile" />
         <item itemvalue="Docker.Compose.yaml.kafka-connect: Compose Deployment" />
       </list>
