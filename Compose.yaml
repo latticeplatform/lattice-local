@@ -110,35 +110,25 @@ services:
         - controller-2
         - controller-3
 
-    kafka-connect:
-      build:
-        context: .
-        dockerfile: Dockerfile
-      container_name: kafka-connect
-      networks:
-        - kafka_default
+    connect:
+      image: debezium/connect:3.4.3.Final
+      container_name: connect-debezium
       ports:
-        - "8083:8083"
+        - 8083:8083
       environment:
         BOOTSTRAP_SERVERS: broker-1:19092,broker-2:19092,broker-3:19092
-        #primarly used for when you have a cluster of kafka connect instances
-        #used for storing the config of the connectors
+        GROUP_ID: 1
         CONFIG_STORAGE_TOPIC: connect_configs
-        #used for storing the offsets of the connectors
         OFFSET_STORAGE_TOPIC: connect_offsets
-        # used for storing the status of the connectors
-        STATUS_STORAGE_TOPIC: connect_statuses
+        ENABLE_APICURIO_CONVERTERS: "true"
+      depends_on: [apicurio, controller-1, controller-2, controller-3, broker-1, broker-2, broker-3]
 
-        CONFIG_STORAGE_REPLICATION_FACTOR: 3
-        OFFSET_STORAGE_REPLICATION_FACTOR: 3
-        STATUS_STORAGE_REPLICATION_FACTOR: 3
+    apicurio:
+      image: apicurio/apicurio-registry:3.0.3
+      container_name: apicurio-registry
+      ports:
+        - 8080:8080
 
-        KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
-        VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
-      depends_on:
-        - broker-1
-        - broker-2
-        - broker-3
 networks:
   kafka_default:
     name: kafka-infrastructure_kafka_default

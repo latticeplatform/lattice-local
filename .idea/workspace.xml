@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="1cd1916a-92f8-4b35-9d8e-a8edb628648d" name="Changes" comment="Added backend network to kafka compose file">
+      <change beforePath="$PROJECT_DIR$/Compose.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/Compose.yaml" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="EmbeddingIndexingInfo">
+    <option name="cachedIndexableFilesCount" value="10" />
+    <option name="fileBasedEmbeddingIndicesEnabled" value="true" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;joshbintree&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;git@github.com:2603-6/kafka-infrastructure.git&quot;,
+    &quot;accountId&quot;: &quot;a6ed81f5-674c-4539-8e8d-74d45be92383&quot;
+  }
+}</component>
+  <component name="McpProjectServerCommands">
+    <commands />
+    <urls />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 3,
+  &quot;fromUser&quot;: false
+}</component>
+  <component name="ProjectId" id="3Djyc25u9v7vwypOdshVaftJ5z9" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Docker.Compose.yaml.kafka-connect: Compose Deployment.executor": "Run",
+    "Docker.Compose.yaml: Compose Deployment.executor": "Run",
+    "Docker.dummy-clickhouse: Compose Deployment.executor": "Run",
+    "Docker.dummy-postgres/Dockerfile.executor": "Run",
+    "Docker.dummy-postgres: Compose Deployment.executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.MCP Project settings loaded": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "apicurio-2",
+    "javascript.preferred.runtime.type.id": "node",
+    "junie.onboarding.icon.badge.shown": "true",
+    "last_opened_file_path": "/Users/onji/Documents/kafka-infrastructure",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "ml.llm.AcpAgentsConfigurable",
+    "to.speed.mode.migration.done": "true",
+    "vue.rearranger.settings.migration": "true"
+  },
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "postgresql"
+    ]
+  }
+}]]></component>
+  <component name="RunManager" selected="Docker.Compose.yaml: Compose Deployment">
+    <configuration name="Compose.yaml: Compose Deployment" type="docker-deploy" factoryName="docker-compose.yml" temporary="true" server-name="Docker">
+      <deployment type="docker-compose.yml">
+        <settings>
+          <option name="sourceFilePath" value="Compose.yaml" />
+        </settings>
+      </deployment>
+      <method v="2" />
+    </configuration>
+    <configuration name="Compose.yaml.kafka-connect: Compose Deployment" type="docker-deploy" factoryName="docker-compose.yml" temporary="true" server-name="Docker">
+      <deployment type="docker-compose.yml">
+        <settings>
+          <option name="services">
+            <list>
+              <option value="kafka-connect" />
+            </list>
+          </option>
+          <option name="sourceFilePath" value="Compose.yaml" />
+        </settings>
+      </deployment>
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="docker-deploy" factoryName="docker-compose.yml" temporary="true">
+      <deployment type="docker-compose.yml">
+        <settings />
+      </deployment>
+      <method v="2" />
+    </configuration>
+    <configuration name="dummy-clickhouse: Compose Deployment" type="docker-deploy" factoryName="docker-compose.yml" temporary="true" server-name="Docker">
+      <deployment type="docker-compose.yml">
+        <settings>
+          <option name="sourceFilePath" value="consumers/dummy-clickhouse/docker-compose.yml" />
+        </settings>
+      </deployment>
+      <method v="2" />
+    </configuration>
+    <configuration name="dummy-postgres: Compose Deployment" type="docker-deploy" factoryName="docker-compose.yml" temporary="true" server-name="Docker">
+      <deployment type="docker-compose.yml">
+        <settings>
+          <option name="sourceFilePath" value="dummy-postgres/docker-compose.yml" />
+        </settings>
+      </deployment>
+      <method v="2" />
+    </configuration>
+    <configuration name="dummy-postgres/Dockerfile" type="docker-deploy" factoryName="dockerfile" temporary="true" server-name="Docker">
+      <deployment type="dockerfile">
+        <settings>
+          <option name="sourceFilePath" value="dummy-postgres/Dockerfile" />
+        </settings>
+      </deployment>
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Docker.dummy-postgres/Dockerfile" />
+      <item itemvalue="Docker.Compose.yaml.kafka-connect: Compose Deployment" />
+      <item itemvalue="Docker.Compose.yaml: Compose Deployment" />
+      <item itemvalue="Docker.dummy-clickhouse: Compose Deployment" />
+      <item itemvalue="Docker.dummy-postgres: Compose Deployment" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Docker.Compose.yaml: Compose Deployment" />
+        <item itemvalue="Docker.dummy-clickhouse: Compose Deployment" />
+        <item itemvalue="Docker.dummy-postgres: Compose Deployment" />
+        <item itemvalue="Docker.dummy-postgres/Dockerfile" />
+        <item itemvalue="Docker.Compose.yaml.kafka-connect: Compose Deployment" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-31caf2ab9e3c-JavaScript-WS-261.23567.141" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="1cd1916a-92f8-4b35-9d8e-a8edb628648d" name="Changes" comment="" />
+      <created>1778809849016</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1778809849016</updated>
+      <workItem from="1778809850159" duration="56640000" />
+      <workItem from="1778982469046" duration="11589000" />
+      <workItem from="1778995616822" duration="5648000" />
+    </task>
+    <task id="LOCAL-00001" summary="Added backend network to kafka compose file">
+      <option name="closed" value="true" />
+      <created>1778810723357</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1778810723357</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Add PostgreSQL setup for Kafka Debezium connector integration&#10;&#10;- Enabled `KAFKA_AUTO_CREATE_TOPICS_ENABLE` in Kafka service configuration.&#10;- Added PostgreSQL service with Docker Compose (`dummy-postgres`).&#10;- Included `pg_hba.conf`, `postgresql.conf`, and a Dockerfile for custom PostgreSQL setup.&#10;- Created initialization SQL script with `products` and `orders` tables for testing.&#10;- Updated README with steps to set up the Debezium PostgreSQL connector and useful commands.&#10;&#10;Co-authored-by: Josh &lt;134466733+joshbintree@users.noreply.github.com&gt;" />
+    <MESSAGE value="Added backend network to kafka compose file" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added backend network to kafka compose file" />
+  </component>
+</project>
