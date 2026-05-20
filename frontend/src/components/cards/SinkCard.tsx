@@ -1,18 +1,16 @@
-import type { ConnectorEntry, ConnectorState } from '../../types/connect';
+import type { ConnectorState } from '../../types/connect';
+import type { FC } from "react";
+import type { SinkCardProps } from "../../types/cardTypes.ts";
 
-interface ConnectorCardProps {
-  name: string;
-  entry: ConnectorEntry;
-}
 
-const ConnectorCard = ({ name, entry }: ConnectorCardProps) => {
+const SinkCard: FC<SinkCardProps> = ({ entry }) => {
   const { connector, tasks, type } = entry.status;
   const runningTasks = tasks.filter(t => t.state === 'RUNNING').length;
 
   return (
     <div className="card">
       <div className="cardHeader">
-        <span className="cardName">{name}</span>
+        <span className="cardName">{entry.info.name}</span>
         <span className="badge">{type}</span>
       </div>
       <StateRow state={connector.state} />
@@ -30,6 +28,6 @@ function StateRow({ state }: { state: ConnectorState }) {
       {state}
     </div>
   );
-};
+}
 
-export default ConnectorCard;
+export default SinkCard;

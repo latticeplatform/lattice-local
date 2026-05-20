@@ -1,9 +1,6 @@
 import type { FC } from "react";
-import type { ConnectorPlugin } from '../../types/connect';
+import type { PluginCardProps } from "../../types/cardTypes.ts";
 
-interface PluginCardProps extends ConnectorPlugin {
-  onClick: () => void;
-}
 
 const PluginCard: FC<PluginCardProps> = ({ class: cls, type, version, onClick }) => {
   const shortName = cls.split('.').pop();

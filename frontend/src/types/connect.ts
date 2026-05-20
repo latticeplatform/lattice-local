@@ -46,12 +46,14 @@ export interface ConfigDefinition {
 
 export interface ValidationFieldResult {
   definition: ConfigDefinition;
-  value: {
-    name: string;
-    value: string | null;
-    errors: string[];
-    visible: boolean;
-  };
+  value: ValidationFieldResultValue | null;
+}
+
+export interface ValidationFieldResultValue {
+  name: string;
+  value: string | null;
+  errors: string[];
+  visible: boolean;
 }
 
 export interface ValidationResult {

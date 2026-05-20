@@ -1,8 +1,9 @@
-import type { ConfigDefinition, ConfigFieldType } from "../../types/connect.ts";
+import type { ConfigDefinition, ConfigFieldType } from "../types/connect.ts";
 import type { FC } from "react";
 
 interface FormFieldProps {
   def: ConfigDefinition;
+  isRequired: boolean;
   value: string;
   errors: string[];
   onChange: (v: string) => void;
@@ -10,7 +11,7 @@ interface FormFieldProps {
 
 type InputFieldType = Exclude<ConfigFieldType, "BOOLEAN" >
 
-const FormField: FC<FormFieldProps> = ({ def, value, errors, onChange }) => {
+const FormField: FC<FormFieldProps> = ({ def, isRequired, value, errors, onChange }) => {
   const id = `field-${def.name}`;
   const hasError = errors.length > 0;
 
@@ -18,7 +19,7 @@ const FormField: FC<FormFieldProps> = ({ def, value, errors, onChange }) => {
     <div className="form-field">
       <label htmlFor={id}>
         {def.display_name}
-        {def.required && <span className="required-mark">*</span>}
+        {isRequired && <span className="required-mark">*</span>}
       </label>
       {def.documentation && <p className="field-doc">{def.documentation}</p>}
       {def.type === 'BOOLEAN' ? (
