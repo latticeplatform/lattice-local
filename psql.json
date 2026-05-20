@@ -1,0 +1,24 @@
+curl -X POST http://localhost:8083/connectors \
+-H "Content-Type: application/json" \
+-d '{
+"name": "fulfillment-connector",
+"config": {
+"connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+"database.hostname": "postgresql",
+"database.port": "5432",
+"database.user": "inventory",
+"database.password": "inventory123",
+"database.dbname": "inventory",
+"topic.prefix": "fulfillment",
+"plugin.name": "pgoutput",
+"snapshot.mode": "when_needed",
+
+"key.converter": "io.apicurio.registry.utils.converter.AvroConverter",
+"key.converter.apicurio.registry.url": "http://apicurio:8080/apis/registry/v2",
+"key.converter.apicurio.registry.auto-register": "true",
+
+"value.converter": "io.apicurio.registry.utils.converter.AvroConverter",
+"value.converter.apicurio.registry.url": "http://apicurio:8080/apis/registry/v2",
+"value.converter.apicurio.registry.auto-register": "true"
+}
+}'
