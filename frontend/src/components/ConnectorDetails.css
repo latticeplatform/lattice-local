@@ -1,0 +1,137 @@
+.detail-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+
+.detail-header-title {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 16px;
+  color: var(--text-h);
+}
+
+.detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detail-section-title {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text);
+  margin: 0;
+}
+
+.detail-status-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-h);
+}
+
+.detail-task-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.detail-task-id {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text);
+  width: 28px;
+  flex-shrink: 0;
+}
+
+.detail-task-restart {
+  margin-left: auto;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.detail-task-restart:hover:not(:disabled) {
+  border-color: var(--accent-border);
+  color: var(--accent);
+}
+
+.detail-task-restart:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.detail-state {
+  font-size: 13px;
+  color: var(--text-h);
+}
+
+.detail-sep {
+  color: var(--border);
+  user-select: none;
+}
+
+.detail-worker {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text);
+}
+
+.detail-config {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.detail-config-row {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  gap: 16px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.detail-config-row:last-child {
+  border-bottom: none;
+}
+
+.detail-config-key {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text);
+  overflow-wrap: break-word;
+  word-break: break-all;
+}
+
+.detail-config-value {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-h);
+  overflow-wrap: break-word;
+  word-break: break-all;
+}
+
+.detail-footer-left {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.detail-footer-right {
+  display: flex;
+  gap: 8px;
+}

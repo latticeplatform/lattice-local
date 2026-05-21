@@ -7,6 +7,7 @@ interface CardProps {
 export interface CollectorCardProps extends CardProps {
   cardType: 'collector';
   entry: ConnectorEntry;
+  onClick: () => void;
 }
 
 export interface PluginCardProps extends ConnectorPlugin, CardProps {
@@ -17,6 +18,7 @@ export interface PluginCardProps extends ConnectorPlugin, CardProps {
 export interface SinkCardProps extends CardProps {
   cardType: 'sink';
   entry: ConnectorEntry;
+  onClick: () => void;
 }
 
 

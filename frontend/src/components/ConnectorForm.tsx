@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, type FC } from 'react';
+import { useState, useCallback, type FC, useEffect } from 'react';
 import { IoSettingsOutline } from 'react-icons/io5';
 import type {
   ConnectorPlugin,
@@ -8,12 +8,13 @@ import type {
 } from '../types/connect';
 import { useToast } from '../context/ToastContext.tsx';
 import { fetchPluginConfig, validateConnectorConfig, createConnector } from '../api/connectApi.ts';
-import './ConnectorFormModal.css';
+import ModalShell from './ModalShell.tsx';
+import './ConnectorForm.css';
 import FormField from "./FormField.tsx";
 import { groupByKey } from "../utils.ts";
 import GearPanel from "./GearPanel.tsx";
 
-interface ConnectorFormModalProps {
+interface ConnectorFormProps {
   plugin: ConnectorPlugin;
   onClose: () => void;
   onCreated: () => void;
@@ -25,7 +26,7 @@ const getNonNullValuesFromValidation = (
    return results.configs.map((result) => result.value).filter(value => value !== null)
 }
 
-const ConnectorFormModal: FC<ConnectorFormModalProps> = ({ plugin, onClose, onCreated }) => {
+const ConnectorForm: FC<ConnectorFormProps> = ({ plugin, onClose, onCreated }) => {
   const [definitions, setDefinitions] = useState<ConfigDefinition[]>([]);
   const [derivedRequired, setDerivedRequired] = useState<Set<string>>(new Set());
   const [values, setValues] = useState<Record<string, string>>({});
@@ -37,49 +38,42 @@ const ConnectorFormModal: FC<ConnectorFormModalProps> = ({ plugin, onClose, onCr
 
   const toast = useToast();
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, [onClose]);
-
-  useEffect(() => {
-    const fetchConfig = async () => {
-      try {
-        const [defs, emptyValidation] = await Promise.all([
-          fetchPluginConfig(plugin.class),
-          validateConnectorConfig(plugin.class, { 'connector.class': plugin.class }),
-        ]);
-        const values = getNonNullValuesFromValidation(emptyValidation)
-        setDefinitions(defs);
-        setDerivedRequired(new Set(
-          values
-            .filter(( value ) =>value.errors.length > 0 )
-            .map(( value ) => value.name)
-        ));
-        const initial: Record<string, string> = { 'connector.class': plugin.class };
-        for (const def of defs) {
-          if (def.name !== 'connector.class' && def.default_value) {
-            initial[def.name] = def.default_value;
-          }
+  const fetchConfig = async () => {
+    try {
+      const [defs, emptyValidation] = await Promise.all([
+        fetchPluginConfig(plugin.class),
+        validateConnectorConfig(plugin.class, { 'connector.class': plugin.class }),
+      ]);
+      const values = getNonNullValuesFromValidation(emptyValidation)
+      setDefinitions(defs);
+      setDerivedRequired(new Set(
+        values
+        .filter(( value ) =>value.errors.length > 0 )
+        .map(( value ) => value.name)
+      ));
+      const initial: Record<string, string> = { 'connector.class': plugin.class };
+      for (const def of defs) {
+        if (def.name !== 'connector.class' && def.default_value) {
+          initial[def.name] = def.default_value;
         }
-        setValues(initial);
-      } catch (e) {
-        console.log(e)
-        toast.push(e instanceof Error ? e.message : 'Failed to load plugin config');
-        onClose();
-      } finally {
-        setLoading(false);
       }
-    };
-    void fetchConfig();
-  }, [plugin.class, toast, onClose]);
-
+      setValues(initial);
+    } catch (e) {
+      console.log(e)
+      toast.push(e instanceof Error ? e.message : 'Failed to load plugin config');
+      onClose();
+    } finally {
+      setLoading(false);
+    }
+  };
   const setValue = useCallback((name: string, value: string) => {
     setValues(prev => ({ ...prev, [name]: value }));
     setErrors(prev => ({ ...prev, [name]: [] }));
   }, []);
 
+  useEffect(() => {
+    void fetchConfig();
+  }, [plugin.class, toast, onClose]);
 
   const handleSubmit = async () => {
     setSubmitting(true);
@@ -132,96 +126,83 @@ const ConnectorFormModal: FC<ConnectorFormModalProps> = ({ plugin, onClose, onCr
   };
 
   const baseDefs   = definitions.filter(d => d.name !== 'connector.class');
-
   const requiredDefs = baseDefs.filter(d => derivedRequired.has(d.name));
   const optionalDefs = baseDefs.filter(d => !derivedRequired.has(d.name));
-
   const activeDefs = [
     ...requiredDefs,
     ...optionalDefs.filter(d => enabledOptional.has(d.name)),
   ];
-
   const grouped = groupByKey(activeDefs, d => d.group ?? 'General');
-
-
-
-
-
   const shortName = plugin.class.split('.').pop();
 
   return (
-    <>
-    <div className="modal-backdrop" onClick={onClose} />
+    <ModalShell
+      title={`New ${shortName}`}
 
-    <div className="connector-modal" role="dialog" aria-modal="true" aria-label={`New ${shortName}`}>
-      <div className="modal-header">
-        <h2>New {shortName}</h2>
-        <div className="modal-header-actions">
-          {!loading && (
-            <button
-              type="button"
-              className={`modal-gear${showGearPanel ? ' modal-gear--active' : ''}`}
-              onClick={() => setShowGearPanel(p => !p)}
-              aria-label="Optional fields"
-              title={`${optionalDefs.length} optional fields`}
-            >
-              <IoSettingsOutline />
-              {enabledOptional.size > 0 && (
-                <span className="gear-badge">{enabledOptional.size}</span>
-              )}
-            </button>
-          )}
-          <button type="button" className="modal-close" onClick={onClose} aria-label="Close">✕</button>
-        </div>
-      </div>
+      onClose={onClose}
 
-      {showGearPanel &&
-        <GearPanel
+      headerActions={
+        <>
+          <button
+            type="button"
+            className={`modal-gear${showGearPanel ? ' modal-gear--active' : ''}`}
+            onClick={() => setShowGearPanel(p => !p)}
+            aria-label="Optional fields"
+            title={`${optionalDefs.length} optional fields`}
+          >
+            <IoSettingsOutline />
+          </button>
+          {enabledOptional.size > 0 && (<span className="gear-badge">{enabledOptional.size}</span>)}
+        </>
+      }
+
+      panel={showGearPanel && <GearPanel
           optionalDefs={optionalDefs}
           setEnabledOptional={setEnabledOptional}
           enabledOptional={enabledOptional}
           setValues={setValues}
-        />
+      />}
+
+      footer={
+        <>
+          <button type="button" className="btn btn-ghost" onClick={onClose}>Cancel</button>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => void handleSubmit()}
+            disabled={loading || submitting}
+          >
+            {submitting ? 'Creating…' : 'Create Connector'}
+          </button>
+        </>
       }
+    >
 
-      <div className="modal-body">
-        {loading ? (
-          <span>Loading config…</span>
-        ) : (
-          Object.entries(grouped).map(([group, defs]) => (
-            <div key={group}>
-              <p className="field-group-title">{group}</p>
-              <div className="field-group">
-                {defs.map(def => (
-                  <FormField
-                    key={def.name}
-                    def={def}
-                    isRequired={derivedRequired.has(def.name)}
-                    value={values[def.name] ?? ''}
-                    errors={errors[def.name] ?? []}
-                    onChange={v => setValue(def.name, v)}
-                  />
-                ))}
-              </div>
+      {loading ? (
+        <span>Loading config…</span>
+      ) : (
+        Object.entries(grouped).map(([group, defs]) => (
+          <div key={group}>
+            <p className="field-group-title">{group}</p>
+            <div className="field-group">
+              {defs.map(def => (
+                <FormField
+                  key={def.name}
+                  def={def}
+                  isRequired={derivedRequired.has(def.name)}
+                  value={values[def.name] ?? ''}
+                  errors={errors[def.name] ?? []}
+                  onChange={v => setValue(def.name, v)}
+                />
+              ))}
             </div>
-          ))
-        )}
-      </div>
+          </div>
+        ))
+      )}
 
-      <div className="modal-footer">
-        <button type="button" className="btn btn-ghost" onClick={onClose}>Cancel</button>
-        <button
-          type="button"
-          className="btn btn-primary"
-          onClick={() => void handleSubmit()}
-          disabled={loading || submitting}
-        >
-          {submitting ? 'Creating…' : 'Create Connector'}
-        </button>
-      </div>
-    </div>
-    </>
+
+    </ModalShell>
   );
 }
 
-export default ConnectorFormModal;
+export default ConnectorForm;
