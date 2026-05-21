@@ -5,7 +5,7 @@ interface CardProps {
 }
 
 export interface CollectorCardProps extends CardProps {
-  cardType: 'collector';
+  cardType: 'source';
   entry: ConnectorEntry;
   onClick: () => void;
 }
@@ -23,6 +23,13 @@ export interface SinkCardProps extends CardProps {
 
 
 
-export type CardType = 'plugin' | 'collector' | 'sink';
-export type CardsData = CollectorCardProps[] | PluginCardProps[] | SinkCardProps[];
+export interface TopicCardProps extends CardProps {
+  cardType: 'topic';
+  name: string;
+  sourceConnector: string;
+  onClick: () => void;
+}
+
+export type CardType = 'plugin' | 'source' | 'sink' | 'topic';
+export type CardsData = CollectorCardProps[] | PluginCardProps[] | SinkCardProps[] | TopicCardProps[];
 

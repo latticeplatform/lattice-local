@@ -3,7 +3,8 @@ import type { CardsData } from "../types/cardTypes.ts";
 import CollectorCard from "./cards/CollectorCard.tsx";
 import PluginCard from "./cards/PluginCard.tsx";
 import SinkCard from "./cards/SinkCard.tsx";
-import { isPluginCard, isCollectorCard, isSinkCard } from "../utils.ts";
+import TopicCard from "./cards/TopicCard.tsx";
+import { isPluginCard, isCollectorCard, isSinkCard, isTopicCard } from "../utils.ts";
 
 type CardGridProps = {
   cardsData: CardsData;
@@ -15,7 +16,8 @@ const CardGrid: FC<CardGridProps> = ({ cardsData }) => {
       {cardsData.map((data, i) => {
         if (isPluginCard(data))    return <PluginCard    key={i} {...data} />;
         if (isCollectorCard(data)) return <CollectorCard key={i} {...data} />;
-        if (isSinkCard(data)) return <SinkCard key={i} {...data} />;
+        if (isSinkCard(data))      return <SinkCard      key={i} {...data} />;
+        if (isTopicCard(data))     return <TopicCard     key={i} {...data} />;
       })}
     </div>
   );

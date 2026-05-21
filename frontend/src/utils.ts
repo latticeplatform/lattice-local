@@ -1,4 +1,4 @@
-import type { CollectorCardProps, SinkCardProps, PluginCardProps } from "./types/cardTypes.ts";
+import type { CollectorCardProps, SinkCardProps, PluginCardProps, TopicCardProps } from "./types/cardTypes.ts";
 
 
 export const isPluginCard = (card: unknown): card is PluginCardProps => {
@@ -6,11 +6,15 @@ export const isPluginCard = (card: unknown): card is PluginCardProps => {
 }
 
 export const isCollectorCard = (card: unknown): card is CollectorCardProps => {
-  return typeof card === 'object' && card !== null && 'cardType' in card && card.cardType === 'collector';
+  return typeof card === 'object' && card !== null && 'cardType' in card && card.cardType === 'source';
 }
 
 export const isSinkCard = (card: unknown): card is SinkCardProps => {
-  return typeof card === 'object' && card !== null && 'cardType' in card && card.cardType === 'connector';
+  return typeof card === 'object' && card !== null && 'cardType' in card && card.cardType === 'sink';
+}
+
+export const isTopicCard = (card: unknown): card is TopicCardProps => {
+  return typeof card === 'object' && card !== null && 'cardType' in card && card.cardType === 'topic';
 }
 
 export const groupByKey = <T>(items: T[], key: (item: T) => string): Record<string, T[]> => {
@@ -27,3 +31,5 @@ export const groupByKey = <T>(items: T[], key: (item: T) => string): Record<stri
     return acc;
   }, {});
 }
+
+export const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);

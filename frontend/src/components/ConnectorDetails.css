@@ -135,3 +135,19 @@
   display: flex;
   gap: 8px;
 }
+
+.detail-link {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-h);
+  font-family: var(--mono);
+  text-align: left;
+  transition: color 0.15s;
+}
+
+.detail-link:hover {
+  color: var(--coral);
+}
