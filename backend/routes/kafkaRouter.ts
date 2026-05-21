@@ -141,4 +141,25 @@ router.put("/connector-plugins/:pluginClass/config/validate", async (req, res) =
   }
 });
 
+router.get("/topics", async (_req, res) => {
+  try {
+    const { data: connectors } = await axios.get<string[]>(`${CONNECT_URL}/connectors`);
+    const topics: Record<string, { topics: string[] }> = {};
+
+    await Promise.all(connectors.map(
+      async (connector) => {
+        const { data } = await axios.get(
+          `${CONNECT_URL}/connectors/${connector}/topics`
+        );
+        Object.assign(topics, data);
+      }
+    ));
+
+    console.log(topics);
+    return res.json(topics);
+  } catch (err) {
+    proxyError(err, res);
+  }
+})
+
 export default router;
