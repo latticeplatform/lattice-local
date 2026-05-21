@@ -4,9 +4,11 @@ import type {
   ConnectorPlugin,
   ConfigDefinition,
   ValidationResult,
+  TopicsResponse,
+  TopicGroup,
 } from '../types/connect';
 
-async function request<T>(url: string, options?: RequestInit): Promise<T> {
+const request = async <T>(url: string, options?: RequestInit): Promise<T> => {
   const res = await fetch(`/api${url}`, options);
   if (!res.ok) {
     let message = `${res.status} ${res.statusText}`;
@@ -19,40 +21,40 @@ async function request<T>(url: string, options?: RequestInit): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-export function fetchConnectors(): Promise<ConnectorsResponse> {
+export const fetchConnectors = (): Promise<ConnectorsResponse> => {
   return request<ConnectorsResponse>('/connectors');
 }
 
-export function fetchConnector(name: string): Promise<ConnectorEntry> {
+export const fetchConnector = (name: string): Promise<ConnectorEntry> => {
   return request<ConnectorEntry>(`/connectors/${encodeURIComponent(name)}`);
 }
 
-export function fetchPlugins(): Promise<ConnectorPlugin[]> {
+export const fetchPlugins = (): Promise<ConnectorPlugin[]> => {
   return request<ConnectorPlugin[]>('/connector-plugins');
 }
 
-export function fetchPluginConfig(pluginClass: string): Promise<ConfigDefinition[]> {
+export const fetchPluginConfig = (pluginClass: string): Promise<ConfigDefinition[]> => {
   return request<ConfigDefinition[]>(`/connector-plugins/${encodeURIComponent(pluginClass)}/config`);
 }
 
-export function validateConnectorConfig(
+export const validateConnectorConfig = (
   pluginClass: string,
   config: Record<string, string>,
-): Promise<ValidationResult> {
+): Promise<ValidationResult> => {
   return request<ValidationResult>(
     `/connector-plugins/${encodeURIComponent(pluginClass)}/config/validate`,
     { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(config) },
   );
 }
 
-export function createConnector(name: string, config: Record<string, string>): Promise<unknown> {
+export const createConnector = (name: string, config: Record<string, string>): Promise<unknown> => {
   return request(
     '/connectors',
     { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, config }) },
   );
 }
 
-async function voidRequest(url: string, options?: RequestInit): Promise<void> {
+ const voidRequest = async (url: string, options?: RequestInit): Promise<void> => {
   const res = await fetch(`/api${url}`, options);
   if (!res.ok) {
     let message = `${res.status} ${res.statusText}`;
@@ -64,22 +66,46 @@ async function voidRequest(url: string, options?: RequestInit): Promise<void> {
   }
 }
 
-export function deleteConnector(name: string): Promise<void> {
+export const deleteConnector = (name: string): Promise<void> => {
   return voidRequest(`/connectors/${encodeURIComponent(name)}`, { method: 'DELETE' });
 }
 
-export function pauseConnector(name: string): Promise<void> {
+export const pauseConnector = (name: string): Promise<void> => {
   return voidRequest(`/connectors/${encodeURIComponent(name)}/pause`, { method: 'PUT' });
 }
 
-export function resumeConnector(name: string): Promise<void> {
+export const resumeConnector = (name: string): Promise<void> => {
   return voidRequest(`/connectors/${encodeURIComponent(name)}/resume`, { method: 'PUT' });
 }
 
-export function restartConnector(name: string): Promise<void> {
+export const restartConnector = (name: string): Promise<void> => {
   return voidRequest(`/connectors/${encodeURIComponent(name)}/restart`, { method: 'POST' });
 }
 
-export function restartTask(name: string, taskId: number): Promise<void> {
+export const restartTask = (name: string, taskId: number): Promise<void> => {
   return voidRequest(`/connectors/${encodeURIComponent(name)}/tasks/${taskId}/restart`, { method: 'POST' });
 }
+
+export const fetchTopics = (): Promise<TopicsResponse> => {
+  return request<TopicsResponse>('/topics', {method: 'GET'});
+}
+
+export const fetchTopicGroups = (): Promise<TopicGroup[]> =>
+  request<TopicGroup[]>('/topic-groups');
+
+export const createTopicGroup = (name: string, topics: string[]): Promise<TopicGroup> =>
+  request<TopicGroup>('/topic-groups', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, topics }),
+  });
+
+export const updateTopicGroup = (oldName: string, name: string, topics: string[]): Promise<TopicGroup> =>
+  request<TopicGroup>(`/topic-groups/${encodeURIComponent(oldName)}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, topics }),
+  });
+
+export const deleteTopicGroup = (name: string): Promise<void> =>
+  voidRequest(`/topic-groups/${encodeURIComponent(name)}`, { method: 'DELETE' });

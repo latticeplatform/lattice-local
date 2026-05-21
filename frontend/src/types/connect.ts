@@ -61,3 +61,12 @@ export interface ValidationResult {
   error_count: number;
   configs: ValidationFieldResult[];
 }
+
+export interface TopicsResponse {
+  [k:string]: {topics: string[]}
+}
+
+export interface TopicGroup {
+  name: string;
+  topics: string[];
+}
