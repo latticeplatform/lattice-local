@@ -144,8 +144,10 @@ router.put("/connector-plugins/:pluginClass/config/validate", async (req, res) =
 router.get("/topics", async (_req, res) => {
   try {
     const { data: connectors } = await axios.get<string[]>(`${CONNECT_URL}/connectors`);
-    const topics: Record<string, { topics: string[] }> = {};
+    //const { data: connectorlessTopics } = await axios.get<string[]>(`${CONNECT_URL}/admin/topics`);
 
+    const topics: Record<string, { topics: string[] }> = {};
+    //topics['connectorless'] = {topics: connectorlessTopics}
     await Promise.all(connectors.map(
       async (connector) => {
         const { data } = await axios.get(
@@ -154,6 +156,7 @@ router.get("/topics", async (_req, res) => {
         Object.assign(topics, data);
       }
     ));
+
 
     console.log(topics);
     return res.json(topics);
