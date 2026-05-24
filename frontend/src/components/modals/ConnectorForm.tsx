@@ -5,13 +5,13 @@ import type {
   ConfigDefinition,
   ValidationResult,
   ValidationFieldResultValue
-} from '../types/connect';
-import { useToast } from '../context/ToastContext.tsx';
-import { fetchPluginConfig, validateConnectorConfig, createConnector } from '../api/connectApi.ts';
+} from '../../types/connect';
+import { useToast } from '../../context/ToastContext.tsx';
+import { useConnect } from '../../context/ConnectContext.tsx';
 import ModalShell from './ModalShell.tsx';
 import './ConnectorForm.css';
 import FormField from "./FormField.tsx";
-import { groupByKey } from "../utils.ts";
+import { groupByKey } from "../../utils/utils.ts";
 import GearPanel from "./GearPanel.tsx";
 
 interface ConnectorFormProps {
@@ -37,6 +37,7 @@ const ConnectorForm: FC<ConnectorFormProps> = ({ plugin, onClose, onCreated }) =
   const [enabledOptional, setEnabledOptional] = useState<Set<string>>(new Set());
 
   const toast = useToast();
+  const { fetchPluginConfig, validateConnectorConfig, createConnector } = useConnect();
 
   const fetchConfig = async () => {
     try {

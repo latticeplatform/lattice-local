@@ -151,3 +151,24 @@
 .detail-link:hover {
   color: var(--coral);
 }
+
+.detail-schema-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.detail-schema-block {
+  margin: 0;
+  padding: 10px 12px;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--text-h);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: auto;
+  max-height: 260px;
+  white-space: pre;
+}

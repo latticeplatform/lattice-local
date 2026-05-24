@@ -1,7 +1,7 @@
 import { useState, type FC } from 'react';
-import type { ConnectorEntry } from '../types/connect';
-import { useToast } from '../context/ToastContext.tsx';
-import { fetchConnector, deleteConnector, pauseConnector, resumeConnector, restartConnector, restartTask } from '../api/connectApi.ts';
+import type { ConnectorEntry } from '../../types/connect';
+import { useToast } from '../../context/ToastContext.tsx';
+import { useConnect } from '../../context/ConnectContext.tsx';
 import ModalShell from './ModalShell.tsx';
 import './ConnectorDetails.css';
 import StatusRow from "./StatusRow.tsx";
@@ -24,6 +24,7 @@ const ConnectorDetails: FC<ConnectorDetailsProps> = ({ entry, onClose, onAction 
   const [busy, setBusy] = useState(false);
   const [restartingTaskId, setRestartingTaskId] = useState<number | null>(null);
   const toast = useToast();
+  const { fetchConnector, deleteConnector, pauseConnector, resumeConnector, restartConnector, restartTask } = useConnect();
 
   const { connector, tasks, type } = localEntry.status;
   const configEntries = Object.entries(localEntry.info.config).filter(([k]) => k !== 'connector.class');
