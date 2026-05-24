@@ -1,4 +1,4 @@
-import type { ConfigDefinition, ConfigFieldType } from "../../types/connect.ts";
+import type { ConfigDefinition, ConfigFieldType } from "../types/connect.ts";
 import type { FC } from "react";
 
 interface FormFieldProps {

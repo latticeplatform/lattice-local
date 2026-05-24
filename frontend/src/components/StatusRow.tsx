@@ -1,4 +1,4 @@
-import type { ConnectorState } from "../../types/connect.ts";
+import type { ConnectorState } from "../types/connect.ts";
 import type { FC } from "react";
 
 

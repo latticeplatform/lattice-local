@@ -10,9 +10,9 @@ import { useToast } from '../../context/ToastContext.tsx';
 import { useConnect } from '../../context/ConnectContext.tsx';
 import ModalShell from './ModalShell.tsx';
 import './ConnectorForm.css';
-import FormField from "./FormField.tsx";
+import FormField from "../FormField.tsx";
 import { groupByKey } from "../../utils/utils.ts";
-import GearPanel from "./GearPanel.tsx";
+import GearPanel from "../GearPanel.tsx";
 
 interface ConnectorFormProps {
   plugin: ConnectorPlugin;
@@ -52,13 +52,15 @@ const ConnectorForm: FC<ConnectorFormProps> = ({ plugin, onClose, onCreated }) =
         .filter(( value ) =>value.errors.length > 0 )
         .map(( value ) => value.name)
       ));
-      const initial: Record<string, string> = { 'connector.class': plugin.class };
-      for (const def of defs) {
-        if (def.name !== 'connector.class' && def.default_value) {
-          initial[def.name] = def.default_value;
-        }
-      }
-      setValues(initial);
+      // Initial value prefilling is disabled as it causes problems with opinionated settings on the backend
+      //
+      // const initial: Record<string, string> = { 'connector.class': plugin.class };
+      // for (const def of defs) {
+      //   if (def.name !== 'connector.class' && def.default_value) {
+      //     initial[def.name] = def.default_value;
+      //   }
+      // }
+      // setValues(initial);
     } catch (e) {
       console.log(e)
       toast.push(e instanceof Error ? e.message : 'Failed to load plugin config');

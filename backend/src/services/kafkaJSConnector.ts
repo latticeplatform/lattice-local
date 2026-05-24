@@ -1,4 +1,7 @@
 import { type Admin, type Consumer, type ConsumerConfig, Kafka, type KafkaConfig, type Producer } from "kafkajs";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const kafkaConfig: KafkaConfig = {
   clientId: process.env.KAFKA_CLIENT_ID ?? "kafka-infrastructure-backend",

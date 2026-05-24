@@ -1,0 +1,16 @@
+services:
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: inventory
+      MONGO_INITDB_ROOT_PASSWORD: inventory123
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    networks:
+      - backend
+networks:
+  backend:
+    external: true
+    name: docker_kafka_default

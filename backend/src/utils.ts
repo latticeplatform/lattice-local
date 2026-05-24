@@ -22,10 +22,10 @@ export const kafkaError = (err: unknown, res: express.Response) => {
 
 export const fetchSchema =  async (schemaId: number): Promise<{ schema: string; schemaType: string }> => {
   if (schemaCache.has(schemaId)) return schemaCache.get(schemaId)!;
-  // Apicurio exposes a Confluent-compatible endpoint at /apis/ccompat/v6
-  const { data } = await axios.get<{ schema: string; schemaType: string }>(
-    `${SCHEMA_REGISTRY_URL}/apis/ccompat/v6/schemas/ids/${schemaId}`
-  );
+  const schemaUrl = `${SCHEMA_REGISTRY_URL}/apis/ccompat/v7/schemas/ids/${schemaId}`
+  // Apicurio exposes a Confluent-compatible endpoint at /apis/ccompat/v7
+  console.log("Fetching schema from Confluent Schema Registry:", schemaUrl);
+  const { data } = await axios.get<{ schema: string; schemaType: string }>(schemaUrl);
   schemaCache.set(schemaId, data);
   return data;
 }
