@@ -8,6 +8,8 @@ const apicurioUrl = process.env.APICURIO_REGISTRY_URL ?? "http://apicurio:8080/a
 
 export const CONNECTOR_DEFAULTS: Record<string, Record<string, string>> = {
   "io.debezium.connector.postgresql.PostgresConnector": {
+    "plugin.name": "pgoutput",
+    "snapshot.mode": "when_needed",
     "key.converter": "io.apicurio.registry.utils.converter.AvroConverter",
     "key.converter.apicurio.registry.url": apicurioUrl,
     "key.converter.apicurio.registry.auto-register": "true",

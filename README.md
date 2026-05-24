@@ -213,7 +213,7 @@ psql "postgresql://inventory:inventory123@localhost:5432/inventory"
 INSERT INTO products (sku, quantity_on_hand) VALUES ('test-sku', 100000);
 ```
 ```sql
-INSERT INTO orders VALUES (1, 1);
+INSERT INTO orders (product_id, quantity ) VALUES (1, 1);
 ```
 
 ## Instructions to Deploy VPC

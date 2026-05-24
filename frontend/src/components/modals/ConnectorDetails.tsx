@@ -4,7 +4,7 @@ import { useToast } from '../../context/ToastContext.tsx';
 import { useConnect } from '../../context/ConnectContext.tsx';
 import ModalShell from './ModalShell.tsx';
 import './ConnectorDetails.css';
-import StatusRow from "./StatusRow.tsx";
+import StatusRow from "../StatusRow.tsx";
 
 interface ConnectorDetailsProps {
   entry: ConnectorEntry;

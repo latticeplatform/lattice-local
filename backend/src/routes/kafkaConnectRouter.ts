@@ -59,6 +59,7 @@ const createKafkaConnectRouter = ():Router => {
     let body: Record<string, unknown>;
     try {
       body = { ...req.body, config: applyDefaults(req.body.config ?? {}) };
+      console.log(body)
     } catch (err) {
       res.status(400).json({ error: (err as Error).message });
       return;
