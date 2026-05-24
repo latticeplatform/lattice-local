@@ -2,12 +2,12 @@ import { useState, type FC } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import type { ConnectorPlugin } from '../../types/connect';
 import './Page.css';
-import ConnectorForm from '../ConnectorForm.tsx';
-import ConnectorDetails from '../ConnectorDetails.tsx';
+import ConnectorForm from '../modals/ConnectorForm.tsx';
+import ConnectorDetails from '../modals/ConnectorDetails.tsx';
 import { useConnect } from '../../context/ConnectContext.tsx';
 import CardSection from "../CardSection.tsx";
 import type { CardsData, CollectorCardProps, SinkCardProps } from "../../types/cardTypes.ts";
-import { capitalize } from "../../utils.ts";
+import { capitalize } from "../../utils/utils.ts";
 
 interface ConnectorPageProps {
   type: 'sink' | 'source';

@@ -4,7 +4,7 @@ import CollectorCard from "./cards/CollectorCard.tsx";
 import PluginCard from "./cards/PluginCard.tsx";
 import SinkCard from "./cards/SinkCard.tsx";
 import TopicCard from "./cards/TopicCard.tsx";
-import { isPluginCard, isCollectorCard, isSinkCard, isTopicCard } from "../utils.ts";
+import { isPluginCard, isCollectorCard, isSinkCard, isTopicCard } from "../utils/utils.ts";
 
 type CardGridProps = {
   cardsData: CardsData;
