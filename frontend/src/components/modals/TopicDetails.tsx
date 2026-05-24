@@ -1,7 +1,9 @@
-import type { FC } from 'react';
+import { useEffect, useState, type FC } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { ConnectorEntry } from '../types/connect.ts';
+import type { ConnectorEntry, TopicSchemaResult } from '../../types/connect.ts';
+import { useConnect } from '../../context/ConnectContext.tsx';
 import ModalShell from './ModalShell.tsx';
+import SchemaDoc from '../schema/SchemaDoc.tsx';
 import './ConnectorDetails.css';
 
 interface TopicDetailsProps {
@@ -13,6 +15,20 @@ interface TopicDetailsProps {
 
 const TopicDetails: FC<TopicDetailsProps> = ({ name, sourceConnector, subscribingSinks, onClose }) => {
   const navigate = useNavigate();
+  const { fetchTopicSchema } = useConnect();
+  const [schema, setSchema] = useState<TopicSchemaResult | null>(null);
+  const [schemaLoading, setSchemaLoading] = useState(true);
+  const [schemaError, setSchemaError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setSchemaLoading(true);
+    setSchemaError(null);
+    setSchema(null);
+    fetchTopicSchema(name)
+      .then(setSchema)
+      .catch(err => setSchemaError(err instanceof Error ? err.message : 'Failed to load schema'))
+      .finally(() => setSchemaLoading(false));
+  }, [name]);
 
   return (
     <ModalShell
@@ -30,6 +46,7 @@ const TopicDetails: FC<TopicDetailsProps> = ({ name, sourceConnector, subscribin
           {sourceConnector}
         </button>
       </div>
+
       <div className="detail-section">
         <p className="detail-section-title">Subscribers ({subscribingSinks.length})</p>
         {subscribingSinks.length === 0 ? (
@@ -47,6 +64,22 @@ const TopicDetails: FC<TopicDetailsProps> = ({ name, sourceConnector, subscribin
             </div>
           ))
         )}
+      </div>
+
+      <div className="detail-section">
+        <p className="detail-section-title">Schema</p>
+        {schemaLoading ? (
+          <span className="detail-state" style={{ color: 'var(--text)' }}>Loading schema…</span>
+        ) : schemaError ? (
+          <span className="detail-state" style={{ color: 'var(--text)' }}>{schemaError}</span>
+        ) : schema ? (
+          <SchemaDoc result={schema} />
+        ) : null}
+      </div>
+
+      <div className="detail-section">
+        <p className="detail-section-title">Data Stream</p>
+        {}
       </div>
     </ModalShell>
   );

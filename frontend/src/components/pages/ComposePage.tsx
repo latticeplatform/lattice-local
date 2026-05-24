@@ -4,7 +4,7 @@ import { useConnect } from '../../context/ConnectContext.tsx';
 import CardSection from '../CardSection.tsx';
 import type { TopicCardProps } from '../../types/cardTypes.ts';
 import type { ConnectorEntry } from '../../types/connect.ts';
-import TopicDetails from '../TopicDetails.tsx';
+import TopicDetails from '../modals/TopicDetails.tsx';
 import TopicGroupsSection from '../TopicGroupsSection.tsx';
 import './Page.css';
 
