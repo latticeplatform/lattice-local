@@ -1,6 +1,7 @@
 import express from "express";
 import axios, { type AxiosResponse } from "axios";
 import dotenv from "dotenv";
+import { applyDefaults, getAutofilledKeys } from "../connectorDefaults.js";
 
 dotenv.config();
 const router = express.Router();
@@ -24,6 +25,10 @@ router.get("/connectors", async (_req, res) => {
     const { data } = await axios.get(
       `${CONNECT_URL}/connectors?expand=info&expand=status`
     );
+    for (const entry of Object.values(data) as any[]) {
+      const connectorClass = entry?.info?.config?.["connector.class"] ?? "";
+      entry.autofilled_keys = getAutofilledKeys(connectorClass);
+    }
     res.json(data);
   } catch (err) {
     proxyError(err, res);
@@ -37,7 +42,12 @@ router.get("/connectors/:name", async (req, res) => {
       axios.get(`${CONNECT_URL}/connectors/${req.params.name}`),
       axios.get(`${CONNECT_URL}/connectors/${req.params.name}/status`),
     ]);
-    res.json({ info: infoRes.data, status: statusRes.data });
+    const connectorClass = infoRes.data?.config?.["connector.class"] ?? "";
+    res.json({
+      info: infoRes.data,
+      status: statusRes.data,
+      autofilled_keys: getAutofilledKeys(connectorClass),
+    });
   } catch (err) {
     proxyError(err, res);
   }
@@ -45,8 +55,15 @@ router.get("/connectors/:name", async (req, res) => {
 
 // POST /connectors -> Create a new connector
 router.post("/connectors", async (req, res) => {
+  let body: Record<string, unknown>;
   try {
-    const { data } = await axios.post(`${CONNECT_URL}/connectors`, req.body, { headers: JSON_HEADERS });
+    body = { ...req.body, config: applyDefaults(req.body.config ?? {}) };
+  } catch (err) {
+    res.status(400).json({ error: (err as Error).message });
+    return;
+  }
+  try {
+    const { data } = await axios.post(`${CONNECT_URL}/connectors`, body, { headers: JSON_HEADERS });
     res.status(201).json(data);
   } catch (err) {
     proxyError(err, res);

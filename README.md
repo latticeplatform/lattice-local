@@ -44,7 +44,15 @@ curl -X POST http://localhost:8083/connectors \
       "database.dbname": "inventory",
       "topic.prefix": "fulfillment",
       "plugin.name": "pgoutput",
-      "snapshot.mode": "when_needed"
+      "snapshot.mode": "when_needed",
+
+      "key.converter": "io.apicurio.registry.utils.converter.AvroConverter",
+      "key.converter.apicurio.registry.url": "http://apicurio:8080/apis/registry/v2",
+      "key.converter.apicurio.registry.auto-register": "true",
+
+      "value.converter": "io.apicurio.registry.utils.converter.AvroConverter",
+      "value.converter.apicurio.registry.url": "http://apicurio:8080/apis/registry/v2",
+      "value.converter.apicurio.registry.auto-register": "true"
     }
   }'
 ```
