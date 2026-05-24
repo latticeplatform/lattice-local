@@ -42,7 +42,7 @@ export const decodeAvro = async (schemaStr: string, payload: Buffer): Promise<un
 
 // Unified message value parser — handles three formats in priority order:
 //   1. Confluent/Apicurio SR wire format: 0x00 magic byte + schema ID + Avro payload
-//   2. Debezium JSON envelope:            { schema: {...}, payload: {...} }
+//   2. Debezium JSON envelope: { schema: {...}, payload: {...} }
 //   3. Plain JSON / plain string fallback
 export type ParsedValue =
   | { format: "apicurio"; schemaId: number; schemaType: string; schema: unknown; payload: unknown }

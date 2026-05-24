@@ -1,34 +1,40 @@
-import express from "express";
+import { Router } from "express";
 import { kafkaError } from "../utils.js";
-import kafkaJSService from "../services/kafkaJSService.js";
+import type { KafkaJSService } from "../types/index.js";
 
-const router = express.Router();
 
-// GET /admin/brokers — broker list and cluster controller
-router.get("/brokers", async (_req, res) => {
-  try {
-    res.json(await kafkaJSService.describeCluster());
-  } catch (err) {
-    kafkaError(err, res);
-  }
-});
+const createKafkaJSRouter = (service: KafkaJSService):Router =>  {
 
-// POST /admin/produce — send a message to a topic
-// Body: { topic: string, messages: [{ key?: string, value: string, partition?: number }] }
-router.post("/produce", async (req, res) => {
-  try {
-    const { topic, messages } = req.body as {
-      topic: string;
-      messages: { key?: string; value: string; partition?: number }[];
-    };
-    if (!topic || !Array.isArray(messages) || messages.length === 0) {
-      res.status(400).json({ error: "topic and messages[] are required" });
-      return;
+  const router = Router();
+
+  // GET /admin/brokers — broker list and cluster controller
+  router.get("/brokers", async (_req, res) => {
+    try {
+      res.json(await service.describeCluster());
+    } catch (err) {
+      kafkaError(err, res);
     }
-    res.status(201).json(await kafkaJSService.produce(topic, messages));
-  } catch (err) {
-    kafkaError(err, res);
-  }
-});
+  });
 
-export default router;
+  // POST /admin/produce — send a message to a topic
+  // Body: { topic: string, messages: [{ key?: string, value: string, partition?: number }] }
+  router.post("/produce", async (req, res) => {
+    try {
+      const { topic, messages } = req.body as {
+        topic: string;
+        messages: { key?: string; value: string; partition?: number }[];
+      };
+      if (!topic || !Array.isArray(messages) || messages.length === 0) {
+        res.status(400).json({ error: "topic and messages[] are required" });
+        return;
+      }
+      res.status(201).json(await service.produce(topic, messages));
+    } catch (err) {
+      kafkaError(err, res);
+    }
+  });
+  return router;
+}
+
+
+export default createKafkaJSRouter;

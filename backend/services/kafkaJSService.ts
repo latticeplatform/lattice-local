@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import { type Consumer, Kafka, type KafkaConfig } from "kafkajs";
 import { parseValue } from "../utils.js";
-import type { KafkaJSService, SchemaResult } from "../types/kafkaJSService.types.js";
+import type { KafkaJSService, SchemaResult } from "../types/index.js";
 
 dotenv.config();
 
