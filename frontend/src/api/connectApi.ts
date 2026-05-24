@@ -6,6 +6,7 @@ import type {
   ValidationResult,
   TopicsResponse,
   TopicGroup,
+  TopicSchemaResult,
 } from '../types/connect';
 
 const request = async <T>(url: string, options?: RequestInit): Promise<T> => {
@@ -109,3 +110,6 @@ export const updateTopicGroup = (oldName: string, name: string, topics: string[]
 
 export const deleteTopicGroup = (name: string): Promise<void> =>
   voidRequest(`/topic-groups/${encodeURIComponent(name)}`, { method: 'DELETE' });
+
+export const fetchTopicSchema = (topicName: string): Promise<TopicSchemaResult> =>
+  request<TopicSchemaResult>(`/admin/topics/${encodeURIComponent(topicName)}/schema`);

@@ -62,11 +62,17 @@ export interface ValidationResult {
   configs: ValidationFieldResult[];
 }
 
-export interface TopicsResponse {
-  [k:string]: {topics: string[]}
-}
 
 export interface TopicGroup {
   name: string;
   topics: string[];
+}
+
+export type TopicsResponse = Record<string, { topics: string[] }>;
+
+export interface TopicSchemaResult {
+  source: 'apicurio' | 'debezium-json';
+  schemaId?: number;
+  schemaType?: string;
+  schema: unknown;
 }

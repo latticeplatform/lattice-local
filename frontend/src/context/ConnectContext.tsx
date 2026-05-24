@@ -8,8 +8,35 @@ import {
   type FC,
   type PropsWithChildren,
 } from 'react';
-import type { ConnectorsResponse, ConnectorPlugin, ConnectorEntry, TopicsResponse } from '../types/connect';
-import { fetchConnectors, fetchPlugins, fetchTopics } from '../api/connectApi';
+import type {
+  ConnectorsResponse,
+  ConnectorPlugin,
+  ConnectorEntry,
+  TopicsResponse,
+  ConfigDefinition,
+  ValidationResult,
+  TopicGroup,
+  TopicSchemaResult,
+} from '../types/connect';
+import {
+  fetchConnectors,
+  fetchPlugins,
+  fetchTopics,
+  fetchConnector,
+  deleteConnector,
+  pauseConnector,
+  resumeConnector,
+  restartConnector,
+  restartTask,
+  fetchPluginConfig,
+  validateConnectorConfig,
+  createConnector,
+  fetchTopicGroups,
+  createTopicGroup,
+  updateTopicGroup,
+  deleteTopicGroup,
+  fetchTopicSchema,
+} from '../api/connectApi';
 import { useToast } from './ToastContext';
 
 interface ConnectContextValue {
@@ -19,6 +46,20 @@ interface ConnectContextValue {
   topics: TopicsResponse;
   loading: boolean;
   refresh: () => void;
+  fetchConnector: (name: string) => Promise<ConnectorEntry>;
+  deleteConnector: (name: string) => Promise<void>;
+  pauseConnector: (name: string) => Promise<void>;
+  resumeConnector: (name: string) => Promise<void>;
+  restartConnector: (name: string) => Promise<void>;
+  restartTask: (name: string, taskId: number) => Promise<void>;
+  fetchPluginConfig: (pluginClass: string) => Promise<ConfigDefinition[]>;
+  validateConnectorConfig: (pluginClass: string, config: Record<string, string>) => Promise<ValidationResult>;
+  createConnector: (name: string, config: Record<string, string>) => Promise<unknown>;
+  fetchTopicGroups: () => Promise<TopicGroup[]>;
+  createTopicGroup: (name: string, topics: string[]) => Promise<TopicGroup>;
+  updateTopicGroup: (oldName: string, name: string, topics: string[]) => Promise<TopicGroup>;
+  deleteTopicGroup: (name: string) => Promise<void>;
+  fetchTopicSchema: (topicName: string) => Promise<TopicSchemaResult>;
 }
 
 const ConnectContext = createContext<ConnectContextValue | null>(null);
@@ -65,7 +106,24 @@ export const ConnectProvider: FC<PropsWithChildren> = ({ children }) => {
   useEffect(() => { void load(); }, [load]);
 
   const value = useMemo(
-    () => ({ sinks, collectors, plugins, topics, loading, refresh: () => { void load(); } }),
+    () => ({
+      sinks, collectors, plugins, topics, loading,
+      refresh: () => { void load(); },
+      fetchConnector,
+      deleteConnector,
+      pauseConnector,
+      resumeConnector,
+      restartConnector,
+      restartTask,
+      fetchPluginConfig,
+      validateConnectorConfig,
+      createConnector,
+      fetchTopicGroups,
+      createTopicGroup,
+      updateTopicGroup,
+      deleteTopicGroup,
+      fetchTopicSchema,
+    }),
     [sinks, collectors, plugins, topics, loading, load],
   );
 

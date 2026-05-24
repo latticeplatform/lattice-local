@@ -1,4 +1,4 @@
-import type { CollectorCardProps, SinkCardProps, PluginCardProps, TopicCardProps } from "./types/cardTypes.ts";
+import type { CollectorCardProps, SinkCardProps, PluginCardProps, TopicCardProps } from "../types/cardTypes.ts";
 
 
 export const isPluginCard = (card: unknown): card is PluginCardProps => {
