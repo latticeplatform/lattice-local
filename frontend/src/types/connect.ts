@@ -62,7 +62,6 @@ export interface ValidationResult {
   configs: ValidationFieldResult[];
 }
 
-
 export interface TopicGroup {
   name: string;
   topics: string[];
@@ -76,3 +75,23 @@ export interface TopicSchemaResult {
   schemaType?: string;
   schema: unknown;
 }
+
+
+export interface ConnectState {
+  collectors: ConnectorEntry[];
+  sinks: ConnectorEntry[];
+  plugins: ConnectorPlugin[] | null;
+  topics: TopicsResponse;
+  loading: boolean;
+}
+
+export type ConnectAction =
+  | { type: 'LOAD_START' }
+  | { type: 'LOAD_SUCCESS'; connectors: ConnectorsResponse; plugins: ConnectorPlugin[]; topics: TopicsResponse }
+  | { type: 'LOAD_ERROR' }
+  | { type: 'CONNECTOR_CREATED';  entry: ConnectorEntry }
+  | { type: 'CONNECTOR_DELETED';  name: string }
+  | { type: 'CONNECTOR_PAUSED';   name: string }
+  | { type: 'CONNECTOR_RESUMED';  name: string }
+  | { type: 'CONNECTOR_RESTARTED'; name: string }
+  | { type: 'TASK_RESTARTED';     connectorName: string; taskId: number };
