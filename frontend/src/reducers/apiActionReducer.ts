@@ -3,7 +3,7 @@ import createConnectorApi from '../api/connectorApi';
 import createPluginApi from '../api/pluginApi';
 import createTopicApi from '../api/topicApi';
 import type { ConnectDispatchAction } from '../types';
-import type { ConnectAction } from "../types";
+import type { ConnectAction } from '../types';
 
 const connectorApi = createConnectorApi();
 const pluginApi = createPluginApi();
@@ -11,7 +11,7 @@ const topicApi = createTopicApi();
 
 const apiActionReducer = async (
   action: ConnectDispatchAction,
-  dispatch: Dispatch<ConnectAction>,
+  dispatch: Dispatch<ConnectAction>
 ): Promise<unknown> => {
   switch (action.type) {
     case 'CONNECTOR_FETCH':
@@ -70,5 +70,5 @@ const apiActionReducer = async (
     case 'TOPIC_DELETE_GROUP':
       return topicApi.deleteGroup(action.name);
   }
-}
+};
 export default apiActionReducer;

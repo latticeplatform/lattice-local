@@ -13,7 +13,12 @@ interface TopicDetailsProps {
   onClose: () => void;
 }
 
-const TopicDetails: FC<TopicDetailsProps> = ({ name, sourceConnector, subscribingSinks, onClose }) => {
+const TopicDetails: FC<TopicDetailsProps> = ({
+  name,
+  sourceConnector,
+  subscribingSinks,
+  onClose,
+}) => {
   const navigate = useNavigate();
   const { dispatch } = useConnect();
   const [schema, setSchema] = useState<TopicSchemaResult | null>(null);
@@ -26,7 +31,7 @@ const TopicDetails: FC<TopicDetailsProps> = ({ name, sourceConnector, subscribin
     setSchema(null);
     dispatch({ type: 'TOPIC_FETCH_SCHEMA', topicName: name })
       .then(setSchema)
-      .catch(err => setSchemaError(err instanceof Error ? err.message : 'Failed to load schema'))
+      .catch((err) => setSchemaError(err instanceof Error ? err.message : 'Failed to load schema'))
       .finally(() => setSchemaLoading(false));
   }, [name]);
 
@@ -50,9 +55,11 @@ const TopicDetails: FC<TopicDetailsProps> = ({ name, sourceConnector, subscribin
       <div className="detail-section">
         <p className="detail-section-title">Subscribers ({subscribingSinks.length})</p>
         {subscribingSinks.length === 0 ? (
-          <span className="detail-state" style={{ color: 'var(--text)' }}>No sinks subscribed to this topic</span>
+          <span className="detail-state" style={{ color: 'var(--text)' }}>
+            No sinks subscribed to this topic
+          </span>
         ) : (
-          subscribingSinks.map(sink => (
+          subscribingSinks.map((sink) => (
             <div key={sink.info.name} className="detail-task-row">
               <button
                 className="detail-link"
@@ -60,7 +67,9 @@ const TopicDetails: FC<TopicDetailsProps> = ({ name, sourceConnector, subscribin
               >
                 {sink.info.name}
               </button>
-              <span className="badge" style={{ marginLeft: 'auto' }}>{sink.status.connector.state}</span>
+              <span className="badge" style={{ marginLeft: 'auto' }}>
+                {sink.status.connector.state}
+              </span>
             </div>
           ))
         )}
@@ -69,9 +78,13 @@ const TopicDetails: FC<TopicDetailsProps> = ({ name, sourceConnector, subscribin
       <div className="detail-section">
         <p className="detail-section-title">Schema</p>
         {schemaLoading ? (
-          <span className="detail-state" style={{ color: 'var(--text)' }}>Loading schema…</span>
+          <span className="detail-state" style={{ color: 'var(--text)' }}>
+            Loading schema…
+          </span>
         ) : schemaError ? (
-          <span className="detail-state" style={{ color: 'var(--text)' }}>{schemaError}</span>
+          <span className="detail-state" style={{ color: 'var(--text)' }}>
+            {schemaError}
+          </span>
         ) : schema ? (
           <SchemaDoc result={schema} />
         ) : null}

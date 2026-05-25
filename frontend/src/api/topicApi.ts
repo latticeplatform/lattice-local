@@ -1,9 +1,5 @@
-import type {
-  TopicsResponse,
-  TopicGroup,
-  TopicSchemaResult,
-} from '../types';
-import { request, voidRequest } from "../utils";
+import type { TopicsResponse, TopicGroup, TopicSchemaResult } from '../types';
+import { request, voidRequest } from '../utils';
 
 interface TopicApi {
   fetchGroups: () => Promise<TopicGroup[]>;
@@ -14,33 +10,31 @@ interface TopicApi {
   deleteGroup: (name: string) => Promise<void>;
 }
 
-const createTopicApi = ():TopicApi => {
+const createTopicApi = (): TopicApi => {
+  const fetchAll = (): Promise<TopicsResponse> => {
+    return request<TopicsResponse>('/topics', { method: 'GET' });
+  };
 
-   const fetchAll = (): Promise<TopicsResponse> => {
-    return request<TopicsResponse>('/topics', {method: 'GET'});
-  }
+  const fetchGroups = (): Promise<TopicGroup[]> => request<TopicGroup[]>('/topic-groups');
 
-   const fetchGroups = (): Promise<TopicGroup[]> =>
-    request<TopicGroup[]>('/topic-groups');
-
-   const createGroup = (name: string, topics: string[]): Promise<TopicGroup> =>
+  const createGroup = (name: string, topics: string[]): Promise<TopicGroup> =>
     request<TopicGroup>('/topic-groups', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, topics }),
     });
 
-   const updateGroup = (oldName: string, name: string, topics: string[]): Promise<TopicGroup> =>
+  const updateGroup = (oldName: string, name: string, topics: string[]): Promise<TopicGroup> =>
     request<TopicGroup>(`/topic-groups/${encodeURIComponent(oldName)}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, topics }),
     });
 
-   const deleteGroup = (name: string): Promise<void> =>
+  const deleteGroup = (name: string): Promise<void> =>
     voidRequest(`/topic-groups/${encodeURIComponent(name)}`, { method: 'DELETE' });
 
-   const fetchSchema = (topicName: string): Promise<TopicSchemaResult> =>
+  const fetchSchema = (topicName: string): Promise<TopicSchemaResult> =>
     request<TopicSchemaResult>(`/admin/topics/${encodeURIComponent(topicName)}/schema`);
 
   return {
@@ -50,7 +44,7 @@ const createTopicApi = ():TopicApi => {
     updateGroup,
     deleteGroup,
     fetchSchema,
-  }
+  };
 };
 
 export default createTopicApi;

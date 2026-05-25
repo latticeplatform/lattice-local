@@ -13,11 +13,20 @@ interface ModalShellProps extends PropsWithChildren {
 }
 
 const ModalShell: FC<ModalShellProps> = ({
-  label, title, headerActions, panel, onClose,
-  footer, footerSplit = false, wide = false, children,
+  label,
+  title,
+  headerActions,
+  panel,
+  onClose,
+  footer,
+  footerSplit = false,
+  wide = false,
+  children,
 }) => {
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
   }, [onClose]);
@@ -35,15 +44,15 @@ const ModalShell: FC<ModalShellProps> = ({
           <h2>{title}</h2>
           <div className="modal-header-actions">
             {headerActions}
-            <button type="button" className="modal-close" onClick={onClose} aria-label="Close">✕</button>
+            <button type="button" className="modal-close" onClick={onClose} aria-label="Close">
+              ✕
+            </button>
           </div>
         </div>
         {panel}
         <div className="modal-body">{children}</div>
         {footer != null && (
-          <div className={`modal-footer${footerSplit ? ' modal-footer--split' : ''}`}>
-            {footer}
-          </div>
+          <div className={`modal-footer${footerSplit ? ' modal-footer--split' : ''}`}>{footer}</div>
         )}
       </div>
     </>

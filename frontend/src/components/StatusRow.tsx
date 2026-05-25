@@ -1,6 +1,5 @@
-import type { ConnectorState } from "../types";
-import type { FC } from "react";
-
+import type { ConnectorState } from '../types';
+import type { FC } from 'react';
 
 interface StatusRowProps {
   state: ConnectorState;
@@ -20,6 +19,6 @@ const StatusRow: FC<StatusRowProps> = ({ state, workerId }) => {
       )}
     </div>
   );
-}
+};
 
 export default StatusRow;

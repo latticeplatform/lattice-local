@@ -61,7 +61,9 @@
   padding: 2px;
 }
 
-.modal-close:hover { color: var(--text-h); }
+.modal-close:hover {
+  color: var(--text-h);
+}
 
 .modal-body {
   overflow-y: auto;
@@ -99,7 +101,10 @@
   color: var(--text);
 }
 
-.btn-ghost:hover { border-color: var(--accent-border); color: var(--accent); }
+.btn-ghost:hover {
+  border-color: var(--accent-border);
+  color: var(--accent);
+}
 
 .btn-primary {
   background: var(--accent);
@@ -107,8 +112,13 @@
   color: #fff;
 }
 
-.btn-primary:hover { opacity: 0.88; }
-.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-primary:hover {
+  opacity: 0.88;
+}
+.btn-primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
 
 .btn-danger {
   background: transparent;

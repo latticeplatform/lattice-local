@@ -60,17 +60,25 @@ export const ConnectProvider: FC<PropsWithChildren> = ({ children }) => {
     }
   }, [toast]);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => {
+    void load();
+  }, [load]);
 
   const dispatch = useCallback(
     <A extends ConnectDispatchAction>(action: A) =>
       apiActionReducer(action, stateDispatch) as Promise<ActionResultMap[A['type']]>,
-    [],
+    []
   ) as ConnectDispatch;
 
   const value = useMemo(
-    () => ({ ...state, refresh: () => { void load(); }, dispatch }),
-    [state, load, dispatch],
+    () => ({
+      ...state,
+      refresh: () => {
+        void load();
+      },
+      dispatch,
+    }),
+    [state, load, dispatch]
   );
 
   return <ConnectContext value={value}>{children}</ConnectContext>;

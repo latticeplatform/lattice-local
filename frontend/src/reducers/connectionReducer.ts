@@ -1,39 +1,38 @@
-import type {
-  ConnectAction,
-  ConnectorEntry,
-  ConnectorState,
-  ConnectState,
-} from '../types';
-
+import type { ConnectAction, ConnectorEntry, ConnectorState, ConnectState } from '../types';
 
 const setConnectorStatus = (
   entries: ConnectorEntry[],
   name: string,
-  state: ConnectorState,
+  state: ConnectorState
 ): ConnectorEntry[] =>
   entries.map((e) =>
     e.info.name === name
       ? { ...e, status: { ...e.status, connector: { ...e.status.connector, state } } }
-      : e,
+      : e
   );
 
 const setTaskStatus = (
   entries: ConnectorEntry[],
   connectorName: string,
   taskId: number,
-  state: ConnectorState,
+  state: ConnectorState
 ): ConnectorEntry[] =>
   entries.map((e) =>
     e.info.name === connectorName
-      ? { ...e, status: { ...e.status, tasks: e.status.tasks.map((t) => (t.id === taskId ? { ...t, state } : t)) } }
-      : e,
+      ? {
+          ...e,
+          status: {
+            ...e.status,
+            tasks: e.status.tasks.map((t) => (t.id === taskId ? { ...t, state } : t)),
+          },
+        }
+      : e
   );
 
 const updateBoth = (
   s: ConnectState,
-  fn: (entries: ConnectorEntry[]) => ConnectorEntry[],
+  fn: (entries: ConnectorEntry[]) => ConnectorEntry[]
 ): ConnectState => ({ ...s, collectors: fn(s.collectors), sinks: fn(s.sinks) });
-
 
 const connectionReducer = (state: ConnectState, action: ConnectAction): ConnectState => {
   switch (action.type) {
@@ -75,7 +74,7 @@ const connectionReducer = (state: ConnectState, action: ConnectAction): ConnectS
 
     case 'TASK_RESTARTED':
       return updateBoth(state, (entries) =>
-        setTaskStatus(entries, action.connectorName, action.taskId, 'RUNNING'),
+        setTaskStatus(entries, action.connectorName, action.taskId, 'RUNNING')
       );
   }
 };

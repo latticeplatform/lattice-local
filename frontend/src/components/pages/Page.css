@@ -41,8 +41,12 @@
   min-width: 0;
 }
 
-.card--clickable { cursor: pointer; }
-.card--clickable:hover { border-color: var(--accent-border); }
+.card--clickable {
+  cursor: pointer;
+}
+.card--clickable:hover {
+  border-color: var(--accent-border);
+}
 
 .cardHeader {
   display: flex;
@@ -95,10 +99,18 @@
   flex-shrink: 0;
 }
 
-.dot[data-state='RUNNING']    { background: #4ade80; }
-.dot[data-state='PAUSED']     { background: #fb923c; }
-.dot[data-state='FAILED']     { background: #f87171; }
-.dot[data-state='UNASSIGNED'] { background: var(--slate); }
+.dot[data-state='RUNNING'] {
+  background: #4ade80;
+}
+.dot[data-state='PAUSED'] {
+  background: #fb923c;
+}
+.dot[data-state='FAILED'] {
+  background: #f87171;
+}
+.dot[data-state='UNASSIGNED'] {
+  background: var(--slate);
+}
 
 .pluginClass {
   font-size: 14px;

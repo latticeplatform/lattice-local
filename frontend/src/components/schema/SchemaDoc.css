@@ -27,7 +27,9 @@
   color: var(--text);
   cursor: pointer;
   font-family: var(--mono), 'monospace';
-  transition: border-color 0.15s, color 0.15s;
+  transition:
+    border-color 0.15s,
+    color 0.15s;
 }
 
 .schema-toggle:hover {

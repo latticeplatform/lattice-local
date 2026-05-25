@@ -29,8 +29,15 @@ export interface ConnectorPlugin {
 }
 
 export type ConfigFieldType =
-  | 'STRING' | 'INT' | 'SHORT' | 'LONG' | 'DOUBLE'
-  | 'BOOLEAN' | 'LIST' | 'CLASS' | 'PASSWORD';
+  | 'STRING'
+  | 'INT'
+  | 'SHORT'
+  | 'LONG'
+  | 'DOUBLE'
+  | 'BOOLEAN'
+  | 'LIST'
+  | 'CLASS'
+  | 'PASSWORD';
 
 export interface ConfigDefinition {
   name: string;
@@ -76,7 +83,6 @@ export interface TopicSchemaResult {
   schema: unknown;
 }
 
-
 export interface ConnectState {
   collectors: ConnectorEntry[];
   sinks: ConnectorEntry[];
@@ -87,11 +93,16 @@ export interface ConnectState {
 
 export type ConnectAction =
   | { type: 'LOAD_START' }
-  | { type: 'LOAD_SUCCESS'; connectors: ConnectorsResponse; plugins: ConnectorPlugin[]; topics: TopicsResponse }
+  | {
+      type: 'LOAD_SUCCESS';
+      connectors: ConnectorsResponse;
+      plugins: ConnectorPlugin[];
+      topics: TopicsResponse;
+    }
   | { type: 'LOAD_ERROR' }
-  | { type: 'CONNECTOR_CREATED';  entry: ConnectorEntry }
-  | { type: 'CONNECTOR_DELETED';  name: string }
-  | { type: 'CONNECTOR_PAUSED';   name: string }
-  | { type: 'CONNECTOR_RESUMED';  name: string }
+  | { type: 'CONNECTOR_CREATED'; entry: ConnectorEntry }
+  | { type: 'CONNECTOR_DELETED'; name: string }
+  | { type: 'CONNECTOR_PAUSED'; name: string }
+  | { type: 'CONNECTOR_RESUMED'; name: string }
   | { type: 'CONNECTOR_RESTARTED'; name: string }
-  | { type: 'TASK_RESTARTED';     connectorName: string; taskId: number };
+  | { type: 'TASK_RESTARTED'; connectorName: string; taskId: number };

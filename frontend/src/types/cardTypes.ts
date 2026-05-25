@@ -1,4 +1,4 @@
-import type { ConnectorEntry, ConnectorPlugin } from "./connect.ts";
+import type { ConnectorEntry, ConnectorPlugin } from './connect.ts';
 
 interface CardProps {
   cardType: CardType;
@@ -15,7 +15,6 @@ export interface PluginCardProps extends ConnectorPlugin, CardProps {
   onClick: () => void;
 }
 
-
 export interface TopicCardProps extends CardProps {
   cardType: 'topic';
   name: string;
@@ -25,4 +24,3 @@ export interface TopicCardProps extends CardProps {
 
 export type CardType = 'plugin' | 'source' | 'sink' | 'topic';
 export type CardsData = ConnectorCardProps[] | PluginCardProps[] | TopicCardProps[];
-

@@ -4,15 +4,15 @@ import type {
   ConnectorPlugin,
   ConfigDefinition,
   ValidationResult,
-  ValidationFieldResultValue
+  ValidationFieldResultValue,
 } from '../../types';
 import { useToast } from '../../context/ToastContext.tsx';
 import { useConnect } from '../../context/ConnectContext.tsx';
 import ModalShell from './ModalShell.tsx';
 import './ConnectorForm.css';
-import FormField from "../FormField.tsx";
-import { groupByKey } from "../../utils";
-import GearPanel from "../GearPanel.tsx";
+import FormField from '../FormField.tsx';
+import { groupByKey } from '../../utils';
+import GearPanel from '../GearPanel.tsx';
 
 interface ConnectorFormProps {
   plugin: ConnectorPlugin;
@@ -21,10 +21,10 @@ interface ConnectorFormProps {
 }
 
 const getNonNullValuesFromValidation = (
-  results:ValidationResult
+  results: ValidationResult
 ): ValidationFieldResultValue[] => {
-   return results.configs.map((result) => result.value).filter(value => value !== null)
-}
+  return results.configs.map((result) => result.value).filter((value) => value !== null);
+};
 
 const ConnectorForm: FC<ConnectorFormProps> = ({ plugin, onClose, onCreated }) => {
   const [definitions, setDefinitions] = useState<ConfigDefinition[]>([]);
@@ -43,15 +43,17 @@ const ConnectorForm: FC<ConnectorFormProps> = ({ plugin, onClose, onCreated }) =
     try {
       const [defs, emptyValidation] = await Promise.all([
         dispatch({ type: 'PLUGIN_FETCH_CONFIG', pluginClass: plugin.class }),
-        dispatch({ type: 'PLUGIN_VALIDATE_CONFIG', pluginClass: plugin.class, config: { 'connector.class': plugin.class } }),
+        dispatch({
+          type: 'PLUGIN_VALIDATE_CONFIG',
+          pluginClass: plugin.class,
+          config: { 'connector.class': plugin.class },
+        }),
       ]);
-      const values = getNonNullValuesFromValidation(emptyValidation)
+      const values = getNonNullValuesFromValidation(emptyValidation);
       setDefinitions(defs);
-      setDerivedRequired(new Set(
-        values
-        .filter(( value ) =>value.errors.length > 0 )
-        .map(( value ) => value.name)
-      ));
+      setDerivedRequired(
+        new Set(values.filter((value) => value.errors.length > 0).map((value) => value.name))
+      );
       // Initial value prefilling is disabled as it causes problems with opinionated settings on the backend
       //
       // const initial: Record<string, string> = { 'connector.class': plugin.class };
@@ -62,7 +64,7 @@ const ConnectorForm: FC<ConnectorFormProps> = ({ plugin, onClose, onCreated }) =
       // }
       // setValues(initial);
     } catch (e) {
-      console.log(e)
+      console.log(e);
       toast.push(e instanceof Error ? e.message : 'Failed to load plugin config');
       onClose();
     } finally {
@@ -70,8 +72,8 @@ const ConnectorForm: FC<ConnectorFormProps> = ({ plugin, onClose, onCreated }) =
     }
   };
   const setValue = useCallback((name: string, value: string) => {
-    setValues(prev => ({ ...prev, [name]: value }));
-    setErrors(prev => ({ ...prev, [name]: [] }));
+    setValues((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: [] }));
   }, []);
 
   useEffect(() => {
@@ -83,7 +85,9 @@ const ConnectorForm: FC<ConnectorFormProps> = ({ plugin, onClose, onCreated }) =
     try {
       const config = { ...values, 'connector.class': plugin.class };
 
-      const validationResult = getNonNullValuesFromValidation(await dispatch({ type: 'PLUGIN_VALIDATE_CONFIG', pluginClass: plugin.class, config }));
+      const validationResult = getNonNullValuesFromValidation(
+        await dispatch({ type: 'PLUGIN_VALIDATE_CONFIG', pluginClass: plugin.class, config })
+      );
 
       const newErrors: Record<string, string[]> = {};
       for (const value of validationResult) {
@@ -92,19 +96,19 @@ const ConnectorForm: FC<ConnectorFormProps> = ({ plugin, onClose, onCreated }) =
 
       if (Object.keys(newErrors).length > 0) {
         const hiddenOptionals = Object.keys(newErrors).filter(
-          name => !derivedRequired.has(name) && !enabledOptional.has(name)
+          (name) => !derivedRequired.has(name) && !enabledOptional.has(name)
         );
         if (hiddenOptionals.length > 0) {
-          setEnabledOptional(prev => {
+          setEnabledOptional((prev) => {
             const next = new Set(prev);
             for (const name of hiddenOptionals) next.add(name);
             return next;
           });
-          setValues(prev => {
+          setValues((prev) => {
             const next = { ...prev };
             for (const name of hiddenOptionals) {
               if (!next[name]) {
-                const def = definitions.find(d => d.name === name);
+                const def = definitions.find((d) => d.name === name);
                 if (def?.default_value) next[name] = def.default_value;
               }
             }
@@ -128,47 +132,46 @@ const ConnectorForm: FC<ConnectorFormProps> = ({ plugin, onClose, onCreated }) =
     }
   };
 
-  const baseDefs   = definitions.filter(d => d.name !== 'connector.class');
-  const requiredDefs = baseDefs.filter(d => derivedRequired.has(d.name));
-  const optionalDefs = baseDefs.filter(d => !derivedRequired.has(d.name));
-  const activeDefs = [
-    ...requiredDefs,
-    ...optionalDefs.filter(d => enabledOptional.has(d.name)),
-  ];
-  const grouped = groupByKey(activeDefs, d => d.group ?? 'General');
+  const baseDefs = definitions.filter((d) => d.name !== 'connector.class');
+  const requiredDefs = baseDefs.filter((d) => derivedRequired.has(d.name));
+  const optionalDefs = baseDefs.filter((d) => !derivedRequired.has(d.name));
+  const activeDefs = [...requiredDefs, ...optionalDefs.filter((d) => enabledOptional.has(d.name))];
+  const grouped = groupByKey(activeDefs, (d) => d.group ?? 'General');
   const shortName = plugin.class.split('.').pop();
 
   return (
     <ModalShell
       title={`New ${shortName}`}
-
       onClose={onClose}
-
       headerActions={
         <>
           <button
             type="button"
             className={`modal-gear${showGearPanel ? ' modal-gear--active' : ''}`}
-            onClick={() => setShowGearPanel(p => !p)}
+            onClick={() => setShowGearPanel((p) => !p)}
             aria-label="Optional fields"
             title={`${optionalDefs.length} optional fields`}
           >
             <IoSettingsOutline />
           </button>
-          {enabledOptional.size > 0 && (<span className="gear-badge">{enabledOptional.size}</span>)}
+          {enabledOptional.size > 0 && <span className="gear-badge">{enabledOptional.size}</span>}
         </>
       }
-
-      panel={showGearPanel && <GearPanel
-          optionalDefs={optionalDefs}
-          setEnabledOptional={setEnabledOptional}
-          enabledOptional={enabledOptional}
-          setValues={setValues}
-      />}
-
+      panel={
+        showGearPanel && (
+          <GearPanel
+            optionalDefs={optionalDefs}
+            setEnabledOptional={setEnabledOptional}
+            enabledOptional={enabledOptional}
+            setValues={setValues}
+          />
+        )
+      }
       footer={
         <>
-          <button type="button" className="btn btn-ghost" onClick={onClose}>Cancel</button>
+          <button type="button" className="btn btn-ghost" onClick={onClose}>
+            Cancel
+          </button>
           <button
             type="button"
             className="btn btn-primary"
@@ -180,7 +183,6 @@ const ConnectorForm: FC<ConnectorFormProps> = ({ plugin, onClose, onCreated }) =
         </>
       }
     >
-
       {loading ? (
         <span>Loading config…</span>
       ) : (
@@ -188,24 +190,22 @@ const ConnectorForm: FC<ConnectorFormProps> = ({ plugin, onClose, onCreated }) =
           <div key={group}>
             <p className="field-group-title">{group}</p>
             <div className="field-group">
-              {defs.map(def => (
+              {defs.map((def) => (
                 <FormField
                   key={def.name}
                   def={def}
                   isRequired={derivedRequired.has(def.name)}
                   value={values[def.name] ?? ''}
                   errors={errors[def.name] ?? []}
-                  onChange={v => setValue(def.name, v)}
+                  onChange={(v) => setValue(def.name, v)}
                 />
               ))}
             </div>
           </div>
         ))
       )}
-
-
     </ModalShell>
   );
-}
+};
 
 export default ConnectorForm;

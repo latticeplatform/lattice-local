@@ -23,7 +23,9 @@ const TopicGroupsSection: FC<TopicGroupsSectionProps> = ({ availableTopics }) =>
     }
   }, [toast, dispatch]);
 
-  useEffect(() => { void loadGroups(); }, [loadGroups]);
+  useEffect(() => {
+    void loadGroups();
+  }, [loadGroups]);
 
   const openCreate = () => {
     setEditingGroup(null);
@@ -39,17 +41,23 @@ const TopicGroupsSection: FC<TopicGroupsSectionProps> = ({ availableTopics }) =>
     <section className="section">
       <div className="sectionHeader">
         <h2>Topic Groups</h2>
-        <button type="button" className="refreshButton" onClick={openCreate}>New Group</button>
+        <button type="button" className="refreshButton" onClick={openCreate}>
+          New Group
+        </button>
       </div>
       {groups.length === 0 ? (
         <div className="empty">No topic groups</div>
       ) : (
         <div className="group-list">
-          {groups.map(group => (
+          {groups.map((group) => (
             <div key={group.name} className="group-row">
               <span className="group-name">{group.name}</span>
-              <span className="group-count">{group.topics.length} topic{group.topics.length !== 1 ? 's' : ''}</span>
-              <button className="detail-task-restart" onClick={() => openEdit(group)}>Edit</button>
+              <span className="group-count">
+                {group.topics.length} topic{group.topics.length !== 1 ? 's' : ''}
+              </span>
+              <button className="detail-task-restart" onClick={() => openEdit(group)}>
+                Edit
+              </button>
             </div>
           ))}
         </div>

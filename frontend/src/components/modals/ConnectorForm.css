@@ -10,11 +10,19 @@
   display: flex;
   align-items: center;
   border-radius: 6px;
-  transition: color 150ms, background 150ms;
+  transition:
+    color 150ms,
+    background 150ms;
 }
 
-.modal-gear:hover { color: var(--text-h); background: var(--accent-bg); }
-.modal-gear--active { color: var(--accent); background: var(--accent-bg); }
+.modal-gear:hover {
+  color: var(--text-h);
+  background: var(--accent-bg);
+}
+.modal-gear--active {
+  color: var(--accent);
+  background: var(--accent-bg);
+}
 
 .gear-badge {
   position: absolute;
@@ -89,7 +97,7 @@
   user-select: none;
 }
 
-.gear-item input[type="checkbox"] {
+.gear-item input[type='checkbox'] {
   accent-color: var(--accent);
   width: 14px;
   height: 14px;

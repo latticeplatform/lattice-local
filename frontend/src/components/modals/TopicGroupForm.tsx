@@ -16,7 +16,12 @@ interface FormState {
   topics: string[];
 }
 
-const TopicGroupForm: FC<TopicGroupFormProps> = ({ editingGroup, availableTopics, onClose, onSaved }) => {
+const TopicGroupForm: FC<TopicGroupFormProps> = ({
+  editingGroup,
+  availableTopics,
+  onClose,
+  onSaved,
+}) => {
   const [form, setForm] = useState<FormState>(
     editingGroup
       ? { name: editingGroup.name, topics: [...editingGroup.topics] }
@@ -28,10 +33,10 @@ const TopicGroupForm: FC<TopicGroupFormProps> = ({ editingGroup, availableTopics
   const { dispatch } = useConnect();
 
   const toggleTopic = (topic: string) => {
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
       topics: prev.topics.includes(topic)
-        ? prev.topics.filter(t => t !== topic)
+        ? prev.topics.filter((t) => t !== topic)
         : [...prev.topics, topic],
     }));
   };
@@ -41,7 +46,12 @@ const TopicGroupForm: FC<TopicGroupFormProps> = ({ editingGroup, availableTopics
     setBusy(true);
     try {
       if (editingGroup) {
-        await dispatch({ type: 'TOPIC_UPDATE_GROUP', oldName: editingGroup.name, name: form.name.trim(), topics: form.topics });
+        await dispatch({
+          type: 'TOPIC_UPDATE_GROUP',
+          oldName: editingGroup.name,
+          name: form.name.trim(),
+          topics: form.topics,
+        });
       } else {
         await dispatch({ type: 'TOPIC_CREATE_GROUP', name: form.name.trim(), topics: form.topics });
       }
@@ -80,16 +90,36 @@ const TopicGroupForm: FC<TopicGroupFormProps> = ({ editingGroup, availableTopics
             <div className="detail-footer-left">
               {pendingDelete ? (
                 <>
-                  <button className="btn btn-danger" onClick={() => void handleDelete()} disabled={busy}>Confirm Delete</button>
-                  <button className="btn btn-ghost" onClick={() => setPendingDelete(false)} disabled={busy}>Cancel</button>
+                  <button
+                    className="btn btn-danger"
+                    onClick={() => void handleDelete()}
+                    disabled={busy}
+                  >
+                    Confirm Delete
+                  </button>
+                  <button
+                    className="btn btn-ghost"
+                    onClick={() => setPendingDelete(false)}
+                    disabled={busy}
+                  >
+                    Cancel
+                  </button>
                 </>
               ) : (
-                <button className="btn btn-danger" onClick={() => setPendingDelete(true)} disabled={busy}>Delete</button>
+                <button
+                  className="btn btn-danger"
+                  onClick={() => setPendingDelete(true)}
+                  disabled={busy}
+                >
+                  Delete
+                </button>
               )}
             </div>
           )}
           <div className="detail-footer-right">
-            <button className="btn btn-ghost" onClick={onClose} disabled={busy}>Cancel</button>
+            <button className="btn btn-ghost" onClick={onClose} disabled={busy}>
+              Cancel
+            </button>
             <button
               className="btn btn-primary"
               onClick={() => void handleSubmit()}
@@ -107,7 +137,7 @@ const TopicGroupForm: FC<TopicGroupFormProps> = ({ editingGroup, availableTopics
           className="group-name-input"
           type="text"
           value={form.name}
-          onChange={e => setForm(prev => ({ ...prev, name: e.target.value }))}
+          onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
           placeholder="Group name"
           autoFocus
         />
@@ -118,7 +148,7 @@ const TopicGroupForm: FC<TopicGroupFormProps> = ({ editingGroup, availableTopics
           <span style={{ fontSize: 13, color: 'var(--text)' }}>No topics available</span>
         ) : (
           <div className="group-topics-list">
-            {availableTopics.map(topic => (
+            {availableTopics.map((topic) => (
               <label key={topic} className="group-topic-row">
                 <input
                   type="checkbox"

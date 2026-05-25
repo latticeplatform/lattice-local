@@ -13,21 +13,19 @@ const LOGICAL_TYPES: Record<string, string> = {
   'timestamp-millis': 'timestamp (ms)',
   'local-timestamp-micros': 'timestamp (µs, local)',
   'local-timestamp-millis': 'timestamp (ms, local)',
-  'date': 'date',
+  date: 'date',
   'time-micros': 'time (µs)',
   'time-millis': 'time (ms)',
-  'uuid': 'uuid',
-  'decimal': 'decimal',
-  'duration': 'duration',
+  uuid: 'uuid',
+  decimal: 'decimal',
+  duration: 'duration',
 };
 
 const typeInfo = (type: unknown): { label: string; nullable: boolean } => {
   if (typeof type === 'string') return { label: type, nullable: false };
   if (Array.isArray(type)) {
-    const nonNull = (type as unknown[]).filter(t => t !== 'null');
-    const inner = nonNull.length === 1
-      ? typeInfo(nonNull[0])
-      : { label: 'union', nullable: false };
+    const nonNull = (type as unknown[]).filter((t) => t !== 'null');
+    const inner = nonNull.length === 1 ? typeInfo(nonNull[0]) : { label: 'union', nullable: false };
     return { ...inner, nullable: (type as unknown[]).includes('null') };
   }
   if (type && typeof type === 'object') {
@@ -36,15 +34,16 @@ const typeInfo = (type: unknown): { label: string; nullable: boolean } => {
       return { label: LOGICAL_TYPES[t.logicalType] ?? t.logicalType, nullable: false };
     }
     if (t.type === 'array') return { label: `array<${typeInfo(t.items).label}>`, nullable: false };
-    if (t.type === 'map') return { label: `map<string, ${typeInfo(t.values).label}>`, nullable: false };
+    if (t.type === 'map')
+      return { label: `map<string, ${typeInfo(t.values).label}>`, nullable: false };
     if (t.type === 'record') return { label: 'record', nullable: false };
     return { label: t.type ?? 'complex', nullable: false };
   }
   return { label: String(type), nullable: false };
-}
+};
 
 const toRows = (fields: AvroField[]): FieldRow[] => {
-  return fields.map(f => {
+  return fields.map((f) => {
     const { label, nullable } = typeInfo(f.type);
     return {
       name: f.name,
@@ -53,7 +52,7 @@ const toRows = (fields: AvroField[]): FieldRow[] => {
       doc: f.doc,
     };
   });
-}
+};
 
 export const avroParser: SchemaParser = {
   canParse: (result: TopicSchemaResult) => result.source === 'apicurio',

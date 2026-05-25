@@ -7,7 +7,7 @@ const TopicCard: FC<TopicCardProps> = ({ name, sourceConnector, onClick }) => (
     onClick={onClick}
     role="button"
     tabIndex={0}
-    onKeyDown={e => e.key === 'Enter' && onClick()}
+    onKeyDown={(e) => e.key === 'Enter' && onClick()}
   >
     <div className="cardHeader">
       <span className="cardName">{name}</span>

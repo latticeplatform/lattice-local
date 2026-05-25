@@ -1,15 +1,21 @@
-import type { FC } from "react";
-import type { PluginCardProps } from "../../types";
-
+import type { FC } from 'react';
+import type { PluginCardProps } from '../../types';
 
 const PluginCard: FC<PluginCardProps> = ({ class: cls, type, version, onClick }) => {
   const shortName = cls.split('.').pop();
 
   return (
-    <div className="card card--clickable" onClick={onClick} role="button" tabIndex={0}
-      onKeyDown={e => e.key === 'Enter' && onClick()}>
+    <div
+      className="card card--clickable"
+      onClick={onClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => e.key === 'Enter' && onClick()}
+    >
       <div className="cardHeader">
-        <span className="pluginClass" title={cls}>{shortName}</span>
+        <span className="pluginClass" title={cls}>
+          {shortName}
+        </span>
         <span className="badge">{type}</span>
       </div>
       <span className="version">v{version}</span>
