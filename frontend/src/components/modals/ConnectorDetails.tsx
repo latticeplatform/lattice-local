@@ -9,7 +9,6 @@ import StatusRow from "../StatusRow.tsx";
 interface ConnectorDetailsProps {
   entry: ConnectorEntry;
   onClose: () => void;
-  onAction: () => void;
 }
 
 const SENSITIVE_KEYS = /password|secret|credential|token|api[._-]?key/i;
@@ -18,13 +17,13 @@ const maskIfSensitive = (key: string, value: string): string => {
   return SENSITIVE_KEYS.test(key) ? '••••••' : value;
 }
 
-const ConnectorDetails: FC<ConnectorDetailsProps> = ({ entry, onClose, onAction }) => {
+const ConnectorDetails: FC<ConnectorDetailsProps> = ({ entry, onClose }) => {
   const [localEntry, setLocalEntry] = useState(entry);
   const [pendingDelete, setPendingDelete] = useState(false);
   const [busy, setBusy] = useState(false);
   const [restartingTaskId, setRestartingTaskId] = useState<number | null>(null);
   const toast = useToast();
-  const { fetchConnector, deleteConnector, pauseConnector, resumeConnector, restartConnector, restartTask } = useConnect();
+  const { dispatch, refresh } = useConnect();
 
   const { connector, tasks, type } = localEntry.status;
   const configEntries = Object.entries(localEntry.info.config).filter(([k]) => k !== 'connector.class');
@@ -35,7 +34,7 @@ const ConnectorDetails: FC<ConnectorDetailsProps> = ({ entry, onClose, onAction 
     setBusy(true);
     try {
       await action();
-      onAction();
+      refresh();
       onClose();
     } catch (e) {
       toast.push(e instanceof Error ? e.message : 'Action failed');
@@ -47,10 +46,10 @@ const ConnectorDetails: FC<ConnectorDetailsProps> = ({ entry, onClose, onAction 
   const handleRestart = async () => {
     setBusy(true);
     try {
-      await restartConnector(name);
-      const refreshed = await fetchConnector(name);
+      await dispatch({ type: 'CONNECTOR_RESTART', name });
+      const refreshed = await dispatch({ type: 'CONNECTOR_FETCH', name });
       setLocalEntry(refreshed);
-      onAction();
+      refresh();
     } catch (e) {
       toast.push(e instanceof Error ? e.message : 'Restart failed');
     } finally {
@@ -61,10 +60,10 @@ const ConnectorDetails: FC<ConnectorDetailsProps> = ({ entry, onClose, onAction 
   const handleTaskRestart = async (taskId: number) => {
     setRestartingTaskId(taskId);
     try {
-      await restartTask(name, taskId);
-      const refreshed = await fetchConnector(name);
+      await dispatch({ type: 'CONNECTOR_RESTART_TASK', name, taskId });
+      const refreshed = await dispatch({ type: 'CONNECTOR_FETCH', name });
       setLocalEntry(refreshed);
-      onAction();
+      refresh();
     } catch (e) {
       toast.push(e instanceof Error ? e.message : `Task ${taskId} restart failed`);
     } finally {
@@ -89,7 +88,7 @@ const ConnectorDetails: FC<ConnectorDetailsProps> = ({ entry, onClose, onAction 
           <div className="detail-footer-left">
             {pendingDelete ? (
               <>
-                <button className="btn btn-danger" onClick={() => runAndClose(() => deleteConnector(name))} disabled={busy}>
+                <button className="btn btn-danger" onClick={() => runAndClose(() => dispatch({ type: 'CONNECTOR_REMOVE', name }))} disabled={busy}>
                   Confirm Delete
                 </button>
                 <button className="btn btn-ghost" onClick={() => setPendingDelete(false)} disabled={busy}>
@@ -106,7 +105,7 @@ const ConnectorDetails: FC<ConnectorDetailsProps> = ({ entry, onClose, onAction 
             <button className="btn btn-ghost" onClick={() => void handleRestart()} disabled={busy}>
               {busy ? 'Restarting…' : 'Restart'}
             </button>
-            <button className="btn btn-primary" onClick={() => runAndClose(() => isPaused ? resumeConnector(name) : pauseConnector(name))} disabled={busy}>
+            <button className="btn btn-primary" onClick={() => runAndClose(() => isPaused ? dispatch({ type: 'CONNECTOR_RESUME', name }) : dispatch({ type: 'CONNECTOR_PAUSE', name }))} disabled={busy}>
               {isPaused ? 'Resume' : 'Pause'}
             </button>
           </div>

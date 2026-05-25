@@ -25,7 +25,7 @@ const ConnectorPage: FC<ConnectorPageProps> = ({ type }) => {
     cardType: type,
     entry,
     onClick: () => setSearchParams(prev => { prev.set('details', entry.info.name); return prev; }),
-  })) as CollectorCardProps[] | SinkCardProps[];
+  })) as ConnectorCardProps[];
 
   const detailsName = searchParams.get('details');
   const selectedEntry = detailsName ? (entries.find(e => e.info.name === detailsName) ?? null) : null;
@@ -36,7 +36,7 @@ const ConnectorPage: FC<ConnectorPageProps> = ({ type }) => {
     <div className="page">
       <CardSection title={`Active ${capitalize(type)}s`} onRefresh={refresh} loading={loading} data={validConnectors} />
       <CardSection title={`Available ${capitalize(type)} Plugins`} data={validPlugins.map(plugin => ({ ...plugin, cardType: 'plugin' as const, onClick: () => setSelectedPlugin(plugin) }))} />
-      {selectedEntry && <ConnectorDetails entry={selectedEntry} onClose={closeDetails} onAction={refresh} />}
+      {selectedEntry && <ConnectorDetails entry={selectedEntry} onClose={closeDetails} />}
       {selectedPlugin && <ConnectorForm plugin={selectedPlugin} onClose={() => setSelectedPlugin(null)} onCreated={refresh} />}
     </div>
   );

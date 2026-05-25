@@ -15,7 +15,7 @@ interface TopicDetailsProps {
 
 const TopicDetails: FC<TopicDetailsProps> = ({ name, sourceConnector, subscribingSinks, onClose }) => {
   const navigate = useNavigate();
-  const { fetchTopicSchema } = useConnect();
+  const { dispatch } = useConnect();
   const [schema, setSchema] = useState<TopicSchemaResult | null>(null);
   const [schemaLoading, setSchemaLoading] = useState(true);
   const [schemaError, setSchemaError] = useState<string | null>(null);
@@ -24,7 +24,7 @@ const TopicDetails: FC<TopicDetailsProps> = ({ name, sourceConnector, subscribin
     setSchemaLoading(true);
     setSchemaError(null);
     setSchema(null);
-    fetchTopicSchema(name)
+    dispatch({ type: 'TOPIC_FETCH_SCHEMA', topicName: name })
       .then(setSchema)
       .catch(err => setSchemaError(err instanceof Error ? err.message : 'Failed to load schema'))
       .finally(() => setSchemaLoading(false));

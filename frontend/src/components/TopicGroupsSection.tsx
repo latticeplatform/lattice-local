@@ -13,15 +13,15 @@ const TopicGroupsSection: FC<TopicGroupsSectionProps> = ({ availableTopics }) =>
   const [editingGroup, setEditingGroup] = useState<TopicGroup | null>(null);
   const [formOpen, setFormOpen] = useState(false);
   const toast = useToast();
-  const { fetchTopicGroups } = useConnect();
+  const { dispatch } = useConnect();
 
   const loadGroups = useCallback(async () => {
     try {
-      setGroups(await fetchTopicGroups());
+      setGroups(await dispatch({ type: 'TOPIC_FETCH_GROUPS' }));
     } catch (e) {
       toast.push(e instanceof Error ? e.message : 'Failed to load topic groups');
     }
-  }, [toast, fetchTopicGroups]);
+  }, [toast, dispatch]);
 
   useEffect(() => { void loadGroups(); }, [loadGroups]);
 

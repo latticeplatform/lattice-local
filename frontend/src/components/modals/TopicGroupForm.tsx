@@ -25,7 +25,7 @@ const TopicGroupForm: FC<TopicGroupFormProps> = ({ editingGroup, availableTopics
   const [busy, setBusy] = useState(false);
   const [pendingDelete, setPendingDelete] = useState(false);
   const toast = useToast();
-  const { createTopicGroup, updateTopicGroup, deleteTopicGroup } = useConnect();
+  const { dispatch } = useConnect();
 
   const toggleTopic = (topic: string) => {
     setForm(prev => ({
@@ -41,9 +41,9 @@ const TopicGroupForm: FC<TopicGroupFormProps> = ({ editingGroup, availableTopics
     setBusy(true);
     try {
       if (editingGroup) {
-        await updateTopicGroup(editingGroup.name, form.name.trim(), form.topics);
+        await dispatch({ type: 'TOPIC_UPDATE_GROUP', oldName: editingGroup.name, name: form.name.trim(), topics: form.topics });
       } else {
-        await createTopicGroup(form.name.trim(), form.topics);
+        await dispatch({ type: 'TOPIC_CREATE_GROUP', name: form.name.trim(), topics: form.topics });
       }
       onSaved();
       onClose();
@@ -58,7 +58,7 @@ const TopicGroupForm: FC<TopicGroupFormProps> = ({ editingGroup, availableTopics
     if (!editingGroup) return;
     setBusy(true);
     try {
-      await deleteTopicGroup(editingGroup.name);
+      await dispatch({ type: 'TOPIC_DELETE_GROUP', name: editingGroup.name });
       onSaved();
       onClose();
     } catch (e) {

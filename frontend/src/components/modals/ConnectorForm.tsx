@@ -37,13 +37,13 @@ const ConnectorForm: FC<ConnectorFormProps> = ({ plugin, onClose, onCreated }) =
   const [enabledOptional, setEnabledOptional] = useState<Set<string>>(new Set());
 
   const toast = useToast();
-  const { fetchPluginConfig, validateConnectorConfig, createConnector } = useConnect();
+  const { dispatch } = useConnect();
 
   const fetchConfig = async () => {
     try {
       const [defs, emptyValidation] = await Promise.all([
-        fetchPluginConfig(plugin.class),
-        validateConnectorConfig(plugin.class, { 'connector.class': plugin.class }),
+        dispatch({ type: 'PLUGIN_FETCH_CONFIG', pluginClass: plugin.class }),
+        dispatch({ type: 'PLUGIN_VALIDATE_CONFIG', pluginClass: plugin.class, config: { 'connector.class': plugin.class } }),
       ]);
       const values = getNonNullValuesFromValidation(emptyValidation)
       setDefinitions(defs);
@@ -83,7 +83,7 @@ const ConnectorForm: FC<ConnectorFormProps> = ({ plugin, onClose, onCreated }) =
     try {
       const config = { ...values, 'connector.class': plugin.class };
 
-      const validationResult = getNonNullValuesFromValidation(await validateConnectorConfig(plugin.class, config));
+      const validationResult = getNonNullValuesFromValidation(await dispatch({ type: 'PLUGIN_VALIDATE_CONFIG', pluginClass: plugin.class, config }));
 
       const newErrors: Record<string, string[]> = {};
       for (const value of validationResult) {
@@ -116,7 +116,7 @@ const ConnectorForm: FC<ConnectorFormProps> = ({ plugin, onClose, onCreated }) =
         return;
       }
 
-      await createConnector(values['name'] ?? '', config);
+      await dispatch({ type: 'CONNECTOR_CREATE', name: values['name'] ?? '', config });
 
       toast.push('Connector created successfully', 'success');
       onCreated();
