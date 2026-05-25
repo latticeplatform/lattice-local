@@ -1,6 +1,6 @@
 import { type Dispatch, type FC, type SetStateAction, useCallback, useState } from "react";
-import { groupByKey } from "../utils/utils.ts";
-import type { ConfigDefinition } from "../types/connect.ts";
+import { groupByKey } from "../utils";
+import type { ConfigDefinition } from "../types";
 
 interface GearPanelProps {
   optionalDefs: ConfigDefinition[];

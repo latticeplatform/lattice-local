@@ -1,5 +1,5 @@
 import { useState, type FC } from 'react';
-import type { TopicGroup } from '../../types/connect.ts';
+import type { TopicGroup } from '../../types';
 import ModalShell from './ModalShell.tsx';
 import { useToast } from '../../context/ToastContext.tsx';
 import { useConnect } from '../../context/ConnectContext.tsx';

@@ -1,5 +1,5 @@
 import type { FC } from "react";
-import type { CardsData } from "../types/cardTypes.ts";
+import type { CardsData } from "../types";
 import CardGrid from "./CardGrid.tsx";
 
 

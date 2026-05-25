@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, type FC } from 'react';
-import type { TopicGroup } from '../types/connect.ts';
+import type { TopicGroup } from '../types';
 import { useToast } from '../context/ToastContext.tsx';
 import { useConnect } from '../context/ConnectContext.tsx';
 import TopicGroupForm from './modals/TopicGroupForm.tsx';

@@ -1,5 +1,5 @@
 import type { FC } from "react";
-import type { PluginCardProps } from "../../types/cardTypes.ts";
+import type { PluginCardProps } from "../../types";
 
 
 const PluginCard: FC<PluginCardProps> = ({ class: cls, type, version, onClick }) => {

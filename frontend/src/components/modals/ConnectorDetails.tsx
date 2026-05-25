@@ -1,5 +1,5 @@
 import { useState, type FC } from 'react';
-import type { ConnectorEntry } from '../../types/connect';
+import type { ConnectorEntry } from '../../types';
 import { useToast } from '../../context/ToastContext.tsx';
 import { useConnect } from '../../context/ConnectContext.tsx';
 import ModalShell from './ModalShell.tsx';

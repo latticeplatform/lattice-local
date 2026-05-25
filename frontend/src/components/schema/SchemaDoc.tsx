@@ -1,8 +1,8 @@
 import { useState, type FC } from 'react';
 import './SchemaDoc.css';
-import type { Extracted } from "../../types/schemaTypes.ts";
-import type { TopicSchemaResult } from "../../types/connect.ts";
-import type { SchemaParser } from "../../types/schemaTypes.ts";
+import type { Extracted } from "../../types";
+import type { TopicSchemaResult } from "../../types";
+import type { SchemaParser } from "../../types";
 import FieldEntry from "./FieldEntry.tsx";
 import { debeziumParser } from '../../parsers/debeziumParser.ts';
 import { avroParser } from '../../parsers/avroParser.ts';

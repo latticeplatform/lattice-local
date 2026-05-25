@@ -5,13 +5,13 @@ import type {
   ConfigDefinition,
   ValidationResult,
   ValidationFieldResultValue
-} from '../../types/connect';
+} from '../../types';
 import { useToast } from '../../context/ToastContext.tsx';
 import { useConnect } from '../../context/ConnectContext.tsx';
 import ModalShell from './ModalShell.tsx';
 import './ConnectorForm.css';
 import FormField from "../FormField.tsx";
-import { groupByKey } from "../../utils/utils.ts";
+import { groupByKey } from "../../utils";
 import GearPanel from "../GearPanel.tsx";
 
 interface ConnectorFormProps {

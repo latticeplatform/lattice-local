@@ -1,6 +1,6 @@
 import { useEffect, useState, type FC } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { ConnectorEntry, TopicSchemaResult } from '../../types/connect.ts';
+import type { ConnectorEntry, TopicSchemaResult } from '../../types';
 import { useConnect } from '../../context/ConnectContext.tsx';
 import ModalShell from './ModalShell.tsx';
 import SchemaDoc from '../schema/SchemaDoc.tsx';

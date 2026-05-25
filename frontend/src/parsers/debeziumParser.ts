@@ -1,5 +1,5 @@
-import type { TopicSchemaResult } from '../types/connect.ts';
-import type { Extracted, FieldRow, SchemaParser } from '../types/schemaTypes.ts';
+import type { TopicSchemaResult } from '../types';
+import type { Extracted, FieldRow, SchemaParser } from '../types';
 
 interface DebeziumField {
   field: string;

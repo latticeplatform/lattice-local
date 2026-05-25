@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import type { TopicCardProps } from '../../types/cardTypes.ts';
+import type { TopicCardProps } from '../../types';
 
 const TopicCard: FC<TopicCardProps> = ({ name, sourceConnector, onClick }) => (
   <div

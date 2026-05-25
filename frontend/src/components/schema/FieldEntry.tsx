@@ -1,5 +1,5 @@
 import { type FC, useState } from "react";
-import type { FieldRow } from "../../types/schemaTypes.ts";
+import type { FieldRow } from "../../types";
 
 const FieldEntry: FC<{ row: FieldRow; depth: number }> = ({ row, depth }) => {
   const [open, setOpen] = useState(false);
