@@ -1,7 +1,7 @@
 import express from "express";
-
 import axios from "axios";
 import avsc from "avsc";
+import type { KCConfigInfos } from "../types/index.js";
 
 // const KAFKA_INFRA_TOPICS = [
 //   '__consumer_offsets',
@@ -11,7 +11,8 @@ import avsc from "avsc";
 //   'connect-statuses'
 // ];
 
-const SCHEMA_REGISTRY_URL = process.env.SCHEMA_REGISTRY_URL ?? "http://localhost:8081";
+import { config } from "../config.js";
+const SCHEMA_REGISTRY_URL = config.schemaRegistry.url;
 const schemaCache = new Map<number, { schema: string; schemaType: string }>();
 
 export const kafkaError = (err: unknown, res: express.Response) => {
@@ -76,3 +77,16 @@ export const parseValue = async (raw: Buffer): Promise<ParsedValue> => {
     return { format: "string", payload: raw.toString("utf-8") };
   }
 }
+
+export const markPasswordsRequired = (data: KCConfigInfos, suppliedConfig: Record<string, string>): void => {
+  for (const c of data.configs) {
+    if (c.definition.type !== "PASSWORD") continue;
+    if (suppliedConfig[c.definition.name]) continue;
+    const label = c.definition.display_name ?? c.definition.name;
+    if (c.value === null) {
+      c.value = { name: c.definition.name, value: null, errors: [`${label} is required`], visible: true, recommended_values: [] };
+    } else if (c.value.errors.length === 0) {
+      c.value.errors = [`${label} is required`];
+    }
+  }
+};
