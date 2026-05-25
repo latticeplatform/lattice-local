@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { kafkaError } from "../utils.js";
+import { kafkaError } from "../utils/index.js";
 import type { KafkaJSService } from "../types/index.js";
 
 

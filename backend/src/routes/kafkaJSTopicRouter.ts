@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { kafkaError, parseValue } from "../utils.js";
+import { kafkaError, parseValue } from "../utils/index.js";
 import type { KafkaJSService } from "../types/index.js";
 
 const createKafkaJSTopicRouter = (service:KafkaJSService):Router => {

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { applyDefaults, getAutofilledKeys, CONNECTOR_DEFAULTS } from '../connectorDefaults.js';
+import { applyDefaults, getAutofilledKeys, CONNECTOR_DEFAULTS } from '../utils/index.js';
 
 const POSTGRES = 'io.debezium.connector.postgresql.PostgresConnector';
 const CLICKHOUSE = 'com.clickhouse.kafka.connect.ClickHouseSinkConnector';
