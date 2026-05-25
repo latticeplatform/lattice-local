@@ -11,7 +11,7 @@
 }
 
 .schema-section-label {
-  font-family: var(--mono);
+  font-family: var(--mono), 'monospace';
   font-size: 11px;
   color: var(--text);
   margin-left: 2px;
@@ -26,7 +26,7 @@
   background: transparent;
   color: var(--text);
   cursor: pointer;
-  font-family: var(--mono);
+  font-family: var(--mono), 'monospace';
   transition: border-color 0.15s, color 0.15s;
 }
 
@@ -105,12 +105,12 @@
 }
 
 .schema-field-name {
-  font-family: var(--mono);
+  font-family: var(--mono), 'monospace';
   color: var(--text-h);
 }
 
 .schema-type {
-  font-family: var(--mono);
+  font-family: var(--mono), 'monospace';
   font-size: 11px;
   color: var(--accent);
   background: none;

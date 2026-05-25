@@ -103,7 +103,7 @@
 .pluginClass {
   font-size: 14px;
   color: var(--text-h);
-  font-family: var(--mono);
+  font-family: var(--mono), 'monospace';
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -113,7 +113,7 @@
   font-size: 12px;
   color: var(--text);
   overflow: hidden;
-  font-family: var(--mono);
+  font-family: var(--mono), 'monospace';
   text-overflow: ellipsis;
   flex: 1 1 0;
   min-width: 0;
@@ -184,7 +184,7 @@
   background: var(--bg);
   color: var(--text-h);
   font-size: 14px;
-  font-family: var(--sans);
+  font-family: var(--sans), 'sans-serif';
   box-sizing: border-box;
 }
 
@@ -208,5 +208,5 @@
   font-size: 13px;
   color: var(--text-h);
   cursor: pointer;
-  font-family: var(--mono);
+  font-family: var(--mono), 'monospace';
 }

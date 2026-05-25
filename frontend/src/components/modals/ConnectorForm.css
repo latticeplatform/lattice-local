@@ -48,7 +48,7 @@
   border-bottom: 1px solid var(--border);
   background: transparent;
   color: var(--text-h);
-  font-family: var(--sans);
+  font-family: var(--sans), 'sans-serif';
   outline: none;
   flex-shrink: 0;
 }
@@ -151,7 +151,7 @@
   border: 1px solid var(--border);
   background: var(--code-bg);
   color: var(--text-h);
-  font-family: var(--mono);
+  font-family: var(--mono), 'monospace';
   width: 100%;
   box-sizing: border-box;
 }

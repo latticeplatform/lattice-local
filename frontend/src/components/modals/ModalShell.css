@@ -91,7 +91,7 @@
   border-radius: 8px;
   border: 1px solid var(--border);
   cursor: pointer;
-  font-family: var(--sans);
+  font-family: var(--sans), 'sans-serif';
 }
 
 .btn-ghost {
