@@ -1,10 +1,23 @@
 import { Router, type Response } from "express";
 import axios, { type AxiosResponse } from "axios";
-import dotenv from "dotenv";
-import { applyDefaults, getAutofilledKeys } from "../connectorDefaults.js";
+import { config } from "../config.js";
+import {
+  markPasswordsRequired,
+  isFieldHidden,
+  applyDefaults,
+  getAutofilledKeys,
+} from "../utils/index.js";
+import type {
+  KCConfigInfos,
+  KCConfigKeyInfo,
+  KCConnectorExpandedEntry,
+  KCConnectorInfo,
+  KCConnectorStateInfo,
+  KCConnectorsExpandedResponse,
+  KCPluginInfo,
+} from "../types/index.js";
 
-dotenv.config();
-const CONNECT_URL = process.env.KAFKA_CONNECT_URL ?? "http://localhost:8083";
+const CONNECT_URL = config.kafkaConnect.url;
 const JSON_HEADERS = { "Content-Type": "application/json" };
 
 const proxyError = (err: unknown, res: Response) => {
@@ -14,19 +27,18 @@ const proxyError = (err: unknown, res: Response) => {
   } else {
     res.status(502).json({ error: "Failed to reach Kafka Connect" });
   }
-}
+};
 
-const createKafkaConnectRouter = ():Router => {
-
+const createKafkaConnectRouter = (): Router => {
   const router = Router();
 
-  // GET /connectors -> Connector list
+  // GET /connectors -> Connector list (expanded with info + status)
   router.get("/connectors", async (_req, res) => {
     try {
-      const { data } = await axios.get(
+      const { data } = await axios.get<KCConnectorsExpandedResponse>(
         `${CONNECT_URL}/connectors?expand=info&expand=status`
       );
-      for (const entry of Object.values(data) as any[]) {
+      for (const entry of Object.values(data) as KCConnectorExpandedEntry[]) {
         const connectorClass = entry?.info?.config?.["connector.class"] ?? "";
         entry.autofilled_keys = getAutofilledKeys(connectorClass);
       }
@@ -40,8 +52,8 @@ const createKafkaConnectRouter = ():Router => {
   router.get("/connectors/:name", async (req, res) => {
     try {
       const [infoRes, statusRes] = await Promise.all([
-        axios.get(`${CONNECT_URL}/connectors/${req.params.name}`),
-        axios.get(`${CONNECT_URL}/connectors/${req.params.name}/status`),
+        axios.get<KCConnectorInfo>(`${CONNECT_URL}/connectors/${req.params.name}`),
+        axios.get<KCConnectorStateInfo>(`${CONNECT_URL}/connectors/${req.params.name}/status`),
       ]);
       const connectorClass = infoRes.data?.config?.["connector.class"] ?? "";
       res.json({
@@ -59,13 +71,17 @@ const createKafkaConnectRouter = ():Router => {
     let body: Record<string, unknown>;
     try {
       body = { ...req.body, config: applyDefaults(req.body.config ?? {}) };
-      console.log(body)
+      console.log(body);
     } catch (err) {
       res.status(400).json({ error: (err as Error).message });
       return;
     }
     try {
-      const { data } = await axios.post(`${CONNECT_URL}/connectors`, body, { headers: JSON_HEADERS });
+      const { data } = await axios.post<KCConnectorInfo>(
+        `${CONNECT_URL}/connectors`,
+        body,
+        { headers: JSON_HEADERS }
+      );
       res.status(201).json(data);
     } catch (err) {
       proxyError(err, res);
@@ -115,7 +131,11 @@ const createKafkaConnectRouter = ():Router => {
   // POST /connectors/{name}/tasks/{taskId}/restart -> Restart a single task
   router.post("/connectors/:name/tasks/:taskId/restart", async (req, res) => {
     try {
-      await axios.post(`${CONNECT_URL}/connectors/${req.params.name}/tasks/${req.params.taskId}/restart`, null, { headers: JSON_HEADERS });
+      await axios.post(
+        `${CONNECT_URL}/connectors/${req.params.name}/tasks/${req.params.taskId}/restart`,
+        null,
+        { headers: JSON_HEADERS }
+      );
       res.status(200).send();
     } catch (err) {
       proxyError(err, res);
@@ -125,66 +145,66 @@ const createKafkaConnectRouter = ():Router => {
   // GET /connector-plugins -> Connector plugin list
   router.get("/connector-plugins", async (_req, res) => {
     try {
-      const { data } = await axios.get(`${CONNECT_URL}/connector-plugins`);
+      const { data } = await axios.get<KCPluginInfo[]>(`${CONNECT_URL}/connector-plugins`);
       res.json(data);
     } catch (err) {
       proxyError(err, res);
     }
   });
 
-  // GET /connector-plugins/{plugin-type}/config -> Get config definition for a plugin
+  // GET /connector-plugins/{pluginClass}/config -> Config definitions for a plugin
   router.get("/connector-plugins/:pluginClass/config", async (req, res) => {
     try {
-      const { data } = await axios.get(
+      const { data } = await axios.get<KCConfigKeyInfo[]>(
         `${CONNECT_URL}/connector-plugins/${req.params.pluginClass}/config`
       );
-      res.json(data);
+      const filtered = data.filter(def => !isFieldHidden(req.params.pluginClass, def.name));
+      res.json(filtered);
     } catch (err) {
       proxyError(err, res);
     }
   });
 
-  // PUT /connector-plugins/{plugin-type}/config/validate -> Validate a connector configuration
+  // PUT /connector-plugins/{pluginClass}/config/validate -> Validate a connector configuration
   router.put("/connector-plugins/:pluginClass/config/validate", async (req, res) => {
     try {
-      const { data } = await axios.put(
-        `${CONNECT_URL}/connector-plugins/${req.params.pluginClass}/config/validate`,
-        req.body,
+      const pluginClass = req.params.pluginClass;
+      const configWithDefaults = applyDefaults({ ...req.body, "connector.class": pluginClass });
+      const { data } = await axios.put<KCConfigInfos>(
+        `${CONNECT_URL}/connector-plugins/${pluginClass}/config/validate`,
+        configWithDefaults,
         { headers: JSON_HEADERS }
       );
+      // Strip hidden fields from the response before returning to the frontend.
+      data.configs = data.configs.filter(c => !isFieldHidden(pluginClass, c.definition.name));
+      markPasswordsRequired(data, configWithDefaults);
+      data.error_count = data.configs.filter(c => (c.value?.errors?.length ?? 0) > 0).length;
       res.json(data);
     } catch (err) {
       proxyError(err, res);
     }
   });
 
-  // GET /topics -> List all topics
+  // GET /topics -> Active topics keyed by connector name
   router.get("/topics", async (_req, res) => {
     try {
       const { data: connectors } = await axios.get<string[]>(`${CONNECT_URL}/connectors`);
-      //const { data: connectorlessTopics } = await axios.get<string[]>(`${CONNECT_URL}/admin/topics`);
-
       const topics: Record<string, { topics: string[] }> = {};
-      //topics['connectorless'] = {topics: connectorlessTopics}
-      await Promise.all(connectors.map(
-        async (connector) => {
-          const { data } = await axios.get(
+      await Promise.all(
+        connectors.map(async connector => {
+          const { data } = await axios.get<Record<string, { topics: string[] }>>(
             `${CONNECT_URL}/connectors/${connector}/topics`
           );
           Object.assign(topics, data);
-        }
-      ));
-
-
-      console.log(topics);
+        })
+      );
       return res.json(topics);
     } catch (err) {
       proxyError(err, res);
     }
-  })
+  });
+
   return router;
-}
-
-
+};
 
 export default createKafkaConnectRouter;

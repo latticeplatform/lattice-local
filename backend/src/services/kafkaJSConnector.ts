@@ -1,11 +1,9 @@
 import { type Admin, type Consumer, type ConsumerConfig, Kafka, type KafkaConfig, type Producer } from "kafkajs";
-import dotenv from "dotenv";
-
-dotenv.config();
+import { config } from "../config.js";
 
 const kafkaConfig: KafkaConfig = {
-  clientId: process.env.KAFKA_CLIENT_ID ?? "kafka-infrastructure-backend",
-  brokers: (process.env.KAFKA_BROKERS ?? "localhost:9092").split(","),
+  clientId: config.kafka.clientId,
+  brokers: config.kafka.brokers,
 };
 
 const kafka = new Kafka(kafkaConfig);

@@ -1,14 +1,11 @@
-import dotenv from "dotenv";
 import { type Consumer, Kafka, type KafkaConfig } from "kafkajs";
-import { parseValue } from "../utils.js";
+import { config } from "../config.js";
 import { parseValue } from "../utils/index.js";
 import type { KafkaJSService, SchemaResult } from "../types/index.js";
 
-dotenv.config();
-
 const kafka = new Kafka({
-  clientId: process.env.KAFKA_CLIENT_ID ?? "kafka-infrastructure-backend",
-  brokers: (process.env.KAFKA_BROKERS ?? "localhost:9092").split(","),
+  clientId: config.kafka.clientId,
+  brokers: config.kafka.brokers,
 } satisfies KafkaConfig);
 
 const withAdmin = async <T>(fn: (admin: ReturnType<typeof kafka.admin>) => Promise<T>): Promise<T> => {
