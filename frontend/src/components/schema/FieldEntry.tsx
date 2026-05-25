@@ -13,7 +13,9 @@ const FieldEntry: FC<{ row: FieldRow; depth: number }> = ({ row, depth }) => {
           {hasChildren ? (
             <button
               className="schema-expand"
-              onClick={() => setOpen((o) => !o)}
+              onClick={() => {
+                setOpen((o) => !o);
+              }}
               aria-label="toggle"
             >
               {open ? '▾' : '▸'}
@@ -35,9 +37,7 @@ const FieldEntry: FC<{ row: FieldRow; depth: number }> = ({ row, depth }) => {
         </td>
         {row.doc && <td className="schema-cell schema-cell--doc">{row.doc}</td>}
       </tr>
-      {hasChildren &&
-        open &&
-        row.children!.map((child) => <FieldEntry key={child.name} row={child} depth={depth + 1} />)}
+      {open && (row.children ?? []).map((child) => <FieldEntry key={child.name} row={child} depth={depth + 1} />)}
     </>
   );
 };

@@ -26,25 +26,27 @@ const GearPanel: FC<GearPanelProps> = ({
 
   const optionalGrouped = groupByKey(filteredOptional, (d) => d.group ?? 'General');
 
-  const toggleOptional = useCallback((def: ConfigDefinition) => {
-    setEnabledOptional((prev) => {
-      const next = new Set(prev);
-      if (next.has(def.name)) {
-        next.delete(def.name);
-        setValues((v) => {
-          const c = { ...v };
-          delete c[def.name];
-          return c;
-        });
-      } else {
-        next.add(def.name);
-        if (def.default_value) {
-          setValues((v) => ({ ...v, [def.name]: def.default_value! }));
+  const toggleOptional = useCallback(
+    (def: ConfigDefinition) => {
+      setEnabledOptional((prev) => {
+        const next = new Set(prev);
+        if (next.has(def.name)) {
+          next.delete(def.name);
+          setValues((v) =>
+            Object.fromEntries(Object.entries(v).filter(([k]) => k !== def.name))
+          );
+        } else {
+          next.add(def.name);
+          const defaultValue = def.default_value;
+          if (defaultValue) {
+            setValues((v) => ({ ...v, [def.name]: defaultValue }));
+          }
         }
-      }
-      return next;
-    });
-  }, []);
+        return next;
+      });
+    },
+    [setEnabledOptional, setValues]
+  );
 
   return (
     <div className="gear-panel">
@@ -52,8 +54,9 @@ const GearPanel: FC<GearPanelProps> = ({
         className="gear-search"
         placeholder="Search optional fields…"
         value={optionalSearch}
-        onChange={(e) => setOptionalSearch(e.target.value)}
-        autoFocus
+        onChange={(e) => {
+          setOptionalSearch(e.target.value);
+        }}
       />
       <div className="gear-list">
         {Object.entries(optionalGrouped).map(([group, defs]) => (
@@ -64,7 +67,9 @@ const GearPanel: FC<GearPanelProps> = ({
                 <input
                   type="checkbox"
                   checked={enabledOptional.has(def.name)}
-                  onChange={() => toggleOptional(def)}
+                  onChange={() => {
+                    toggleOptional(def);
+                  }}
                 />
                 <span title={def.documentation}>{def.display_name}</span>
               </label>

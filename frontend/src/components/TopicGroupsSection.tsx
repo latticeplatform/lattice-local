@@ -24,8 +24,12 @@ const TopicGroupsSection: FC<TopicGroupsSectionProps> = ({ availableTopics }) =>
   }, [toast, dispatch]);
 
   useEffect(() => {
-    void loadGroups();
-  }, [loadGroups]);
+    void dispatch({ type: 'TOPIC_FETCH_GROUPS' })
+      .then(setGroups)
+      .catch((e: unknown) => {
+        toast.push(e instanceof Error ? e.message : 'Failed to load topic groups');
+      });
+  }, [dispatch, toast]);
 
   const openCreate = () => {
     setEditingGroup(null);
@@ -55,7 +59,12 @@ const TopicGroupsSection: FC<TopicGroupsSectionProps> = ({ availableTopics }) =>
               <span className="group-count">
                 {group.topics.length} topic{group.topics.length !== 1 ? 's' : ''}
               </span>
-              <button className="detail-task-restart" onClick={() => openEdit(group)}>
+              <button
+                className="detail-task-restart"
+                onClick={() => {
+                  openEdit(group);
+                }}
+              >
                 Edit
               </button>
             </div>
@@ -66,7 +75,9 @@ const TopicGroupsSection: FC<TopicGroupsSectionProps> = ({ availableTopics }) =>
         <TopicGroupForm
           editingGroup={editingGroup}
           availableTopics={availableTopics}
-          onClose={() => setFormOpen(false)}
+          onClose={() => {
+            setFormOpen(false);
+          }}
           onSaved={() => void loadGroups()}
         />
       )}

@@ -10,7 +10,9 @@ const PluginCard: FC<PluginCardProps> = ({ class: cls, type, version, onClick })
       onClick={onClick}
       role="button"
       tabIndex={0}
-      onKeyDown={(e) => e.key === 'Enter' && onClick()}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') onClick();
+      }}
     >
       <div className="cardHeader">
         <span className="pluginClass" title={cls}>

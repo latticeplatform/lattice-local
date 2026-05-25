@@ -46,7 +46,7 @@ const createConnectorApi = (): ConnectorApi => {
   };
 
   const restartTask = (name: string, taskId: number): Promise<void> => {
-    return voidRequest(`/connectors/${encodeURIComponent(name)}/tasks/${taskId}/restart`, {
+    return voidRequest(`/connectors/${encodeURIComponent(name)}/tasks/${String(taskId)}/restart`, {
       method: 'POST',
     });
   };

@@ -26,14 +26,18 @@ const TopicDetails: FC<TopicDetailsProps> = ({
   const [schemaError, setSchemaError] = useState<string | null>(null);
 
   useEffect(() => {
-    setSchemaLoading(true);
-    setSchemaError(null);
-    setSchema(null);
-    dispatch({ type: 'TOPIC_FETCH_SCHEMA', topicName: name })
-      .then(setSchema)
-      .catch((err) => setSchemaError(err instanceof Error ? err.message : 'Failed to load schema'))
-      .finally(() => setSchemaLoading(false));
-  }, [name]);
+    void dispatch({ type: 'TOPIC_FETCH_SCHEMA', topicName: name })
+      .then((result) => {
+        setSchema(result);
+        setSchemaError(null);
+        setSchemaLoading(false);
+      })
+      .catch((err: unknown) => {
+        setSchema(null);
+        setSchemaError(err instanceof Error ? err.message : 'Failed to load schema');
+        setSchemaLoading(false);
+      });
+  }, [name, dispatch]);
 
   return (
     <ModalShell
@@ -46,7 +50,7 @@ const TopicDetails: FC<TopicDetailsProps> = ({
         <p className="detail-section-title">Source Connector</p>
         <button
           className="detail-link"
-          onClick={() => navigate(`/collect?details=${encodeURIComponent(sourceConnector)}`)}
+          onClick={() => void navigate(`/collect?details=${encodeURIComponent(sourceConnector)}`)}
         >
           {sourceConnector}
         </button>
@@ -63,7 +67,9 @@ const TopicDetails: FC<TopicDetailsProps> = ({
             <div key={sink.info.name} className="detail-task-row">
               <button
                 className="detail-link"
-                onClick={() => navigate(`/connect?details=${encodeURIComponent(sink.info.name)}`)}
+                onClick={() =>
+                  void navigate(`/connect?details=${encodeURIComponent(sink.info.name)}`)
+                }
               >
                 {sink.info.name}
               </button>

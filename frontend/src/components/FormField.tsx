@@ -26,7 +26,9 @@ const FormField: FC<FormFieldProps> = ({ def, isRequired, value, errors, onChang
         <select
           id={id}
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => {
+            onChange(e.target.value);
+          }}
           className={hasError ? 'has-error' : ''}
         >
           <option value="">—</option>
@@ -39,7 +41,9 @@ const FormField: FC<FormFieldProps> = ({ def, isRequired, value, errors, onChang
           type={getFieldType(def.type)}
           value={value}
           placeholder={def.default_value ?? undefined}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => {
+            onChange(e.target.value);
+          }}
           className={hasError ? 'has-error' : ''}
         />
       )}

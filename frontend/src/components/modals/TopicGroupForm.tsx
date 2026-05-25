@@ -99,7 +99,9 @@ const TopicGroupForm: FC<TopicGroupFormProps> = ({
                   </button>
                   <button
                     className="btn btn-ghost"
-                    onClick={() => setPendingDelete(false)}
+                    onClick={() => {
+                      setPendingDelete(false);
+                    }}
                     disabled={busy}
                   >
                     Cancel
@@ -108,7 +110,9 @@ const TopicGroupForm: FC<TopicGroupFormProps> = ({
               ) : (
                 <button
                   className="btn btn-danger"
-                  onClick={() => setPendingDelete(true)}
+                  onClick={() => {
+                    setPendingDelete(true);
+                  }}
                   disabled={busy}
                 >
                   Delete
@@ -137,9 +141,10 @@ const TopicGroupForm: FC<TopicGroupFormProps> = ({
           className="group-name-input"
           type="text"
           value={form.name}
-          onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
+          onChange={(e) => {
+            setForm((prev) => ({ ...prev, name: e.target.value }));
+          }}
           placeholder="Group name"
-          autoFocus
         />
       </div>
       <div className="detail-section">
@@ -153,7 +158,9 @@ const TopicGroupForm: FC<TopicGroupFormProps> = ({
                 <input
                   type="checkbox"
                   checked={form.topics.includes(topic)}
-                  onChange={() => toggleTopic(topic)}
+                  onChange={() => {
+                    toggleTopic(topic);
+                  }}
                 />
                 <span>{topic}</span>
               </label>

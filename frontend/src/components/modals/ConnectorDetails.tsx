@@ -67,7 +67,7 @@ const ConnectorDetails: FC<ConnectorDetailsProps> = ({ entry, onClose }) => {
       setLocalEntry(refreshed);
       refresh();
     } catch (e) {
-      toast.push(e instanceof Error ? e.message : `Task ${taskId} restart failed`);
+      toast.push(e instanceof Error ? e.message : `Task ${String(taskId)} restart failed`);
     } finally {
       setRestartingTaskId(null);
     }
@@ -92,14 +92,18 @@ const ConnectorDetails: FC<ConnectorDetailsProps> = ({ entry, onClose }) => {
               <>
                 <button
                   className="btn btn-danger"
-                  onClick={() => runAndClose(() => dispatch({ type: 'CONNECTOR_REMOVE', name }))}
+                  onClick={() =>
+                    void runAndClose(() => dispatch({ type: 'CONNECTOR_REMOVE', name }))
+                  }
                   disabled={busy}
                 >
                   Confirm Delete
                 </button>
                 <button
                   className="btn btn-ghost"
-                  onClick={() => setPendingDelete(false)}
+                  onClick={() => {
+                    setPendingDelete(false);
+                  }}
                   disabled={busy}
                 >
                   Cancel
@@ -108,7 +112,9 @@ const ConnectorDetails: FC<ConnectorDetailsProps> = ({ entry, onClose }) => {
             ) : (
               <button
                 className="btn btn-danger"
-                onClick={() => setPendingDelete(true)}
+                onClick={() => {
+                  setPendingDelete(true);
+                }}
                 disabled={busy}
               >
                 Delete
@@ -122,7 +128,7 @@ const ConnectorDetails: FC<ConnectorDetailsProps> = ({ entry, onClose }) => {
             <button
               className="btn btn-primary"
               onClick={() =>
-                runAndClose(() =>
+                void runAndClose(() =>
                   isPaused
                     ? dispatch({ type: 'CONNECTOR_RESUME', name })
                     : dispatch({ type: 'CONNECTOR_PAUSE', name })
@@ -155,7 +161,7 @@ const ConnectorDetails: FC<ConnectorDetailsProps> = ({ entry, onClose }) => {
                   className="detail-task-restart"
                   onClick={() => void handleTaskRestart(task.id)}
                   disabled={isDisabled}
-                  title={`Restart task ${task.id}`}
+                  title={`Restart task ${String(task.id)}`}
                 >
                   {isRestarting ? 'Restarting…' : 'Restart'}
                 </button>

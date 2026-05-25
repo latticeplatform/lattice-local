@@ -28,12 +28,14 @@ const ModalShell: FC<ModalShellProps> = ({
       if (e.key === 'Escape') onClose();
     };
     document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+    };
   }, [onClose]);
 
   return (
     <>
-      <div className="modal-backdrop" onClick={onClose} />
+      <div className="modal-backdrop" role="none" onClick={onClose} />
       <div
         className={`connector-modal${wide ? ' connector-modal--wide' : ''}`}
         role="dialog"

@@ -20,11 +20,12 @@ const ComposePage: FC = () => {
     cardType: 'topic' as const,
     name,
     sourceConnector,
-    onClick: () =>
+    onClick: () => {
       setSearchParams((prev) => {
         prev.set('details', name);
         return prev;
-      }),
+      });
+    },
   }));
 
   const detailsName = searchParams.get('details');
@@ -32,11 +33,12 @@ const ComposePage: FC = () => {
     ? (topicIndex.find((t) => t.name === detailsName) ?? null)
     : null;
 
-  const closeDetails = () =>
+  const closeDetails = () => {
     setSearchParams((prev) => {
       prev.delete('details');
       return prev;
     });
+  };
 
   const getSubscribingSinks = (topicName: string): ConnectorEntry[] =>
     sinks.filter((sink) => {

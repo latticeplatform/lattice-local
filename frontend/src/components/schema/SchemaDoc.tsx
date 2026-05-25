@@ -25,7 +25,12 @@ const SchemaDoc: FC<{ result: TopicSchemaResult }> = ({ result }) => {
         {result.schemaId != null && <span className="detail-worker">ID {result.schemaId}</span>}
         {extracted && (
           <>
-            <button className="schema-toggle" onClick={() => setRaw((r) => !r)}>
+            <button
+              className="schema-toggle"
+              onClick={() => {
+                setRaw((r) => !r);
+              }}
+            >
               {raw ? 'parsed' : 'raw'}
             </button>
           </>

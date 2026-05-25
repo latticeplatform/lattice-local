@@ -17,7 +17,9 @@ const CardSection: FC<CardSectionProps> = ({ title, data, onRefresh, loading }) 
         <button
           type="button"
           className="refreshButton"
-          onClick={() => onRefresh()}
+          onClick={() => {
+            onRefresh();
+          }}
           disabled={loading}
         >
           {loading ? 'Loading…' : 'Refresh'}
