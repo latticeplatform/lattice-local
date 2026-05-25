@@ -1,8 +1,10 @@
 import type {
   ConfigDefinition,
   ConnectorEntry,
+  ConnectorPlugin,
   TopicGroup,
   TopicSchemaResult,
+  TopicsResponse,
   ValidationResult,
 } from './connect';
 
@@ -28,20 +30,30 @@ export type ConnectDispatchAction =
 export interface ActionResultMap {
   CONNECTOR_FETCH: ConnectorEntry;
   CONNECTOR_CREATE: ConnectorEntry;
-  CONNECTOR_REMOVE: void;
-  CONNECTOR_PAUSE: void;
-  CONNECTOR_RESUME: void;
-  CONNECTOR_RESTART: void;
-  CONNECTOR_RESTART_TASK: void;
+  CONNECTOR_REMOVE: undefined;
+  CONNECTOR_PAUSE: undefined;
+  CONNECTOR_RESUME: undefined;
+  CONNECTOR_RESTART: undefined;
+  CONNECTOR_RESTART_TASK: undefined;
   PLUGIN_FETCH_CONFIG: ConfigDefinition[];
   PLUGIN_VALIDATE_CONFIG: ValidationResult;
   TOPIC_FETCH_GROUPS: TopicGroup[];
   TOPIC_FETCH_SCHEMA: TopicSchemaResult;
   TOPIC_CREATE_GROUP: TopicGroup;
   TOPIC_UPDATE_GROUP: TopicGroup;
-  TOPIC_DELETE_GROUP: void;
+  TOPIC_DELETE_GROUP: undefined;
 }
 
 export type ConnectDispatch = <A extends ConnectDispatchAction>(
   action: A
 ) => Promise<ActionResultMap[A['type']]>;
+
+export interface ConnectContextValue {
+  sinks: ConnectorEntry[];
+  collectors: ConnectorEntry[];
+  plugins: ConnectorPlugin[] | null;
+  topics: TopicsResponse;
+  loading: boolean;
+  refresh: () => void;
+  dispatch: ConnectDispatch;
+}
