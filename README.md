@@ -161,7 +161,7 @@ CREATE TABLE IF NOT EXISTS clickhouseconsumer.fulfillment_products
 ORDER BY id;
 
 ```
-### Create table for orders
+### Create a table for orders
 
 ```sql
 CREATE TABLE clickhouseconsumer.fulfillment_orders
@@ -225,7 +225,7 @@ Before running the bootstrap scripts in this repo, each person should have:
 - `ssh`
 - `psql` if you want to use `./provision-vpc.sh tunnel`
 
-Clone repository and navigate to root directory
+Clone the repository and navigate to the root directory
 ```bash
 git@github.com:2603-6/kafka-infrastructure.git && cd kafka-infrastructure
 ```
@@ -247,7 +247,7 @@ To download opentofu and the aws cli, run `setup_tools.sh`
 ./setup_tools.sh
 ```
 
-To setup the VPC (CIDR range is 10.0.0.0/16), run `setup_vpc.sh`
+To set up the VPC (CIDR range is 10.0.0.0/16), run `setup_vpc.sh`
 (Setting up RDS will take a couple of minutes)
 ```
 ./setup_vpc.sh apply
