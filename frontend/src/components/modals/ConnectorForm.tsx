@@ -11,6 +11,7 @@ import { useConnect } from '../../context/ConnectContext.tsx';
 import ModalShell from './ModalShell.tsx';
 import './ConnectorForm.css';
 import FormField from '../FormField.tsx';
+import TopicSelectorField from '../TopicSelectorField.tsx';
 import { groupByKey } from '../../utils';
 import GearPanel from '../GearPanel.tsx';
 
@@ -39,46 +40,36 @@ const ConnectorForm: FC<ConnectorFormProps> = ({ plugin, onClose, onCreated }) =
   const toast = useToast();
   const { dispatch } = useConnect();
 
-  const fetchConfig = async () => {
-    try {
-      const [defs, emptyValidation] = await Promise.all([
-        dispatch({ type: 'PLUGIN_FETCH_CONFIG', pluginClass: plugin.class }),
-        dispatch({
-          type: 'PLUGIN_VALIDATE_CONFIG',
-          pluginClass: plugin.class,
-          config: { 'connector.class': plugin.class },
-        }),
-      ]);
-      const values = getNonNullValuesFromValidation(emptyValidation);
-      setDefinitions(defs);
-      setDerivedRequired(
-        new Set(values.filter((value) => value.errors.length > 0).map((value) => value.name))
-      );
-      // Initial value prefilling is disabled as it causes problems with opinionated settings on the backend
-      //
-      // const initial: Record<string, string> = { 'connector.class': plugin.class };
-      // for (const def of defs) {
-      //   if (def.name !== 'connector.class' && def.default_value) {
-      //     initial[def.name] = def.default_value;
-      //   }
-      // }
-      // setValues(initial);
-    } catch (e) {
-      console.log(e);
-      toast.push(e instanceof Error ? e.message : 'Failed to load plugin config');
-      onClose();
-    } finally {
-      setLoading(false);
-    }
-  };
   const setValue = useCallback((name: string, value: string) => {
     setValues((prev) => ({ ...prev, [name]: value }));
     setErrors((prev) => ({ ...prev, [name]: [] }));
   }, []);
 
   useEffect(() => {
-    void fetchConfig();
-  }, [plugin.class, toast, onClose]);
+    void Promise.all([
+      dispatch({ type: 'PLUGIN_FETCH_CONFIG', pluginClass: plugin.class }),
+      dispatch({
+        type: 'PLUGIN_VALIDATE_CONFIG',
+        pluginClass: plugin.class,
+        config: { 'connector.class': plugin.class },
+      }),
+    ])
+      .then(([defs, emptyValidation]) => {
+        const values = getNonNullValuesFromValidation(emptyValidation);
+        setDefinitions(defs);
+        setDerivedRequired(
+          new Set(values.filter((value) => value.errors.length > 0).map((value) => value.name))
+        );
+      })
+      .catch((e: unknown) => {
+        console.log(e);
+        toast.push(e instanceof Error ? e.message : 'Failed to load plugin config');
+        onClose();
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [plugin.class, toast, onClose, dispatch]);
 
   const handleSubmit = async () => {
     setSubmitting(true);
@@ -116,7 +107,7 @@ const ConnectorForm: FC<ConnectorFormProps> = ({ plugin, onClose, onCreated }) =
           });
         }
         setErrors(newErrors);
-        toast.push(`${Object.keys(newErrors).length} errors found in configuration`);
+        toast.push(`${String(Object.keys(newErrors).length)} errors found in configuration`);
         return;
       }
 
@@ -141,16 +132,18 @@ const ConnectorForm: FC<ConnectorFormProps> = ({ plugin, onClose, onCreated }) =
 
   return (
     <ModalShell
-      title={`New ${shortName}`}
+      title={`New ${shortName ?? plugin.class}`}
       onClose={onClose}
       headerActions={
         <>
           <button
             type="button"
             className={`modal-gear${showGearPanel ? ' modal-gear--active' : ''}`}
-            onClick={() => setShowGearPanel((p) => !p)}
+            onClick={() => {
+              setShowGearPanel((p) => !p);
+            }}
             aria-label="Optional fields"
-            title={`${optionalDefs.length} optional fields`}
+            title={`${String(optionalDefs.length)} optional fields`}
           >
             <IoSettingsOutline />
           </button>
@@ -190,16 +183,31 @@ const ConnectorForm: FC<ConnectorFormProps> = ({ plugin, onClose, onCreated }) =
           <div key={group}>
             <p className="field-group-title">{group}</p>
             <div className="field-group">
-              {defs.map((def) => (
-                <FormField
-                  key={def.name}
-                  def={def}
-                  isRequired={derivedRequired.has(def.name)}
-                  value={values[def.name] ?? ''}
-                  errors={errors[def.name] ?? []}
-                  onChange={(v) => setValue(def.name, v)}
-                />
-              ))}
+              {defs.map((def) =>
+                def.name === 'topics' ? (
+                  <TopicSelectorField
+                    key={def.name}
+                    def={def}
+                    isRequired={derivedRequired.has(def.name)}
+                    value={values[def.name] ?? ''}
+                    errors={errors[def.name] ?? []}
+                    onChange={(v) => {
+                      setValue(def.name, v);
+                    }}
+                  />
+                ) : (
+                  <FormField
+                    key={def.name}
+                    def={def}
+                    isRequired={derivedRequired.has(def.name)}
+                    value={values[def.name] ?? ''}
+                    errors={errors[def.name] ?? []}
+                    onChange={(v) => {
+                      setValue(def.name, v);
+                    }}
+                  />
+                )
+              )}
             </div>
           </div>
         ))

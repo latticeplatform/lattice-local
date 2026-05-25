@@ -160,7 +160,7 @@
   background: var(--code-bg);
   color: var(--text-h);
   font-family: var(--mono), 'monospace';
-  width: 100%;
+  max-width: 100%;
   box-sizing: border-box;
 }
 
@@ -180,4 +180,58 @@
 .field-error {
   font-size: 12px;
   color: #f87171;
+}
+
+.topic-selector {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.topic-selector--error {
+  border-color: #f87171;
+}
+
+.topic-selector-section {
+  padding: 10px 12px;
+}
+
+.topic-selector-section + .topic-selector-section {
+  border-top: 1px solid var(--border);
+}
+
+.topic-selector-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text);
+  margin: 0 0 8px;
+}
+
+.topic-selector-search {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text-h);
+  font-size: 12px;
+  font-family: var(--mono), 'monospace';
+  box-sizing: border-box;
+  margin-bottom: 8px;
+  outline: none;
+}
+
+.topic-selector-search:focus {
+  border-color: var(--accent-border);
+}
+
+.topic-selector-empty {
+  font-size: 13px;
+  color: var(--text);
+}
+
+.topic-selector .group-topics-list {
+  max-height: 180px;
 }
