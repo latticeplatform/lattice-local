@@ -4,40 +4,22 @@ import {
   useCallback,
   useEffect,
   useMemo,
-  useState,
+  useReducer,
   type FC,
   type PropsWithChildren,
 } from 'react';
-import type {
-  ConnectorsResponse,
-  ConnectorPlugin,
-  ConnectorEntry,
-  TopicsResponse,
-  ConfigDefinition,
-  ValidationResult,
-  TopicGroup,
-  TopicSchemaResult,
-} from '../types/connect';
-import {
-  fetchConnectors,
-  fetchPlugins,
-  fetchTopics,
-  fetchConnector,
-  deleteConnector,
-  pauseConnector,
-  resumeConnector,
-  restartConnector,
-  restartTask,
-  fetchPluginConfig,
-  validateConnectorConfig,
-  createConnector,
-  fetchTopicGroups,
-  createTopicGroup,
-  updateTopicGroup,
-  deleteTopicGroup,
-  fetchTopicSchema,
-} from '../api/connectApi';
+import type { ConnectorPlugin, ConnectorEntry, TopicsResponse, ConnectState } from '../types';
 import { useToast } from './ToastContext';
+import createConnectorApi from '../api/connectorApi';
+import createPluginApi from '../api/pluginApi';
+import createTopicApi from '../api/topicApi';
+import connectionReducer from '../reducers/connectionReducer.ts';
+import apiActionReducer from '../reducers/apiActionReducer.ts';
+import type { ActionResultMap, ConnectDispatch, ConnectDispatchAction } from '../types';
+
+const connectorApi = createConnectorApi();
+const pluginApi = createPluginApi();
+const topicApi = createTopicApi();
 
 interface ConnectContextValue {
   sinks: ConnectorEntry[];
@@ -46,85 +28,49 @@ interface ConnectContextValue {
   topics: TopicsResponse;
   loading: boolean;
   refresh: () => void;
-  fetchConnector: (name: string) => Promise<ConnectorEntry>;
-  deleteConnector: (name: string) => Promise<void>;
-  pauseConnector: (name: string) => Promise<void>;
-  resumeConnector: (name: string) => Promise<void>;
-  restartConnector: (name: string) => Promise<void>;
-  restartTask: (name: string, taskId: number) => Promise<void>;
-  fetchPluginConfig: (pluginClass: string) => Promise<ConfigDefinition[]>;
-  validateConnectorConfig: (pluginClass: string, config: Record<string, string>) => Promise<ValidationResult>;
-  createConnector: (name: string, config: Record<string, string>) => Promise<unknown>;
-  fetchTopicGroups: () => Promise<TopicGroup[]>;
-  createTopicGroup: (name: string, topics: string[]) => Promise<TopicGroup>;
-  updateTopicGroup: (oldName: string, name: string, topics: string[]) => Promise<TopicGroup>;
-  deleteTopicGroup: (name: string) => Promise<void>;
-  fetchTopicSchema: (topicName: string) => Promise<TopicSchemaResult>;
+  dispatch: ConnectDispatch;
 }
+
+export const initialState: ConnectState = {
+  collectors: [],
+  sinks: [],
+  plugins: null,
+  topics: {},
+  loading: true,
+};
 
 const ConnectContext = createContext<ConnectContextValue | null>(null);
 
 export const ConnectProvider: FC<PropsWithChildren> = ({ children }) => {
-  const [sinks, setSinks] = useState<ConnectorEntry[]>([]);
-  const [collectors, setCollectors] = useState<ConnectorEntry[]>([]);
-  const [plugins, setPlugins] = useState<ConnectorPlugin[] | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [topics, setTopics] = useState<TopicsResponse>({})
+  const [state, stateDispatch] = useReducer(connectionReducer, initialState);
   const toast = useToast();
 
-
-  const getCollectors = (response: ConnectorsResponse): ConnectorEntry[] =>
-    Object.entries(response).filter(([_, entry]) => entry.info.type === "source").map(([_, entry]) => entry)
-
-  const getSinks = (response: ConnectorsResponse): ConnectorEntry[] =>
-    Object.entries(response).filter(([_, entry]) => entry.info.type === "sink").map(([_, entry]) => entry)
-
   const load = useCallback(async () => {
-    setLoading(true);
+    stateDispatch({ type: 'LOAD_START' });
     try {
-      const [connectorsData, pluginsData, topicsData] = await Promise.all([
-        fetchConnectors(),
-        fetchPlugins(),
-        fetchTopics()
+      const [connectors, plugins, topics] = await Promise.all([
+        connectorApi.fetchAll(),
+        pluginApi.fetchAll(),
+        topicApi.fetchAll(),
       ]);
-      if (connectorsData) {
-        setCollectors(getCollectors(connectorsData));
-        setSinks(getSinks(connectorsData))
-      } else {
-        setCollectors([])
-        setSinks([])
-      }
-      setPlugins(pluginsData);
-      setTopics(topicsData)
+      stateDispatch({ type: 'LOAD_SUCCESS', connectors, plugins, topics });
     } catch (e) {
       toast.push(e instanceof Error ? e.message : 'Failed to load Kafka Connect data');
-    } finally {
-      setLoading(false);
+      stateDispatch({ type: 'LOAD_ERROR' });
     }
   }, [toast]);
 
   useEffect(() => { void load(); }, [load]);
 
+  const dispatch = useCallback(
+    <A extends ConnectDispatchAction>(action: A) =>
+      apiActionReducer(action, stateDispatch) as Promise<ActionResultMap[A['type']]>,
+    [],
+  ) as ConnectDispatch;
+
   const value = useMemo(
-    () => ({
-      sinks, collectors, plugins, topics, loading,
-      refresh: () => { void load(); },
-      fetchConnector,
-      deleteConnector,
-      pauseConnector,
-      resumeConnector,
-      restartConnector,
-      restartTask,
-      fetchPluginConfig,
-      validateConnectorConfig,
-      createConnector,
-      fetchTopicGroups,
-      createTopicGroup,
-      updateTopicGroup,
-      deleteTopicGroup,
-      fetchTopicSchema,
-    }),
-    [sinks, collectors, plugins, topics, loading, load],
+    () => ({ ...state, refresh: () => { void load(); }, dispatch }),
+    [state, load, dispatch],
   );
 
   return <ConnectContext value={value}>{children}</ConnectContext>;
