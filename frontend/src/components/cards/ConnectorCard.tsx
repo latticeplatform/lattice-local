@@ -1,9 +1,9 @@
-import type { ConnectorState } from '../../types/connect';
+import type { ConnectorState } from '../../types';
 import type { FC } from "react";
-import type { SinkCardProps } from "../../types/cardTypes.ts";
+import type { ConnectorCardProps } from "../../types";
 
 
-const SinkCard: FC<SinkCardProps> = ({ entry, onClick }) => {
+const ConnectorCard: FC<ConnectorCardProps> = ({ entry, onClick }) => {
   const { connector, tasks, type } = entry.status;
   const runningTasks = tasks.filter(t => t.state === 'RUNNING').length;
 
@@ -31,4 +31,4 @@ function StateRow({ state }: { state: ConnectorState }) {
   );
 }
 
-export default SinkCard;
+export default ConnectorCard;
