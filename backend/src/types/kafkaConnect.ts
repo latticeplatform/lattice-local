@@ -103,7 +103,6 @@ export interface KCConnectorStateInfo {
   tasks: KCTaskState[];
 }
 
-
 export interface KCConnectorExpandedEntry {
   info: KCConnectorInfo;
   status: KCConnectorStateInfo;

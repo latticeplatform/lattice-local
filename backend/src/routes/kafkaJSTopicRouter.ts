@@ -1,12 +1,12 @@
-import { Router } from "express";
-import { kafkaError, parseValue } from "../utils/index.js";
-import type { KafkaJSService } from "../types/index.js";
+import { Router } from 'express';
+import { kafkaError, parseValue } from '../utils/index.js';
+import type { KafkaJSService } from '../types/index.js';
 
-const createKafkaJSTopicRouter = (service:KafkaJSService):Router => {
+const createKafkaJSTopicRouter = (service: KafkaJSService): Router => {
   const router = Router();
 
   // GET /admin/topics — list all topic names
-  router.get("/", async (_req, res) => {
+  router.get('/', async (_req, res) => {
     try {
       res.json(await service.listTopics());
     } catch (err) {
@@ -16,23 +16,23 @@ const createKafkaJSTopicRouter = (service:KafkaJSService):Router => {
 
   // POST /admin/topics — create one or more topics
   // Body: { topics: [{ topic: string, numPartitions?: number, replicationFactor?: number }] }
-  router.post("/", async (req, res) => {
+  router.post('/', async (req, res) => {
     try {
-      const {topics} = req.body as {
+      const { topics } = req.body as {
         topics: { topic: string; numPartitions?: number; replicationFactor?: number }[];
       };
       if (!Array.isArray(topics) || topics.length === 0) {
-        res.status(400).json({error: "topics array is required"});
+        res.status(400).json({ error: 'topics array is required' });
         return;
       }
-      res.status(201).json({created: await service.createTopics(topics)});
+      res.status(201).json({ created: await service.createTopics(topics) });
     } catch (err) {
       kafkaError(err, res);
     }
   });
 
   // GET /admin/topics/:name/metadata — partitions, leaders, replicas, ISR
-  router.get("/:name/metadata", async (req, res) => {
+  router.get('/:name/metadata', async (req, res) => {
     try {
       res.json(await service.getTopicMetadata(req.params.name));
     } catch (err) {
@@ -41,7 +41,7 @@ const createKafkaJSTopicRouter = (service:KafkaJSService):Router => {
   });
 
   // GET /admin/topics/:name/offsets — earliest & latest offset per partition
-  router.get("/:name/offsets", async (req, res) => {
+  router.get('/:name/offsets', async (req, res) => {
     try {
       res.json(await service.getTopicOffsets(req.params.name));
     } catch (err) {
@@ -50,7 +50,7 @@ const createKafkaJSTopicRouter = (service:KafkaJSService):Router => {
   });
 
   // GET /admin/topics/:name/schema — peek at the first message to extract its schema
-  router.get("/:name/schema", async (req, res) => {
+  router.get('/:name/schema', async (req, res) => {
     try {
       res.json(await service.peekTopicSchema(req.params.name));
     } catch (err) {
@@ -59,10 +59,10 @@ const createKafkaJSTopicRouter = (service:KafkaJSService):Router => {
   });
 
   // GET /admin/topics/:name/stream?from=beginning — SSE live message stream
-  router.get("/:name/stream", async (req, res) => {
-    res.setHeader("Content-Type", "text/event-stream");
-    res.setHeader("Cache-Control", "no-cache");
-    res.setHeader("Connection", "keep-alive");
+  router.get('/:name/stream', async (req, res) => {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
     res.flushHeaders();
 
     let stopped = false;
@@ -77,52 +77,56 @@ const createKafkaJSTopicRouter = (service:KafkaJSService):Router => {
       if (stopped) return;
       stopped = true;
       if (heartbeatTimer) clearInterval(heartbeatTimer);
-      await consumer?.disconnect().catch(() => {
-      });
+      await consumer?.disconnect().catch(() => {});
     };
 
-    req.on("close", cleanup);
+    req.on('close', () => void cleanup);
 
     try {
-      consumer = await service.createStreamConsumer(req.params.name, req.query.from === "beginning");
+      consumer = await service.createStreamConsumer(
+        req.params.name,
+        req.query.from === 'beginning'
+      );
 
       heartbeatTimer = setInterval(() => {
-        if (!stopped) res.write(": heartbeat\n\n");
+        if (!stopped) res.write(': heartbeat\n\n');
       }, 15_000);
 
       await consumer.run({
-        eachMessage: async ({partition, message}) => {
+        eachMessage: async ({ partition, message }) => {
           if (stopped) return;
 
           let payload: unknown = null;
           let schema: unknown = undefined;
           let schemaId: number | undefined;
 
-          if (message.value) {
-            const parsed = await parseValue(message.value).catch(() => ({
-              format: "string" as const,
-              payload: message.value!.toString("utf-8"),
+          const value = message.value;
+          if (value !== null) {
+            const parsed = await parseValue(value).catch(() => ({
+              format: 'string' as const,
+              payload: value.toString('utf-8'),
             }));
             payload = parsed.payload;
-            if (parsed.format === "apicurio") {
+            if (parsed.format === 'apicurio') {
               schemaId = parsed.schemaId;
               schema = parsed.schema;
             }
-            if (parsed.format === "debezium-json") {
+            if (parsed.format === 'debezium-json') {
               schema = parsed.schema;
             }
           }
 
           let key: unknown = null;
-          if (message.key) {
-            const parsedKey = await parseValue(message.key).catch(() => ({
-              format: "string" as const,
-              payload: message.key!.toString("utf-8"),
+          const keyValue = message.key;
+          if (keyValue !== null) {
+            const parsedKey = await parseValue(keyValue).catch(() => ({
+              format: 'string' as const,
+              payload: keyValue.toString('utf-8'),
             }));
             key = parsedKey.payload;
           }
 
-          send("message", {
+          send('message', {
             offset: message.offset,
             partition,
             key,
@@ -134,13 +138,13 @@ const createKafkaJSTopicRouter = (service:KafkaJSService):Router => {
         },
       });
     } catch (err) {
-      send("error", {error: err instanceof Error ? err.message : "Stream error"});
+      send('error', { error: err instanceof Error ? err.message : 'Stream error' });
       await cleanup();
     }
   });
 
   // DELETE /admin/topics/:name — delete a topic
-  router.delete("/:name", async (req, res) => {
+  router.delete('/:name', async (req, res) => {
     try {
       await service.deleteTopic(req.params.name);
       res.status(204).send();
@@ -149,6 +153,6 @@ const createKafkaJSTopicRouter = (service:KafkaJSService):Router => {
     }
   });
   return router;
-}
+};
 
 export default createKafkaJSTopicRouter;

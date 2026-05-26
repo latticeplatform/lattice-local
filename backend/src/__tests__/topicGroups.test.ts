@@ -34,7 +34,9 @@ describe('topic group router', () => {
 
   describe('POST /', () => {
     it('creates a group with topics and returns 201', async () => {
-      const res = await request(app).post('/').send({ name: 'group-a', topics: ['t1', 't2'] });
+      const res = await request(app)
+        .post('/')
+        .send({ name: 'group-a', topics: ['t1', 't2'] });
       expect(res.status).toBe(201);
       expect(res.body).toEqual({ name: 'group-a', topics: ['t1', 't2'] });
     });
@@ -64,8 +66,12 @@ describe('topic group router', () => {
 
   describe('PUT /:name', () => {
     it('updates the topic list', async () => {
-      await request(app).post('/').send({ name: 'editable', topics: ['old'] });
-      const res = await request(app).put('/editable').send({ topics: ['new'] });
+      await request(app)
+        .post('/')
+        .send({ name: 'editable', topics: ['old'] });
+      const res = await request(app)
+        .put('/editable')
+        .send({ topics: ['new'] });
       expect(res.status).toBe(200);
       expect(res.body.topics).toEqual(['new']);
     });

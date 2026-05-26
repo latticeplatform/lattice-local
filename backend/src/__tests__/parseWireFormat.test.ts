@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseWireFormat } from '../utils/index.js';
+import { parseWireFormat } from '../utils';
 
 const wireBuffer = (schemaId: number, payload: Buffer): Buffer => {
   const buf = Buffer.alloc(5 + payload.length);

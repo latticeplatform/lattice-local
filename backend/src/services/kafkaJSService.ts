@@ -1,14 +1,16 @@
-import { type Consumer, Kafka, type KafkaConfig } from "kafkajs";
-import { config } from "../config.js";
-import { parseValue } from "../utils/index.js";
-import type { KafkaJSService, SchemaResult } from "../types/index.js";
+import { type Consumer, Kafka, type KafkaConfig } from 'kafkajs';
+import { config } from '../config.js';
+import { isKafkaTopicMessageWithValue, parseValue } from '../utils/index.js';
+import type { KafkaJSService, SchemaResult } from '../types/index.js';
 
 const kafka = new Kafka({
   clientId: config.kafka.clientId,
   brokers: config.kafka.brokers,
 } satisfies KafkaConfig);
 
-const withAdmin = async <T>(fn: (admin: ReturnType<typeof kafka.admin>) => Promise<T>): Promise<T> => {
+const withAdmin = async <T>(
+  fn: (admin: ReturnType<typeof kafka.admin>) => Promise<T>
+): Promise<T> => {
   const admin = kafka.admin();
   await admin.connect();
   try {
@@ -18,7 +20,9 @@ const withAdmin = async <T>(fn: (admin: ReturnType<typeof kafka.admin>) => Promi
   }
 };
 
-const withProducer = async <T>(fn: (producer: ReturnType<typeof kafka.producer>) => Promise<T>): Promise<T> => {
+const withProducer = async <T>(
+  fn: (producer: ReturnType<typeof kafka.producer>) => Promise<T>
+): Promise<T> => {
   const producer = kafka.producer();
   await producer.connect();
   try {
@@ -29,9 +33,7 @@ const withProducer = async <T>(fn: (producer: ReturnType<typeof kafka.producer>)
 };
 
 const kafkaJSService: KafkaJSService = {
-
-  listTopics: () =>
-    withAdmin((a) => a.listTopics()),
+  listTopics: () => withAdmin((a) => a.listTopics()),
 
   getTopicMetadata: (topicName: string) =>
     withAdmin((a) =>
@@ -46,16 +48,14 @@ const kafkaJSService: KafkaJSService = {
       ]);
       return latest.map((p) => ({
         partition: p.partition,
-        earliest: earliest.find((e) => e.partition === p.partition)?.offset ?? "0",
+        earliest: earliest.find((e) => e.partition === p.partition)?.offset ?? '0',
         latest: p.offset,
         high: p.high,
         low: p.low,
       }));
     }),
 
-  createTopics: (
-    topics: { topic: string; numPartitions?: number; replicationFactor?: number }[]
-  ) =>
+  createTopics: (topics: { topic: string; numPartitions?: number; replicationFactor?: number }[]) =>
     withAdmin((a) =>
       a.createTopics({
         topics: topics.map((t) => ({
@@ -66,56 +66,60 @@ const kafkaJSService: KafkaJSService = {
       })
     ),
 
-  deleteTopic: (topicName: string) =>
-    withAdmin((a) => a.deleteTopics({ topics: [topicName] })),
+  deleteTopic: (topicName: string) => withAdmin((a) => a.deleteTopics({ topics: [topicName] })),
 
   describeCluster: () => withAdmin((a) => a.describeCluster()),
 
-  produce: (
-    topic: string,
-    messages: { key?: string; value: string; partition?: number }[]
-  ) => withProducer((p) => p.send({ topic, messages })),
-
+  produce: (topic: string, messages: { key?: string; value: string; partition?: number }[]) =>
+    withProducer((p) => p.send({ topic, messages })),
 
   peekTopicSchema: async (topicName: string): Promise<SchemaResult> => {
     const consumer = kafka.consumer({
-      groupId: `__schema-peek-${topicName}-${Date.now()}`,
+      groupId: `__schema-peek-${topicName}-${String(Date.now())}`,
     });
 
     let resolveSchema!: (v: SchemaResult) => void;
     let rejectSchema!: (e: Error) => void;
-    const pending = new Promise<SchemaResult>((rs, rj) => { resolveSchema = rs; rejectSchema = rj; });
+    const pending = new Promise<SchemaResult>((rs, rj) => {
+      resolveSchema = rs;
+      rejectSchema = rj;
+    });
 
-    const timeout = setTimeout(
-      () => rejectSchema(new Error("Timed out — topic may be empty")),
-      10_000
-    );
+    const timeout = setTimeout(() => {
+      rejectSchema(new Error('Timed out — topic may be empty'));
+    }, 10_000);
 
     try {
       await consumer.connect();
       await consumer.subscribe({ topic: topicName, fromBeginning: true });
 
       let handled = false;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       await consumer.run({
-        eachMessage: async ({ message }: { message: any }) => {
+        eachMessage: async ({ message }: { message: unknown }) => {
           if (handled) return;
           handled = true;
           clearTimeout(timeout);
 
-          const raw = message.value as Buffer | null;
-          if (!raw) { rejectSchema(new Error("Message has no value")); return; }
-
+          if (!isKafkaTopicMessageWithValue(message)) {
+            rejectSchema(new Error('Message has no value'));
+            return;
+          }
           try {
-            const parsed = await parseValue(raw);
-            if (parsed.format === "json" || parsed.format === "string") {
-              rejectSchema(new Error("Message has no schema (plain JSON or unencoded string)"));
+            const parsed = await parseValue(message.value);
+            if (parsed.format === 'json' || parsed.format === 'string') {
+              rejectSchema(new Error('Message has no schema (plain JSON or unencoded string)'));
               return;
             }
             resolveSchema(
-              parsed.format === "apicurio"
-                ? { source: "apicurio", schemaId: parsed.schemaId, schemaType: parsed.schemaType, schema: parsed.schema }
-                : { source: "debezium-json", schema: parsed.schema }
+              parsed.format === 'apicurio'
+                ? {
+                    source: 'apicurio',
+                    schemaId: parsed.schemaId,
+                    schemaType: parsed.schemaType,
+                    schema: parsed.schema,
+                  }
+                : { source: 'debezium-json', schema: parsed.schema }
             );
           } catch (e) {
             rejectSchema(e instanceof Error ? e : new Error(String(e)));
@@ -136,20 +140,14 @@ const kafkaJSService: KafkaJSService = {
   // lifecycle — call .run() to receive messages and .disconnect() to stop.
   // This is intentional: the stream lives as long as the SSE connection does.
   // ---------------------------------------------------------------------------3
-  createStreamConsumer: async (
-    topicName: string,
-    fromBeginning: boolean
-  ): Promise<Consumer> => {
+  createStreamConsumer: async (topicName: string, fromBeginning: boolean): Promise<Consumer> => {
     const consumer = kafka.consumer({
-      groupId: `__stream-${topicName}-${Date.now()}`,
+      groupId: `__stream-${topicName}-${String(Date.now())}`,
     });
     await consumer.connect();
     await consumer.subscribe({ topic: topicName, fromBeginning });
     return consumer;
-  }
+  },
 };
 
 export default kafkaJSService;
-
-
-

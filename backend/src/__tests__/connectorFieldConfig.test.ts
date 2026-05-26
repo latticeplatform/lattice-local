@@ -4,14 +4,14 @@ import {
   UNIVERSAL_HIDDEN,
   UNIVERSAL_HIDDEN_PREFIXES,
   PLUGIN_HIDDEN,
-} from '../utils/index.js';
+} from '../utils';
 
-const POSTGRES   = 'io.debezium.connector.postgresql.PostgresConnector';
-const MYSQL      = 'io.debezium.connector.mysql.MySqlConnector';
+const POSTGRES = 'io.debezium.connector.postgresql.PostgresConnector';
+const MYSQL = 'io.debezium.connector.mysql.MySqlConnector';
 const CLICKHOUSE = 'com.clickhouse.kafka.connect.ClickHouseSinkConnector';
-const JDBC_SINK  = 'io.debezium.connector.jdbc.JdbcSinkConnector';
+const JDBC_SINK = 'io.debezium.connector.jdbc.JdbcSinkConnector';
 const MIRROR_SRC = 'org.apache.kafka.connect.mirror.MirrorSourceConnector';
-const UNKNOWN    = 'com.example.UnknownConnector';
+const UNKNOWN = 'com.example.UnknownConnector';
 
 describe('isFieldHidden', () => {
   describe('universal hidden fields', () => {
@@ -19,7 +19,10 @@ describe('isFieldHidden', () => {
       for (const field of UNIVERSAL_HIDDEN) {
         expect(isFieldHidden(POSTGRES, field), `${field} should be hidden`).toBe(true);
         expect(isFieldHidden(CLICKHOUSE, field), `${field} should be hidden`).toBe(true);
-        expect(isFieldHidden(UNKNOWN, field), `${field} should be hidden for unknown connector`).toBe(true);
+        expect(
+          isFieldHidden(UNKNOWN, field),
+          `${field} should be hidden for unknown connector`
+        ).toBe(true);
       }
     });
 

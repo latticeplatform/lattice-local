@@ -1,5 +1,12 @@
-import { type Admin, type Consumer, type ConsumerConfig, Kafka, type KafkaConfig, type Producer } from "kafkajs";
-import { config } from "../config.js";
+import {
+  type Admin,
+  type Consumer,
+  type ConsumerConfig,
+  Kafka,
+  type KafkaConfig,
+  type Producer,
+} from 'kafkajs';
+import { config } from '../config.js';
 
 const kafkaConfig: KafkaConfig = {
   clientId: config.kafka.clientId,
@@ -18,7 +25,7 @@ export const getAdmin = async (): Promise<Admin> => {
     await _admin.connect();
   }
   return _admin;
-}
+};
 
 export const getProducer = async (): Promise<Producer> => {
   if (!_producer) {
@@ -26,8 +33,8 @@ export const getProducer = async (): Promise<Producer> => {
     await _producer.connect();
   }
   return _producer;
-}
+};
 
-export const createNewConsumer = (config:ConsumerConfig): Consumer => {
+export const createNewConsumer = (config: ConsumerConfig): Consumer => {
   return kafka.consumer(config);
-}
+};

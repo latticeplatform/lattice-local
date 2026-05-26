@@ -1,4 +1,4 @@
-import type { Consumer, ITopicMetadata, RecordMetadata } from "kafkajs";
+import type { Consumer, ITopicMetadata, RecordMetadata } from 'kafkajs';
 
 export interface CreateTopicConfig {
   topic: string;
@@ -36,8 +36,8 @@ export interface ClusterDescription {
 
 // Discriminated union for peekTopicSchema
 export type SchemaResult =
-  | { source: "apicurio"; schemaId: number; schemaType: string; schema: unknown }
-  | { source: "debezium-json"; schema: unknown };
+  | { source: 'apicurio'; schemaId: number; schemaType: string; schema: unknown }
+  | { source: 'debezium-json'; schema: unknown };
 
 export interface KafkaJSService {
   // Topics
@@ -56,4 +56,8 @@ export interface KafkaJSService {
   // Schema / Stream (consumer-based)
   peekTopicSchema: (topicName: string) => Promise<SchemaResult>;
   createStreamConsumer: (topicName: string, fromBeginning: boolean) => Promise<Consumer>;
+}
+
+export interface KafkaTopicMessageWithValue {
+  value: Buffer;
 }

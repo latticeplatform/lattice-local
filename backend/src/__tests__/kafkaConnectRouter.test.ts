@@ -38,12 +38,19 @@ describe('POST /connectors', () => {
   });
 
   it('merges Avro converter defaults for the Postgres connector before forwarding', async () => {
-    vi.mocked(axios.post).mockResolvedValueOnce({ data: { name: 'test', config: {}, tasks: [], type: 'source' } });
-
-    await request(buildApp()).post('/connectors').send({
-      name: 'test',
-      config: { 'connector.class': 'io.debezium.connector.postgresql.PostgresConnector', 'database.hostname': 'pg' },
+    vi.mocked(axios.post).mockResolvedValueOnce({
+      data: { name: 'test', config: {}, tasks: [], type: 'source' },
     });
+
+    await request(buildApp())
+      .post('/connectors')
+      .send({
+        name: 'test',
+        config: {
+          'connector.class': 'io.debezium.connector.postgresql.PostgresConnector',
+          'database.hostname': 'pg',
+        },
+      });
 
     expect(axios.post).toHaveBeenCalledOnce();
     const [, sentBody] = vi.mocked(axios.post).mock.calls[0]!;
@@ -56,10 +63,12 @@ describe('POST /connectors', () => {
   it('merges unwrap transform defaults for the ClickHouse connector', async () => {
     vi.mocked(axios.post).mockResolvedValueOnce({ data: {} });
 
-    await request(buildApp()).post('/connectors').send({
-      name: 'sink',
-      config: { 'connector.class': 'com.clickhouse.kafka.connect.ClickHouseSinkConnector' },
-    });
+    await request(buildApp())
+      .post('/connectors')
+      .send({
+        name: 'sink',
+        config: { 'connector.class': 'com.clickhouse.kafka.connect.ClickHouseSinkConnector' },
+      });
 
     const [, sentBody] = vi.mocked(axios.post).mock.calls[0]!;
     const config = (sentBody as { config: Record<string, string> }).config;
@@ -71,22 +80,29 @@ describe('POST /connectors', () => {
     vi.mocked(axios.post).mockRejectedValueOnce(new Error('ECONNREFUSED'));
     vi.mocked(axios.isAxiosError).mockReturnValue(false);
 
-    const res = await request(buildApp()).post('/connectors').send({
-      name: 'test',
-      config: { 'connector.class': 'io.debezium.connector.postgresql.PostgresConnector' },
-    });
+    const res = await request(buildApp())
+      .post('/connectors')
+      .send({
+        name: 'test',
+        config: { 'connector.class': 'io.debezium.connector.postgresql.PostgresConnector' },
+      });
     expect(res.status).toBe(502);
   });
 
   it('passes through Kafka Connect error status and body', async () => {
-    const connectError = { isAxiosError: true, response: { status: 409, data: { error_code: 409, message: 'already exists' } } };
+    const connectError = {
+      isAxiosError: true,
+      response: { status: 409, data: { error_code: 409, message: 'already exists' } },
+    };
     vi.mocked(axios.post).mockRejectedValueOnce(connectError);
     vi.mocked(axios.isAxiosError).mockReturnValue(true);
 
-    const res = await request(buildApp()).post('/connectors').send({
-      name: 'test',
-      config: { 'connector.class': 'io.debezium.connector.postgresql.PostgresConnector' },
-    });
+    const res = await request(buildApp())
+      .post('/connectors')
+      .send({
+        name: 'test',
+        config: { 'connector.class': 'io.debezium.connector.postgresql.PostgresConnector' },
+      });
     expect(res.status).toBe(409);
   });
 });
@@ -98,7 +114,10 @@ describe('GET /connectors', () => {
     vi.mocked(axios.get).mockResolvedValueOnce({
       data: {
         'pg-connector': {
-          info: { config: { 'connector.class': 'io.debezium.connector.postgresql.PostgresConnector' }, type: 'source' },
+          info: {
+            config: { 'connector.class': 'io.debezium.connector.postgresql.PostgresConnector' },
+            type: 'source',
+          },
           status: { connector: { state: 'RUNNING' }, tasks: [] },
         },
       },

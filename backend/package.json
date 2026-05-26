@@ -25,7 +25,7 @@
     "format": "prettier --write .",
     "format:clean": "npm run format && npm run lint"
   },
-  "author": "",
+  "author": "Kessler Mentele",
   "license": "ISC",
   "dependencies": {
     "avsc": "^5.7.9",
