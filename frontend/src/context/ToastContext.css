@@ -1,0 +1,104 @@
+.toast-stack {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.toast {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px 15px;
+  border-radius: 10px;
+  border: 1px solid;
+  font-size: 14px;
+  max-width: 360px;
+  pointer-events: all;
+  animation: toast-in 200ms ease forwards;
+}
+
+.toast::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  background: var(--progress-color);
+  transform-origin: left;
+  animation: toast-progress var(--toast-duration) linear forwards;
+}
+
+@keyframes toast-progress {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.toast--error {
+  --progress-color: #f87171;
+  background: color-mix(in srgb, #f87171 12%, var(--bg));
+  border-color: color-mix(in srgb, #f87171 40%, transparent);
+  color: var(--text-h);
+}
+
+.toast--success {
+  --progress-color: #4ade80;
+  background: color-mix(in srgb, #4ade80 12%, var(--bg));
+  border-color: color-mix(in srgb, #4ade80 40%, transparent);
+  color: var(--text-h);
+}
+
+.toast--warning {
+  --progress-color: var(--coral);
+  background: color-mix(in srgb, var(--coral) 12%, var(--bg));
+  border-color: color-mix(in srgb, var(--coral) 40%, transparent);
+  color: var(--text-h);
+}
+
+.toast--info {
+  --progress-color: var(--violet);
+  background: color-mix(in srgb, var(--violet) 12%, var(--bg));
+  border-color: color-mix(in srgb, var(--violet) 40%, transparent);
+  color: var(--text-h);
+}
+
+.toast-message {
+  flex: 1;
+}
+
+.toast-dismiss {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text);
+  font-size: 12px;
+  padding: 0;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.toast-dismiss:hover {
+  color: var(--text-h);
+}

@@ -2,7 +2,7 @@
 
 A Kafka-based CDC (Change Data Capture) pipeline using Debezium to stream PostgreSQL changes into ClickHouse.
 
----
+# Commands for Confirming the Connector
 
 ## PSQL DB Schema
 
@@ -44,7 +44,15 @@ curl -X POST http://localhost:8083/connectors \
       "database.dbname": "inventory",
       "topic.prefix": "fulfillment",
       "plugin.name": "pgoutput",
-      "snapshot.mode": "when_needed"
+      "snapshot.mode": "when_needed",
+
+      "key.converter": "io.apicurio.registry.utils.converter.AvroConverter",
+      "key.converter.apicurio.registry.url": "http://apicurio:8080/apis/registry/v2",
+      "key.converter.apicurio.registry.auto-register": "true",
+
+      "value.converter": "io.apicurio.registry.utils.converter.AvroConverter",
+      "value.converter.apicurio.registry.url": "http://apicurio:8080/apis/registry/v2",
+      "value.converter.apicurio.registry.auto-register": "true"
     }
   }'
 ```
@@ -58,31 +66,67 @@ curl -X DELETE http://localhost:8083/connectors/fulfillment-connector
 
 ## ClickHouse Sink Connector
 
-### Add the connector
+### Add the connector for products
 ```bash
 curl -X POST http://localhost:8083/connectors \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "fulfillment-sink-clickhouse",
+    "name": "fulfillment-products-sink-clickhouse",
+    "config": {
+      "connector.class": "com.clickhouse.kafka.connect.ClickHouseSinkConnector",
+      "tasks.max": "1",
+      "topics": "fulfillment.public.products",
+      "hostname": "clickhouse",
+      "port": "8123",
+      "ssl": "false",
+      "database": "clickhouseconsumer",
+      "username": "clickhouseconsumer",
+      "password": "clickhouseconsumer123",
+      "exactlyOnce": "false",
+      "schema.evolution": "none",
+      "topic2TableMap": "fulfillment.public.products=fulfillment_products",
+      "key.converter": "io.apicurio.registry.utils.converter.AvroConverter",
+      "key.converter.apicurio.registry.url": "http://apicurio:8080/apis/registry/v2",
+      "value.converter": "io.apicurio.registry.utils.converter.AvroConverter",
+      "value.converter.apicurio.registry.url": "http://apicurio:8080/apis/registry/v2",
+      "transforms": "unwrap",
+      "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+      "transforms.unwrap.delete.handling.mode": "rewrite",
+      "transforms.unwrap.add.fields": "op,source.ts_ms:source_ts_ms"
+    }
+  }'
+```
+
+### Add the connector for orders
+```bash
+curl -X POST http://localhost:8083/connectors \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "fulfillment-orders-sink-clickhouse",
     "config": {
       "connector.class": "com.clickhouse.kafka.connect.ClickHouseSinkConnector",
       "tasks.max": "1",
       "topics": "fulfillment.public.orders",
       "hostname": "clickhouse",
       "port": "8123",
+      "ssl": "false",
       "database": "clickhouseconsumer",
       "username": "clickhouseconsumer",
       "password": "clickhouseconsumer123",
-      "schema.evolution": "alter",
       "exactlyOnce": "false",
-      "value.converter": "org.apache.kafka.connect.json.JsonConverter",
-      "value.converter.schemas.enable": "false",
-      "schemas.enable": "false",
-      "transforms": "extractPayload",
-      "transforms.extractPayload.type": "org.apache.kafka.connect.transforms.ExtractField$Value",
-      "transforms.extractPayload.field": "payload"
+      "schema.evolution": "none",
+      "topic2TableMap": "fulfillment.public.products=fulfillment_orders",
+      "key.converter": "io.apicurio.registry.utils.converter.AvroConverter",
+      "key.converter.apicurio.registry.url": "http://apicurio:8080/apis/registry/v2",
+      "value.converter": "io.apicurio.registry.utils.converter.AvroConverter",
+      "value.converter.apicurio.registry.url": "http://apicurio:8080/apis/registry/v2",
+      "transforms": "unwrap",
+      "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+      "transforms.unwrap.delete.handling.mode": "rewrite",
+      "transforms.unwrap.add.fields": "op,source.ts_ms:source_ts_ms"
     }
   }'
+
 ```
 
 ### Delete the connector
@@ -102,36 +146,35 @@ docker exec -it clickhouse clickhouse-client \
   --database clickhouseconsumer
 ```
 
-### Create tables
-
+### Create table for products
 ```sql
-CREATE TABLE IF NOT EXISTS `fulfillment.public.products` (
-                                                             before      Nullable(JSON),
-    after       Nullable(JSON),
-    source      JSON,
-    op          String,
-    ts_ms       Nullable(Int64),
-    ts_us       Nullable(Int64),
-    ts_ns       Nullable(Int64),
-    transaction Nullable(JSON)
-    )
-    ENGINE = MergeTree
-    ORDER BY tuple();
+CREATE TABLE IF NOT EXISTS clickhouseconsumer.fulfillment_products
+(
+    id Int32,
+    sku String,
+    quantity_on_hand Int32,
+    __op LowCardinality(String),
+    __source_ts_ms Int64,
+    __deleted Nullable(String)
+)
+    ENGINE = ReplacingMergeTree(__source_ts_ms)
+ORDER BY id;
+
 ```
+### Create a table for orders
 
 ```sql
-CREATE TABLE IF NOT EXISTS `fulfillment.public.orders` (
-                                                           before      Nullable(String),
-    after       Nullable(String),
-    source      Nullable(String),
-    transaction Nullable(String),
-    op          Nullable(String),
-    ts_ms       Nullable(Int64),
-    ts_us       Nullable(Int64),
-    ts_ns       Nullable(Int64)
-    )
-    ENGINE = MergeTree
-    ORDER BY tuple();
+CREATE TABLE clickhouseconsumer.fulfillment_orders
+(
+    id Int32,
+    product_id Int32,
+    quantity Int32,
+    __op LowCardinality(String),
+    __source_ts_ms Int64,
+    __deleted Nullable(String)
+)
+    ENGINE = ReplacingMergeTree(__source_ts_ms)
+ORDER BY id;
 ```
 
 ---
@@ -170,8 +213,72 @@ psql "postgresql://inventory:inventory123@localhost:5432/inventory"
 INSERT INTO products (sku, quantity_on_hand) VALUES ('test-sku', 100000);
 ```
 ```sql
-INSERT INTO orders VALUES (1, 1);
+INSERT INTO orders (product_id, quantity ) VALUES (1, 1);
 ```
+
+## Instructions to Deploy VPC
+
+Before running the bootstrap scripts in this repo, each person should have:
+
+- `bash`
+- `python3`
+- `ssh`
+- `psql` if you want to use `./provision-vpc.sh tunnel`
+
+Clone the repository and navigate to the root directory
+```bash
+git@github.com:2603-6/kafka-infrastructure.git && cd kafka-infrastructure
+```
+
+Create a root `.env` file with AWS credentials that can authenticate to your target AWS account and create the VPC resources used by this stack.
+```
+AWS_ACCESS_KEY_ID=<your_access_key_id>
+AWS_SECRET_ACCESS_KEY=<your_access_secret_access_key>
+AWS_REGION=us-west-2
+```
+
+Create an SSH public key file in the following path. The private key is assumed to be the same path without the `.pub` suffix.
+```
+~/.ssh/id_ed25519.pub
+```
+
+To download opentofu and the aws cli, run `setup_tools.sh`
+```
+./setup_tools.sh
+```
+
+To set up the VPC (CIDR range is 10.0.0.0/16), run `setup_vpc.sh`
+(Setting up RDS will take a couple of minutes)
+```
+./setup_vpc.sh apply
+```
+
+This command tunnels through the bastion host to run psql directly against the
+private RDS instance.
+```
+./setup_vpc.sh tunnel
+```
+
+# Instructions to teardown
+To completely remove the VPC from your AWS account, go to the root directory and run
+```
+./setup_vpc.sh destroy
+```
+
+## SSH access input
+The bastion host needs an SSH allowlist CIDR.
+
+- The script auto-detects your public IP during `apply`
+- If auto-detection fails, you can pass it explicitly with:
+
+```bash
+--bastion-ssh-cidr 203.0.113.10/32
+```
+
+# summary
+- `./setup_tools.sh` verifies the local toolchain and checks `.env`
+- `./setup_vpc.sh apply` creates the VPC, bastion, and private RDS instance
+- `./setup_vpc.sh tunnel` opens a local SSH tunnel and runs `psql` against `localhost`
 
 ### One-liner from host
 ```bash
