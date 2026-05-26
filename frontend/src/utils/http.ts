@@ -1,6 +1,6 @@
 const delay = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms));
 
-export async function withRetry<T>(fn: () => Promise<T>, attempts = 3, delayMs = 1000): Promise<T> {
+export const withRetry = async <T>(fn: () => Promise<T>, attempts = 3, delayMs = 1000): Promise<T> => {
   for (let i = 0; i < attempts; i++) {
     await delay(delayMs);
     try {
