@@ -1,5 +1,5 @@
 {
-  "name": "sample-node-app",
+  "name": "lattice-platform",
   "version": "1.0.0",
   "description": "",
   "type": "module",
@@ -8,8 +8,11 @@
   },
   "scripts": {
     "dev": "tsx watch src/app.ts",
-    "build": "tsc",
-    "start": "node dist/app.js",
+    "build": "rm -rf ./dist && tsc",
+    "build:ui": "npm --prefix ../frontend install && npm --prefix ../frontend run build",
+    "bundle:ui": "rm -rf ./dist/public && cp -r ../frontend/dist ./dist/public",
+    "build:prod": "npm run build:ui && npm run build && npm run bundle:ui",
+    "start": "node ./dist/app.js",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
