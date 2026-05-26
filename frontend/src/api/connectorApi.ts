@@ -1,5 +1,5 @@
 import type { ConnectorEntry, ConnectorsResponse } from '../types';
-import { request, voidRequest } from '../utils';
+import { request, voidRequest, withRetry } from '../utils';
 
 interface ConnectorApi {
   fetch: (name: string) => Promise<ConnectorEntry>;
@@ -9,7 +9,7 @@ interface ConnectorApi {
   resume: (name: string) => Promise<void>;
   restart: (name: string) => Promise<void>;
   restartTask: (name: string, taskId: number) => Promise<void>;
-  create: (name: string, config: Record<string, string>) => Promise<unknown>;
+  create: (name: string, config: Record<string, string>) => Promise<ConnectorEntry>;
 }
 
 const createConnectorApi = (): ConnectorApi => {
@@ -37,12 +37,13 @@ const createConnectorApi = (): ConnectorApi => {
     return voidRequest(`/connectors/${encodeURIComponent(name)}/restart`, { method: 'POST' });
   };
 
-  const create = (name: string, config: Record<string, string>): Promise<unknown> => {
-    return request('/connectors', {
+  const create = async (name: string, config: Record<string, string>): Promise<ConnectorEntry> => {
+    await request('/connectors', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, config }),
     });
+    return withRetry(() => request<ConnectorEntry>(`/connectors/${encodeURIComponent(name)}`));
   };
 
   const restartTask = (name: string, taskId: number): Promise<void> => {
