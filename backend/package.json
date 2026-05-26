@@ -8,6 +8,11 @@
   },
   "scripts": {
     "dev": "tsx watch src/app.ts",
+    "dev:ui": "npm --prefix ../frontend run dev",
+    "dev:full": "npm run dev:kafka & npm run dev:producers & npm run dev:consumers & npm run dev:ui & npm run dev",
+    "dev:consumers": "docker compose -f ../example-services/consumers/dummy-clickhouse/docker-compose.yml -f ../example-services/consumers/dummy-mongo/docker-compose.yml up -d",
+    "dev:producers": "docker compose -f ../example-services/producers/dummy-postgres/docker-compose.yml up -d",
+    "dev:kafka": "docker compose -f ../docker/Compose.yaml up -d",
     "build": "rm -rf ./dist && tsc",
     "build:ui": "npm --prefix ../frontend install && npm --prefix ../frontend run build",
     "bundle:ui": "rm -rf ./dist/public && cp -r ../frontend/dist ./dist/public",
