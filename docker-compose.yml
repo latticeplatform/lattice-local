@@ -1,0 +1,9 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile-app
+#    env_file:
+#      - ./backend/.env
+    ports:
+      - "5001:5001"
