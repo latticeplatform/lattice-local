@@ -81,6 +81,7 @@ export const parseValue = async (raw: Buffer): Promise<ParsedValue> => {
 export const markPasswordsRequired = (data: KCConfigInfos, suppliedConfig: Record<string, string>): void => {
   for (const c of data.configs) {
     if (c.definition.type !== "PASSWORD") continue;
+    if (c.definition.name.includes('ssl')) continue;
     if (suppliedConfig[c.definition.name]) continue;
     const label = c.definition.display_name ?? c.definition.name;
     if (c.value === null) {
