@@ -4,3 +4,4 @@
 .env
 /.obsidian/
 /backend/dist/
+.DS_Store
