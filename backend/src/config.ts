@@ -22,14 +22,15 @@ const DEPLOYMENT: Deployment = (() => {
 /** Reads an env var, throwing at startup if it is missing or empty. */
 const required = (name: string): string => {
   const val = process.env[name];
-  if (!val) throw new Error(`Missing required environment variable for ${DEPLOYMENT} deployment: ${name}`);
+  if (!val)
+    throw new Error(`Missing required environment variable for ${DEPLOYMENT} deployment: ${name}`);
   return val;
-}
+};
 
 /** Reads an env var with a fallback. */
 const optional = (name: string, fallback: string): string => {
   return process.env[name] ?? fallback;
-}
+};
 
 // ---------------------------------------------------------------------------
 // Config shape
@@ -37,6 +38,7 @@ const optional = (name: string, fallback: string): string => {
 
 export interface AppConfig {
   deployment: Deployment;
+  port: number;
   kafka: {
     clientId: string;
     brokers: string[];
@@ -62,26 +64,34 @@ const buildConfig = (): AppConfig => {
   if (DEPLOYMENT === 'aws') {
     return {
       deployment: 'aws',
+      port: parseInt(optional('PORT', '5000')),
       kafka: {
         clientId,
-        brokers: required('AWS_KAFKA_BROKERS').split(',').map(b => b.trim()),
+        brokers: required('AWS_KAFKA_BROKERS')
+          .split(',')
+          .map((b) => b.trim()),
       },
-      kafkaConnect:    { url: required('AWS_KAFKA_CONNECT_URL') },
-      schemaRegistry:  { url: required('AWS_SCHEMA_REGISTRY_URL') },
+      kafkaConnect: { url: required('AWS_KAFKA_CONNECT_URL') },
+      schemaRegistry: { url: required('AWS_SCHEMA_REGISTRY_URL') },
       apicurioRegistry: { url: required('AWS_APICURIO_REGISTRY_URL') },
     };
   }
 
   return {
     deployment: 'local',
+    port: 5000,
     kafka: {
       clientId,
-      brokers: optional('KAFKA_BROKERS', 'localhost:9092').split(',').map(b => b.trim()),
+      brokers: optional('KAFKA_BROKERS', 'localhost:9092')
+        .split(',')
+        .map((b) => b.trim()),
     },
-    kafkaConnect:    { url: optional('KAFKA_CONNECT_URL', 'http://localhost:8083') },
-    schemaRegistry:  { url: optional('SCHEMA_REGISTRY_URL', 'http://localhost:8081') },
-    apicurioRegistry: { url: optional('APICURIO_REGISTRY_URL', 'http://apicurio:8080/apis/registry/v2') },
+    kafkaConnect: { url: optional('KAFKA_CONNECT_URL', 'http://localhost:8083') },
+    schemaRegistry: { url: optional('SCHEMA_REGISTRY_URL', 'http://localhost:8081') },
+    apicurioRegistry: {
+      url: optional('APICURIO_REGISTRY_URL', 'http://apicurio:8080/apis/registry/v2'),
+    },
   };
-}
+};
 
 export const config: AppConfig = buildConfig();

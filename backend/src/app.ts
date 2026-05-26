@@ -5,11 +5,12 @@ import fs from 'fs';
 import createKafkaConnectRouter from './routes/kafkaConnectRouter.js';
 import createKafkaJSRouter from './routes/kafkaJSRouter.js';
 import createTopicGroupRouter from './routes/topicGroupRouter.js';
-import createKafkaJSTopicRouter from "./routes/kafkaJSTopicRouter.js";
-import kafkaJSService from "./services/kafkaJSService.js";
+import createKafkaJSTopicRouter from './routes/kafkaJSTopicRouter.js';
+import kafkaJSService from './services/kafkaJSService.js';
+import { config } from './config.js';
 import cors from 'cors';
 
-const port = 5000;
+const port = config.port || 5000;
 const app = express();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const publicDir = path.join(__dirname, 'public');
@@ -29,4 +30,6 @@ if (fs.existsSync(publicDir)) {
   });
 }
 
-app.listen(port, () => console.log(`Backend listening on port ${port}!`));
+app.listen(port, () => {
+  console.log(`Backend listening on port ${String(port)}!`);
+});
