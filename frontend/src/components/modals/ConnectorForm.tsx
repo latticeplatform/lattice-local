@@ -146,8 +146,8 @@ const ConnectorForm: FC<ConnectorFormProps> = ({ plugin, onClose, onCreated }) =
             title={`${String(optionalDefs.length)} optional fields`}
           >
             <IoSettingsOutline />
+            {enabledOptional.size > 0 && <span className="gear-badge">{enabledOptional.size}</span>}
           </button>
-          {enabledOptional.size > 0 && <span className="gear-badge">{enabledOptional.size}</span>}
         </>
       }
       panel={
