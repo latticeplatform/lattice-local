@@ -115,6 +115,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: kafka-connect
+    pull_policy: build
     networks:
       - kafka_default
     ports:
