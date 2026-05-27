@@ -76,11 +76,70 @@ export interface TopicGroup {
 
 export type TopicsResponse = Record<string, { topics: string[] }>;
 
+export interface AvroConnectMeta {
+  'connect.name'?: string;
+  'connect.version'?: number;
+  'connect.default'?: string;
+  'connect.parameters'?: Record<string, string>;
+}
+
+export interface AvroRecordType extends AvroConnectMeta {
+  type: 'record';
+  name: string;
+  namespace?: string;
+  doc?: string;
+  fields: AvroField[];
+}
+
+export interface AvroEnumType extends AvroConnectMeta {
+  type: 'enum';
+  name: string;
+  namespace?: string;
+  doc?: string;
+  symbols: string[];
+}
+
+export interface AvroArrayType extends AvroConnectMeta {
+  type: 'array';
+  items: AvroType;
+}
+
+export interface AvroMapType extends AvroConnectMeta {
+  type: 'map';
+  values: AvroType;
+}
+
+// A primitive used as an object (e.g., annotated with connect metadata)
+export interface AvroAnnotatedPrimitive extends AvroConnectMeta {
+  type: 'null' | 'boolean' | 'int' | 'long' | 'float' | 'double' | 'bytes' | 'string';
+}
+
+export type AvroComplexType =
+  | AvroRecordType
+  | AvroEnumType
+  | AvroArrayType
+  | AvroMapType
+  | AvroAnnotatedPrimitive;
+
+// A string is either an AVRO primitive name or a named type reference
+// An array represents an AVRO union
+export type AvroType = string | AvroComplexType | AvroType[];
+
+export interface AvroField {
+  name: string;
+  type: AvroType;
+  default?: unknown;
+  doc?: string;
+}
+
 export interface TopicSchemaResult {
-  source: 'apicurio' | 'debezium-json';
+  source: string;
   schemaId?: number;
   schemaType?: string;
-  schema: unknown;
+  name: string;
+  namespace: string;
+  fields: AvroField[];
+  raw: string;
 }
 
 export interface ConnectState {
