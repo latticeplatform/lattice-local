@@ -1,13 +1,5 @@
-import type { TopicSchemaResult } from '../types';
+import type { AvroField, AvroRecordType, AvroType, TopicSchemaResult } from '../types';
 import type { Extracted, FieldRow, SchemaParser } from '../types';
-
-interface DebeziumField {
-  field: string;
-  type: string;
-  optional: boolean;
-  name?: string; // logical type (e.g. "io.debezium.time.MicroTimestamp")
-  fields?: DebeziumField[];
-}
 
 const LOGICAL_TYPES: Record<string, string> = {
   MicroTimestamp: 'timestamp (µs)',
@@ -19,42 +11,53 @@ const LOGICAL_TYPES: Record<string, string> = {
   Date: 'date',
   Decimal: 'decimal',
   VariableScaleDecimal: 'decimal',
-  Bits: 'bits',
   Json: 'json',
   Uuid: 'uuid',
-  Geometry: 'geometry',
-  Point: 'point',
   ZonedTimestamp: 'timestamp (tz)',
-  Year: 'year',
 };
 
-const typeLabel = (f: DebeziumField): string => {
-  if (f.name) {
-    const tail = f.name.split('.').pop() ?? '';
+const typeLabel = (type: AvroType): string => {
+  if (typeof type === 'string') return type;
+  if (Array.isArray(type)) {
+    const nonNull = type.filter((t) => t !== 'null');
+    return nonNull.length === 1 ? typeLabel(nonNull[0]) : 'union';
+  }
+  if (type.type === 'record') return type.name;
+  const connectName = type['connect.name'];
+  if (connectName) {
+    const tail = connectName.split('.').pop() ?? '';
     return LOGICAL_TYPES[tail] ?? tail;
   }
-  return f.type;
+  return type.type;
 };
 
-const toRows = (fields: DebeziumField[]): FieldRow[] => {
-  return fields.map((f) => ({
-    name: f.field,
-    type: f.type === 'struct' ? 'struct' : typeLabel(f),
-    required: !f.optional,
-    children: f.type === 'struct' && Array.isArray(f.fields) ? toRows(f.fields) : undefined,
-  }));
+const resolveRecord = (type: AvroType): AvroRecordType | null => {
+  if (typeof type === 'string') return null;
+  if (Array.isArray(type)) {
+    for (const t of type) { const r = resolveRecord(t); if (r) return r; }
+    return null;
+  }
+  return type.type === 'record' ? type : null;
 };
+
+const toRows = (fields: AvroField[]): FieldRow[] =>
+  fields.map((f) => {
+    const nested = resolveRecord(f.type);
+    return {
+      name: f.name,
+      type: typeLabel(f.type),
+      required: !('default' in f),
+      children: nested ? toRows(nested.fields) : undefined,
+    };
+  });
 
 export const debeziumParser: SchemaParser = {
   canParse: (result: TopicSchemaResult) => result.source === 'debezium-json',
 
   parse: (result: TopicSchemaResult): Extracted | null => {
-    const s = result.schema as Record<string, unknown> | null;
-    if (!s) return null;
-    const fields = s['fields'] as DebeziumField[] | undefined;
-    if (!Array.isArray(fields)) return null;
-    const afterField = fields.find((f) => f.field === 'after' && f.type === 'struct');
-    const recordFields = afterField?.fields ?? fields;
-    return { rows: toRows(recordFields), section: afterField ? 'after' : 'envelope' };
+    const afterField = result.fields.find((f) => f.name === 'after');
+    const nested = afterField ? resolveRecord(afterField.type) : null;
+    const recordFields = nested?.fields ?? result.fields;
+    return { rows: toRows(recordFields), section: nested ? 'after' : 'envelope' };
   },
 };

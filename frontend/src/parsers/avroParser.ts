@@ -1,67 +1,61 @@
-import type { TopicSchemaResult } from '../types';
+import type { AvroField, AvroRecordType, AvroType, TopicSchemaResult } from '../types';
 import type { Extracted, FieldRow, SchemaParser } from '../types';
 
-interface AvroField {
-  name: string;
-  type: unknown;
-  doc?: string;
-  default?: unknown;
-}
-
-const LOGICAL_TYPES: Record<string, string> = {
-  'timestamp-micros': 'timestamp (µs)',
-  'timestamp-millis': 'timestamp (ms)',
-  'local-timestamp-micros': 'timestamp (µs, local)',
-  'local-timestamp-millis': 'timestamp (ms, local)',
-  date: 'date',
-  'time-micros': 'time (µs)',
-  'time-millis': 'time (ms)',
-  uuid: 'uuid',
-  decimal: 'decimal',
-  duration: 'duration',
-};
-
-const typeInfo = (type: unknown): { label: string; nullable: boolean } => {
+const typeInfo = (type: AvroType): { label: string; nullable: boolean } => {
   if (typeof type === 'string') return { label: type, nullable: false };
   if (Array.isArray(type)) {
-    const nonNull = (type as unknown[]).filter((t) => t !== 'null');
+    const nonNull = type.filter((t) => t !== 'null');
     const inner = nonNull.length === 1 ? typeInfo(nonNull[0]) : { label: 'union', nullable: false };
-    return { ...inner, nullable: (type as unknown[]).includes('null') };
+    return { ...inner, nullable: type.includes('null') };
   }
-  if (type && typeof type === 'object') {
-    const t = type as { type?: string; logicalType?: string; items?: unknown; values?: unknown };
-    if (t.logicalType && LOGICAL_TYPES[t.logicalType]) {
-      return { label: LOGICAL_TYPES[t.logicalType] ?? t.logicalType, nullable: false };
-    }
-    if (t.type === 'array') return { label: `array<${typeInfo(t.items).label}>`, nullable: false };
-    if (t.type === 'map')
-      return { label: `map<string, ${typeInfo(t.values).label}>`, nullable: false };
-    if (t.type === 'record') return { label: 'record', nullable: false };
-    return { label: t.type ?? 'complex', nullable: false };
-  }
-  return { label: String(type), nullable: false };
+  if (type.type === 'record') return { label: type.name, nullable: false };
+  if (type.type === 'enum') return { label: type.name, nullable: false };
+  if (type.type === 'array') return { label: `array<${typeInfo(type.items).label}>`, nullable: false };
+  if (type.type === 'map') return { label: `map<string, ${typeInfo(type.values).label}>`, nullable: false };
+  const connectName = type['connect.name'];
+  return { label: connectName ? (connectName.split('.').pop() ?? type.type) : type.type, nullable: false };
 };
 
-const toRows = (fields: AvroField[]): FieldRow[] => {
-  return fields.map((f) => {
-    const { label, nullable } = typeInfo(f.type);
-    return {
-      name: f.name,
-      type: label,
-      required: !nullable && !('default' in f),
-      doc: f.doc,
-    };
-  });
+const buildRegistry = (fields: AvroField[]): Map<string, AvroRecordType> => {
+  const reg = new Map<string, AvroRecordType>();
+  const scan = (type: AvroType): void => {
+    if (typeof type === 'string') return;
+    if (Array.isArray(type)) { type.forEach(scan); return; }
+    if (type.type === 'record') { reg.set(type.name, type); type.fields.forEach((f) => scan(f.type)); }
+  };
+  fields.forEach((f) => scan(f.type));
+  return reg;
 };
+
+const resolveRecord = (type: AvroType, reg: Map<string, AvroRecordType>): AvroRecordType | null => {
+  if (typeof type === 'string') return reg.get(type) ?? null;
+  if (Array.isArray(type)) {
+    for (const t of type) { const r = resolveRecord(t, reg); if (r) return r; }
+    return null;
+  }
+  return type.type === 'record' ? type : null;
+};
+
+const toRows = (
+  fields: AvroField[],
+  reg: Map<string, AvroRecordType>,
+  seen = new Set<string>(),
+): FieldRow[] =>
+  fields.map((f) => {
+    const { label, nullable } = typeInfo(f.type);
+    const nested = resolveRecord(f.type, reg);
+    const children =
+      nested && !seen.has(nested.name)
+        ? toRows(nested.fields, reg, new Set([...seen, nested.name]))
+        : undefined;
+    return { name: f.name, type: label, required: !nullable && !('default' in f), doc: f.doc, children };
+  });
 
 export const avroParser: SchemaParser = {
   canParse: (result: TopicSchemaResult) => result.source === 'apicurio',
 
   parse: (result: TopicSchemaResult): Extracted | null => {
-    const s = result.schema as Record<string, unknown> | null;
-    if (!s) return null;
-    const fields = s['fields'] as AvroField[] | undefined;
-    if (!Array.isArray(fields)) return null;
-    return { rows: toRows(fields), section: 'record' };
+    const reg = buildRegistry(result.fields);
+    return { rows: toRows(result.fields, reg), section: result.name };
   },
 };

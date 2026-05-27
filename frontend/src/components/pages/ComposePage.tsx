@@ -5,7 +5,7 @@ import CardSection from '../CardSection.tsx';
 import type { TopicCardProps } from '../../types';
 import type { ConnectorEntry } from '../../types';
 import TopicDetails from '../modals/TopicDetails.tsx';
-import TopicGroupsSection from '../TopicGroupsSection.tsx';
+// import TopicGroupsSection from '../TopicGroupsSection.tsx';
 import './Page.css';
 
 const ComposePage: FC = () => {
@@ -59,7 +59,7 @@ const ComposePage: FC = () => {
   return (
     <div className="page">
       <CardSection title="Topics" onRefresh={refresh} loading={loading} data={topicCards} />
-      <TopicGroupsSection availableTopics={topicIndex.map((t) => t.name)} />
+      {/*<TopicGroupsSection availableTopics={topicIndex.map((t) => t.name)} />*/}
       {selectedTopic && (
         <TopicDetails
           name={selectedTopic.name}
