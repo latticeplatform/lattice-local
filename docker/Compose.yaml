@@ -145,6 +145,33 @@ services:
       - kafka_default
     ports:
       - "8080:8080"
+
+  lattice-app:
+    container_name: lattice-app
+    build:
+      context: ..
+      dockerfile: Dockerfile-app
+    ports:
+      - "5000:5000"
+    networks:
+      - kafka_default
+    environment:
+      DEPLOYMENT: 'local'
+      PORT: '5000'
+      LOG_LEVEL: 'debug'
+      KAFKA_CONNECT_URL: 'http://kafka-connect:8083'
+      KAFKA_CLIENT_ID: 'kafka-admin-control'
+      KAFKA_BROKERS: 'broker-1:19092,broker-2:19092,broker-3:19092'
+      SCHEMA_REGISTRY_URL: 'http://apicurio:8080/apis/registry/v2'
+      APICURIO_REGISTRY_URL: 'http://apicurio:8080/apis/registry/v2'
+
+      AWS_KAFKA_CONNECT_URL: 'kafka-connect.lattice.local:9092'
+      AWS_KAFKA_BROKERS: 'kafka-1:19092,kafka-2:19092,kafka-3:19092'
+      AWS_SCHEMA_REGISTRY_URL: 'apicurio.lattice.local:9092/apis/registry/v2'
+      AWS_APICURIO_REGISTRY_URL: 'apicurio.lattice.local:9092'
+    depends_on:
+      - kafka-connect
+
 networks:
   kafka_default:
     name: docker_kafka_default
