@@ -32,6 +32,12 @@ const optional = (name: string, fallback: string): string => {
   return process.env[name] ?? fallback;
 };
 
+const resolveLogLevel = (): AppConfig['logLevel'] => {
+  const raw = process.env.LOG_LEVEL;
+  if (raw === 'debug' || raw === 'info' || raw === 'warn' || raw === 'error') return raw;
+  return DEPLOYMENT === 'aws' ? 'info' : 'debug';
+};
+
 // ---------------------------------------------------------------------------
 // Config shape
 // ---------------------------------------------------------------------------
@@ -39,6 +45,7 @@ const optional = (name: string, fallback: string): string => {
 export interface AppConfig {
   deployment: Deployment;
   port: number;
+  logLevel: 'debug' | 'info' | 'warn' | 'error';
   kafka: {
     clientId: string;
     brokers: string[];
@@ -65,6 +72,7 @@ const buildConfig = (): AppConfig => {
     return {
       deployment: 'aws',
       port: parseInt(optional('PORT', '5000')),
+      logLevel: resolveLogLevel(),
       kafka: {
         clientId,
         brokers: required('AWS_KAFKA_BROKERS')
@@ -79,7 +87,8 @@ const buildConfig = (): AppConfig => {
 
   return {
     deployment: 'local',
-    port: 5000,
+    port: parseInt(optional('PORT', '5000')),
+    logLevel: resolveLogLevel(),
     kafka: {
       clientId,
       brokers: optional('KAFKA_BROKERS', 'localhost:9092')

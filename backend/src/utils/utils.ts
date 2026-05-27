@@ -2,6 +2,7 @@ import express, { type Response } from 'express';
 import axios from 'axios';
 import avsc from 'avsc';
 import type { KCConfigInfos } from '../types/index.js';
+import { logger } from '../logger.js';
 
 // const KAFKA_INFRA_TOPICS = [
 //   '__consumer_offsets',
@@ -16,7 +17,7 @@ const SCHEMA_REGISTRY_URL = config.schemaRegistry.url;
 const schemaCache = new Map<number, { schema: string; schemaType: string }>();
 
 export const kafkaError = (err: unknown, res: express.Response) => {
-  console.error('KafkaJS error:', err);
+  logger.error({ err }, 'KafkaJS error');
   const message = err instanceof Error ? err.message : 'Kafka operation failed';
   res.status(500).json({ error: message });
 };
@@ -133,9 +134,11 @@ export const withProxiedError = async <T>(
     if (axios.isAxiosError(err) && err.response) {
       const { status } = err.response;
       const data = err.response.data as T | undefined;
+      logger.warn({ status, url: err.config?.url, err }, 'Kafka Connect returned error');
       res.status(status);
       return data ?? { error: err.message };
     } else {
+      logger.error({ err }, 'failed to reach Kafka Connect');
       res.status(502);
       return { error: 'Failed to reach Kafka Connect' };
     }
