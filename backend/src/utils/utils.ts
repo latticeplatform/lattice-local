@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { type Response } from 'express';
 import axios from 'axios';
 import avsc from 'avsc';
 import type { KCConfigInfos } from '../types/index.js';
@@ -40,7 +40,9 @@ export const parseWireFormat = (value: Buffer): { schemaId: number; payload: Buf
 };
 
 export const decodeAvro = (schemaStr: string, payload: Buffer): Promise<unknown> => {
-  return avsc.Type.forSchema(JSON.parse(schemaStr)).fromBuffer(payload);
+  const schema = JSON.parse(schemaStr) as avsc.Schema;
+  const result: unknown = avsc.Type.forSchema(schema).fromBuffer(payload) as unknown;
+  return Promise.resolve(result);
 };
 
 // Unified message value parser — handles three formats in priority order:
@@ -115,4 +117,23 @@ export const markPasswordsRequired = (
   }
 };
 
-export const extractDatabaseConnectivityInfo = () => {}
+export const extractDatabaseConnectivityInfo = () => {};
+
+export const withProxiedError = async <T>(
+  fn: () => Promise<T>,
+  res: Response
+): Promise<{ error: string } | T> => {
+  try {
+    return await fn();
+  } catch (err) {
+    if (axios.isAxiosError(err) && err.response) {
+      const { status } = err.response;
+      const data = err.response.data as T | undefined;
+      res.status(status);
+      return data ?? { error: err.message };
+    } else {
+      res.status(502);
+      return { error: 'Failed to reach Kafka Connect' };
+    }
+  }
+};

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { kafkaError, parseValue } from '../utils/index.js';
+import { kafkaError } from '../utils/index.js';
 import type { KafkaJSService } from '../types/index.js';
 
 const createKafkaJSTopicRouter = (service: KafkaJSService): Router => {
@@ -95,46 +95,7 @@ const createKafkaJSTopicRouter = (service: KafkaJSService): Router => {
       await consumer.run({
         eachMessage: async ({ partition, message }) => {
           if (stopped) return;
-
-          let payload: unknown = null;
-          let schema: unknown = undefined;
-          let schemaId: number | undefined;
-
-          const value = message.value;
-          if (value !== null) {
-            const parsed = await parseValue(value).catch(() => ({
-              format: 'string' as const,
-              payload: value.toString('utf-8'),
-            }));
-            payload = parsed.payload;
-            if (parsed.format === 'apicurio') {
-              schemaId = parsed.schemaId;
-              schema = parsed.schema;
-            }
-            if (parsed.format === 'debezium-json') {
-              schema = parsed.schema;
-            }
-          }
-
-          let key: unknown = null;
-          const keyValue = message.key;
-          if (keyValue !== null) {
-            const parsedKey = await parseValue(keyValue).catch(() => ({
-              format: 'string' as const,
-              payload: keyValue.toString('utf-8'),
-            }));
-            key = parsedKey.payload;
-          }
-
-          send('message', {
-            offset: message.offset,
-            partition,
-            key,
-            timestamp: message.timestamp,
-            schemaId,
-            schema,
-            value: payload,
-          });
+          send('message', await service.parseStreamMessage(partition, message));
         },
       });
     } catch (err) {

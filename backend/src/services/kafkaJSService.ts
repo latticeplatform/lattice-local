@@ -148,6 +148,47 @@ const kafkaJSService: KafkaJSService = {
     await consumer.subscribe({ topic: topicName, fromBeginning });
     return consumer;
   },
+
+  parseStreamMessage: async (partition, message) => {
+    let value: unknown = null;
+    let schema: unknown = undefined;
+    let schemaId: number | undefined;
+
+    if (message.value !== null) {
+      const rawValue = message.value;
+      const parsed = await parseValue(rawValue).catch(() => ({
+        format: 'string' as const,
+        payload: rawValue.toString('utf-8'),
+      }));
+      value = parsed.payload;
+      if (parsed.format === 'apicurio') {
+        schemaId = parsed.schemaId;
+        schema = parsed.schema;
+      } else if (parsed.format === 'debezium-json') {
+        schema = parsed.schema;
+      }
+    }
+
+    let key: unknown = null;
+    if (message.key !== null) {
+      const rawKey = message.key;
+      const parsedKey = await parseValue(rawKey).catch(() => ({
+        format: 'string' as const,
+        payload: rawKey.toString('utf-8'),
+      }));
+      key = parsedKey.payload;
+    }
+
+    return {
+      offset: message.offset,
+      partition,
+      key,
+      timestamp: message.timestamp,
+      schemaId,
+      schema,
+      value,
+    };
+  },
 };
 
 export default kafkaJSService;

@@ -110,3 +110,21 @@ export interface KCConnectorExpandedEntry {
 }
 
 export type KCConnectorsExpandedResponse = Record<string, KCConnectorExpandedEntry>;
+
+export interface KafkaConnectService {
+  getConnectors: () => Promise<KCConnectorsExpandedResponse>;
+  getConnector: (name: string) => Promise<KCConnectorExpandedEntry>;
+  createConnector: (body: Record<string, unknown>) => Promise<KCConnectorInfo>;
+  deleteConnector: (name: string) => Promise<void>;
+  pauseConnector: (name: string) => Promise<void>;
+  resumeConnector: (name: string) => Promise<void>;
+  restartConnector: (name: string) => Promise<void>;
+  restartTask: (name: string, taskId: string) => Promise<void>;
+  getPlugins: () => Promise<KCPluginInfo[]>;
+  getPluginConfig: (pluginClass: string) => Promise<KCConfigKeyInfo[]>;
+  validatePluginConfig: (
+    pluginClass: string,
+    inputConfig: Record<string, string>
+  ) => Promise<KCConfigInfos>;
+  getTopics: () => Promise<Record<string, { topics: string[] }>>;
+}
