@@ -9,6 +9,7 @@ import createKafkaJSTopicRouter from './routes/kafkaJSTopicRouter.js';
 import kafkaJSService from './services/kafkaJSService.js';
 import { config } from './config.js';
 import cors from 'cors';
+import kafkaConnectService from './services/kafkaConnectService.js';
 
 const port = config.port || 5000;
 const app = express();
@@ -18,7 +19,7 @@ const publicDir = path.join(__dirname, 'public');
 app.use(cors());
 app.use(express.json());
 app.use('/health', (_req, res) => res.status(200).send('OK'));
-app.use('/api', createKafkaConnectRouter());
+app.use('/api', createKafkaConnectRouter(kafkaConnectService));
 app.use('/api/admin', createKafkaJSRouter(kafkaJSService));
 app.use('/api/admin/topics', createKafkaJSTopicRouter(kafkaJSService));
 app.use('/api/topic-groups', createTopicGroupRouter());

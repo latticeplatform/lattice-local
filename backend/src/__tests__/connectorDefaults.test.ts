@@ -56,11 +56,13 @@ describe('applyDefaults', () => {
 
 describe('getAutofilledKeys', () => {
   it('returns exactly the keys defined for the Postgres connector', () => {
-    expect(getAutofilledKeys(POSTGRES)).toEqual(Object.keys(CONNECTOR_DEFAULTS[POSTGRES]!));
+    expect(getAutofilledKeys(POSTGRES)).toEqual(Object.keys(CONNECTOR_DEFAULTS[POSTGRES] ?? {}));
   });
 
   it('returns exactly the keys defined for the ClickHouse connector', () => {
-    expect(getAutofilledKeys(CLICKHOUSE)).toEqual(Object.keys(CONNECTOR_DEFAULTS[CLICKHOUSE]!));
+    expect(getAutofilledKeys(CLICKHOUSE)).toEqual(
+      Object.keys(CONNECTOR_DEFAULTS[CLICKHOUSE] ?? {})
+    );
   });
 
   it('includes transform keys for ClickHouse but not for Postgres', () => {

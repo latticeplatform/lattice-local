@@ -11,12 +11,16 @@ export default defineConfig(
     languageOptions: {
       globals: globals.node,
       parserOptions: {
-        project: true,
+        project: './tsconfig.eslint.json',
         tsconfigRootDir: import.meta.dirname,
       },
     },
     rules: {
       'no-console': 'warn',
     },
+  },
+  {
+    files: ['src/__tests__/**/*.ts'],
+    extends: [tseslint.configs.disableTypeChecked],
   }
 );
