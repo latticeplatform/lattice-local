@@ -1,7 +1,7 @@
 import { type Consumer, Kafka, type KafkaConfig } from 'kafkajs';
 import { config } from '../config.js';
-import { isKafkaTopicMessageWithValue, parseValue } from '../utils/index.js';
-import type { KafkaJSService, SchemaResult } from '../types/index.js';
+import { fetchSchema, parseValue } from '../utils/index.js';
+import type { KafkaJSService, SchemaField, SchemaResult } from '../types/index.js';
 
 const kafka = new Kafka({
   clientId: config.kafka.clientId,
@@ -30,6 +30,32 @@ const withProducer = async <T>(
   } finally {
     await producer.disconnect();
   }
+};
+
+const extractSchemaShape = (
+  rawSchema: string
+): { name?: string; namespace?: string; doc?: string; fields?: SchemaField[] } => {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(rawSchema);
+  } catch {
+    return {};
+  }
+  if (typeof parsed !== 'object' || parsed === null) return {};
+  const rec = parsed as Record<string, unknown>;
+  return {
+    ...(typeof rec.name === 'string' && { name: rec.name }),
+    ...(typeof rec.namespace === 'string' && { namespace: rec.namespace }),
+    ...(typeof rec.doc === 'string' && { doc: rec.doc }),
+    ...(Array.isArray(rec.fields) && {
+      fields: (rec.fields as Record<string, unknown>[]).map((f) => ({
+        name: String(f.name),
+        type: f.type,
+        ...(f.default !== undefined && { default: f.default }),
+        ...(typeof f.doc === 'string' && { doc: f.doc }),
+      })),
+    }),
+  };
 };
 
 const kafkaJSService: KafkaJSService = {
@@ -96,30 +122,48 @@ const kafkaJSService: KafkaJSService = {
       let handled = false;
 
       await consumer.run({
-        eachMessage: async ({ message }: { message: unknown }) => {
+        eachMessage: async ({ message }) => {
           if (handled) return;
           handled = true;
           clearTimeout(timeout);
 
-          if (!isKafkaTopicMessageWithValue(message)) {
-            rejectSchema(new Error('Message has no value'));
-            return;
-          }
           try {
+            // Apicurio v2: schema ID is in the header as an 8-byte big-endian global ID
+            const globalIdBuf = message.headers?.['apicurio.value.globalId'];
+            if (Buffer.isBuffer(globalIdBuf) && globalIdBuf.length === 8) {
+              const schemaId = Number(globalIdBuf.readBigInt64BE(0));
+              const { schema: raw, schemaType } = await fetchSchema(schemaId);
+              resolveSchema({
+                source: 'apicurio',
+                schemaId,
+                schemaType,
+                ...extractSchemaShape(raw),
+                raw,
+              });
+              return;
+            }
+
+            // Fallback: Confluent wire format or Debezium JSON embedded in the value
+            if (!message.value) {
+              rejectSchema(new Error('Message has no value'));
+              return;
+            }
             const parsed = await parseValue(message.value);
             if (parsed.format === 'json' || parsed.format === 'string') {
               rejectSchema(new Error('Message has no schema (plain JSON or unencoded string)'));
               return;
             }
+            const raw = JSON.stringify(parsed.schema);
             resolveSchema(
               parsed.format === 'apicurio'
                 ? {
                     source: 'apicurio',
                     schemaId: parsed.schemaId,
                     schemaType: parsed.schemaType,
-                    schema: parsed.schema,
+                    ...extractSchemaShape(raw),
+                    raw,
                   }
-                : { source: 'debezium-json', schema: parsed.schema }
+                : { source: 'debezium-json', ...extractSchemaShape(raw), raw }
             );
           } catch (e) {
             rejectSchema(e instanceof Error ? e : new Error(String(e)));

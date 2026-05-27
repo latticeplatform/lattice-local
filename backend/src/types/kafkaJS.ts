@@ -44,10 +44,32 @@ export interface StreamMessageEvent {
   value: unknown;
 }
 
-// Discriminated union for peekTopicSchema
+export interface SchemaField {
+  name: string;
+  type: unknown;
+  default?: unknown;
+  doc?: string;
+}
+
 export type SchemaResult =
-  | { source: 'apicurio'; schemaId: number; schemaType: string; schema: unknown }
-  | { source: 'debezium-json'; schema: unknown };
+  | {
+      source: 'apicurio';
+      schemaId: number;
+      schemaType: string;
+      name?: string;
+      namespace?: string;
+      doc?: string;
+      fields?: SchemaField[];
+      raw: string;
+    }
+  | {
+      source: 'debezium-json';
+      name?: string;
+      namespace?: string;
+      doc?: string;
+      fields?: SchemaField[];
+      raw: string;
+    };
 
 export interface KafkaJSService {
   // Topics

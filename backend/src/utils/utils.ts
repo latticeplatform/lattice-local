@@ -26,11 +26,15 @@ export const fetchSchema = async (
 ): Promise<{ schema: string; schemaType: string }> => {
   const existingSchema = schemaCache.get(schemaId);
   if (existingSchema) return existingSchema;
-  const schemaUrl = `${APICURIO_REGISTRY_URL}/schemas/ids/${String(schemaId)}`;
-  console.log('Fetching schema from Confluent Schema Registry:', schemaUrl);
-  const { data } = await axios.get<{ schema: string; schemaType: string }>(schemaUrl);
-  schemaCache.set(schemaId, data);
-  return data;
+  const schemaUrl = `${APICURIO_REGISTRY_URL}/ids/globalIds/${String(schemaId)}`;
+  const response = await axios.get<unknown>(schemaUrl);
+  const schemaType =
+    (response.headers['x-registry-artifacttype'] as string | undefined) ?? 'AVRO';
+  const schema =
+    typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
+  const result = { schema, schemaType };
+  schemaCache.set(schemaId, result);
+  return result;
 };
 
 // Wire format: 0x00 magic byte | 4-byte big-endian schema ID | encoded payload

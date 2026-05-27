@@ -15,12 +15,19 @@ const APICURIO_CONVERTERS = {
   'value.converter.apicurio.registry.auto-register': 'true',
 };
 
+
+const TOPIC_CREATION_DEFAULTS = {
+  'topic.creation.default.replication.factor': '-1',
+  'topic.creation.default.partitions': '-1',
+};
+
 export const CONNECTOR_DEFAULTS: Record<string, Record<string, string>> = {
   // ── Debezium Sources ────────────────────────────────────────────────────
   // All sources use Apicurio Avro converters so topics carry registered schemas.
 
   'io.debezium.connector.postgresql.PostgresConnector': {
     ...APICURIO_CONVERTERS,
+    ...TOPIC_CREATION_DEFAULTS,
     'plugin.name': 'pgoutput',
     'snapshot.mode': 'when_needed',
     'snapshot.locking.mode': 'none',
@@ -28,18 +35,22 @@ export const CONNECTOR_DEFAULTS: Record<string, Record<string, string>> = {
 
   'io.debezium.connector.mysql.MySqlConnector': {
     ...APICURIO_CONVERTERS,
+    ...TOPIC_CREATION_DEFAULTS,
   },
 
   'io.debezium.connector.mariadb.MariaDbConnector': {
     ...APICURIO_CONVERTERS,
+    ...TOPIC_CREATION_DEFAULTS,
   },
 
   'io.debezium.connector.sqlserver.SqlServerConnector': {
     ...APICURIO_CONVERTERS,
+    ...TOPIC_CREATION_DEFAULTS,
   },
 
   'io.debezium.connector.oracle.OracleConnector': {
     ...APICURIO_CONVERTERS,
+    ...TOPIC_CREATION_DEFAULTS,
     'database.connection.adapter': 'LogMiner',
     'log.mining.strategy': 'online_catalog',
     'snapshot.locking.mode': 'none',
@@ -47,34 +58,41 @@ export const CONNECTOR_DEFAULTS: Record<string, Record<string, string>> = {
 
   'io.debezium.connector.db2.Db2Connector': {
     ...APICURIO_CONVERTERS,
+    ...TOPIC_CREATION_DEFAULTS,
   },
 
   'io.debezium.connector.informix.InformixConnector': {
     ...APICURIO_CONVERTERS,
+    ...TOPIC_CREATION_DEFAULTS,
   },
 
   'io.debezium.connector.mongodb.MongoDbConnector': {
     ...APICURIO_CONVERTERS,
+    ...TOPIC_CREATION_DEFAULTS,
   },
 
   'io.debezium.connector.db2as400.As400RpcConnector': {
     ...APICURIO_CONVERTERS,
+    ...TOPIC_CREATION_DEFAULTS,
   },
 
   'io.debezium.connector.cockroachdb.CockroachDBConnector': {
     ...APICURIO_CONVERTERS,
+    ...TOPIC_CREATION_DEFAULTS,
   },
 
   'io.debezium.connector.vitess.VitessConnector': {
     ...APICURIO_CONVERTERS,
+    ...TOPIC_CREATION_DEFAULTS,
   },
 
   'io.debezium.connector.spanner.SpannerConnector': {
     ...APICURIO_CONVERTERS,
+    ...TOPIC_CREATION_DEFAULTS,
   },
 
   // ── Sinks ───────────────────────────────────────────────────────────────
-  // Sinks need Apicurio to deserialise the Avro messages written by Debezium sources.
+  // Sinks need Apicurio to deserialize the Avro messages written by Debezium sources.
 
   'com.clickhouse.kafka.connect.ClickHouseSinkConnector': {
     ...APICURIO_CONVERTERS,
@@ -93,17 +111,20 @@ export const CONNECTOR_DEFAULTS: Record<string, Record<string, string>> = {
   },
 
   // ── Mirror connectors ───────────────────────────────────────────────────
-  // Mirror connectors replicate raw bytes; no Apicurio needed.
+  // Mirrors are source connectors writing to a target cluster, so topic creation applies.
 
   'org.apache.kafka.connect.mirror.MirrorSourceConnector': {
+    ...TOPIC_CREATION_DEFAULTS,
     'target.cluster.alias': 'target',
   },
 
   'org.apache.kafka.connect.mirror.MirrorCheckpointConnector': {
+    ...TOPIC_CREATION_DEFAULTS,
     'target.cluster.alias': 'target',
   },
 
   'org.apache.kafka.connect.mirror.MirrorHeartbeatConnector': {
+    ...TOPIC_CREATION_DEFAULTS,
     'target.cluster.alias': 'target',
   },
 };
