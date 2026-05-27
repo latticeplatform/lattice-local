@@ -20,7 +20,14 @@ const publicDir = path.join(__dirname, 'public');
 
 app.use(cors());
 app.use(express.json());
-app.use(pinoHttp({ logger: httpLogger, autoLogging: { ignore: (req: { url?: string }) => req.url === '/health' } }));
+app.use(pinoHttp({
+  logger: httpLogger,
+  autoLogging: { ignore: (req) => req.url === '/health' },
+  customSuccessMessage: (req, res, responseTime) =>
+    `${req.method} ${req.url} ${res.statusCode} ${String(responseTime)}ms`,
+  customErrorMessage: (req, res, err) =>
+    `${req.method} ${req.url} ${res.statusCode} — ${err.message}`
+}));
 app.use('/health', (_req, res) => res.status(200).send('OK'));
 app.use('/api', createKafkaConnectRouter(kafkaConnectService));
 app.use('/api/admin', createKafkaJSRouter(kafkaJSService));

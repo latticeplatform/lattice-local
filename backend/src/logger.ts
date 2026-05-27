@@ -6,7 +6,11 @@ const transport =
     ? { target: 'pino-pretty', options: { colorize: true, translateTime: 'SYS:HH:MM:ss' } }
     : undefined;
 
-export const logger = pino({ level: config.logLevel, transport });
+export const logger = pino({
+  level: config.logLevel,
+  transport,
+  serializers: { responseTime: () => undefined },
+});
 
 export const httpLogger = logger.child({ module: 'http' });
 export const kafkaLogger = logger.child({ module: 'kafka' });
