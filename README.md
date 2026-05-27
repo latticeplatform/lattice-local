@@ -148,17 +148,15 @@ docker exec -it clickhouse clickhouse-client \
 
 ### Create table for products
 ```sql
-CREATE TABLE IF NOT EXISTS clickhouseconsumer.fulfillment_products
-(
-    id Int32,
-    sku String,
-    quantity_on_hand Int32,
-    __op LowCardinality(String),
-    __source_ts_ms Int64,
-    __deleted Nullable(String)
-)
-    ENGINE = ReplacingMergeTree(__source_ts_ms)
-ORDER BY id;
+CREATE TABLE clickhouseconsumer.public.products (
+     id               Int32,
+     sku              String,
+     quantity_on_hand Int32,
+     op               String,
+     source_ts_ms     Int64,
+     __deleted        String DEFAULT 'false'
+) ENGINE = ReplacingMergeTree()
+  ORDER BY id;
 
 ```
 ### Create a table for orders
@@ -169,11 +167,10 @@ CREATE TABLE clickhouseconsumer.fulfillment_orders
     id Int32,
     product_id Int32,
     quantity Int32,
-    __op LowCardinality(String),
-    __source_ts_ms Int64,
-    __deleted Nullable(String)
-)
-    ENGINE = ReplacingMergeTree(__source_ts_ms)
+    op String,
+    source_ts_ms Int64,
+    __deleted String DEFAULT 'false'
+) ENGINE = ReplacingMergeTree()
 ORDER BY id;
 ```
 
