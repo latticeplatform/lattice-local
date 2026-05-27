@@ -1,6 +1,6 @@
 {
   "name": "lattice-platform",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "",
   "type": "module",
   "engines": {
@@ -35,6 +35,7 @@
     "express": "^5.2.1",
     "kafkajs": "^2.2.4",
     "pg": "^8.21.0"
+    "pg": "^8.21.0",
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -42,6 +43,7 @@
     "@types/express": "^5.0.6",
     "@types/node": "^25.9.0",
     "@types/pg": "^8.20.0",
+    "@types/pino-http": "^5.8.4",
     "@types/supertest": "^7.2.0",
     "eslint": "^10.4.0",
     "globals": "^17.6.0",

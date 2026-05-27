@@ -47,8 +47,11 @@ export interface StreamMessageEvent {
 export interface SchemaField {
   name: string;
   type: unknown;
+  optional?: boolean;
+  logicalType?: string;
   default?: unknown;
   doc?: string;
+  fields?: SchemaField[];
 }
 
 export type SchemaResult =

@@ -32,6 +32,20 @@ const withProducer = async <T>(
   }
 };
 
+const extractFields = (rawFields: Record<string, unknown>[]): SchemaField[] =>
+  rawFields.map((f) => ({
+    // Avro uses f.name; Debezium uses f.field (f.name is its logical type)
+    name: String(f.field ?? f.name ?? ''),
+    type: f.type,
+    ...(typeof f.optional === 'boolean' && { optional: f.optional }),
+    // Avro logicalType sits on the type object; Debezium puts it in f.name when f.field exists
+    ...(typeof f.logicalType === 'string' && { logicalType: f.logicalType }),
+    ...(typeof f.name === 'string' && f.field !== undefined && { logicalType: f.name }),
+    ...(f.default !== undefined && { default: f.default }),
+    ...(typeof f.doc === 'string' && { doc: f.doc }),
+    ...(Array.isArray(f.fields) && { fields: extractFields(f.fields as Record<string, unknown>[]) }),
+  }));
+
 const extractSchemaShape = (
   rawSchema: string
 ): { name?: string; namespace?: string; doc?: string; fields?: SchemaField[] } => {
@@ -47,24 +61,23 @@ const extractSchemaShape = (
     ...(typeof rec.name === 'string' && { name: rec.name }),
     ...(typeof rec.namespace === 'string' && { namespace: rec.namespace }),
     ...(typeof rec.doc === 'string' && { doc: rec.doc }),
-    ...(Array.isArray(rec.fields) && {
-      fields: (rec.fields as Record<string, unknown>[]).map((f) => ({
-        name: String(f.name),
-        type: f.type,
-        ...(f.default !== undefined && { default: f.default }),
-        ...(typeof f.doc === 'string' && { doc: f.doc }),
-      })),
-    }),
+    ...(Array.isArray(rec.fields) && { fields: extractFields(rec.fields as Record<string, unknown>[]) }),
   };
 };
 
 const kafkaJSService: KafkaJSService = {
   listTopics: () => withAdmin((a) => a.listTopics()),
+  listTopics: () => {
+    return withAdmin((a) => a.listTopics());
+  },
 
   getTopicMetadata: (topicName: string) =>
     withAdmin((a) =>
+  getTopicMetadata: (topicName: string) => {
+    return withAdmin((a) =>
       a.fetchTopicMetadata({ topics: [topicName] }).then((r) => r.topics[0] ?? null)
-    ),
+    );
+  },
 
   getTopicOffsets: (topicName: string) =>
     withAdmin(async (a) => {
@@ -83,6 +96,8 @@ const kafkaJSService: KafkaJSService = {
 
   createTopics: (topics: { topic: string; numPartitions?: number; replicationFactor?: number }[]) =>
     withAdmin((a) =>
+  createTopics: (topics: { topic: string; numPartitions?: number; replicationFactor?: number }[]) => {
+    return withAdmin((a) =>
       a.createTopics({
         topics: topics.map((t) => ({
           topic: t.topic,
@@ -90,14 +105,24 @@ const kafkaJSService: KafkaJSService = {
           replicationFactor: t.replicationFactor ?? 1,
         })),
       })
-    ),
+    );
+  },
 
   deleteTopic: (topicName: string) => withAdmin((a) => a.deleteTopics({ topics: [topicName] })),
+  deleteTopic: (topicName: string) => {
+    return withAdmin((a) => a.deleteTopics({ topics: [topicName] }));
+  },
 
   describeCluster: () => withAdmin((a) => a.describeCluster()),
+  describeCluster: () => {
+    return withAdmin((a) => a.describeCluster());
+  },
 
   produce: (topic: string, messages: { key?: string; value: string; partition?: number }[]) =>
     withProducer((p) => p.send({ topic, messages })),
+  produce: (topic: string, messages: { key?: string; value: string; partition?: number }[]) => {
+    return withProducer((p) => p.send({ topic, messages }));
+  },
 
   peekTopicSchema: async (topicName: string): Promise<SchemaResult> => {
     const consumer = kafka.consumer({
@@ -167,6 +192,8 @@ const kafkaJSService: KafkaJSService = {
             );
           } catch (e) {
             rejectSchema(e instanceof Error ? e : new Error(String(e)));
+            const err = e instanceof Error ? e : new Error(String(e));
+            rejectSchema(err);
           }
         },
       });

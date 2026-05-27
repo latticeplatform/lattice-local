@@ -12,7 +12,7 @@ import type { KCConfigInfos } from '../types/index.js';
 // ];
 
 import { config } from '../config.js';
-const APICURIO_REGISTRY_URL = config.apicurioRegistry.url;
+const SCHEMA_REGISTRY_URL = config.schemaRegistry.url;
 const schemaCache = new Map<number, { schema: string; schemaType: string }>();
 
 export const kafkaError = (err: unknown, res: express.Response) => {
@@ -26,7 +26,7 @@ export const fetchSchema = async (
 ): Promise<{ schema: string; schemaType: string }> => {
   const existingSchema = schemaCache.get(schemaId);
   if (existingSchema) return existingSchema;
-  const schemaUrl = `${APICURIO_REGISTRY_URL}/ids/globalIds/${String(schemaId)}`;
+  const schemaUrl = `${SCHEMA_REGISTRY_URL}/ids/globalIds/${String(schemaId)}`;
   const response = await axios.get<unknown>(schemaUrl);
   const schemaType =
     (response.headers['x-registry-artifacttype'] as string | undefined) ?? 'AVRO';
