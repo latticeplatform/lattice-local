@@ -100,6 +100,10 @@ export const CONNECTOR_DEFAULTS: Record<string, Record<string, string>> = {
     'transforms.unwrap.type': 'io.debezium.transforms.ExtractNewRecordState',
     'transforms.unwrap.delete.handling.mode': 'rewrite',
     'transforms.unwrap.add.fields': 'op,source.ts_ms:source_ts_ms',
+    'transforms.unwrap.add.fields.prefix': '',
+    'exactlyOnce': 'false',
+    'ssl': 'false',
+    'tasks.max': '1',
   },
 
   'io.debezium.connector.jdbc.JdbcSinkConnector': {

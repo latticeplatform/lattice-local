@@ -1,7 +1,10 @@
 import express, { type Response } from 'express';
 import axios from 'axios';
 import avsc from 'avsc';
-import type { KCConfigInfos } from '../types/index.js';
+import type {
+  KCConnectorsResponse,
+  KCConnectorsResponseVariantsWithInfo
+} from '../types/index.js';
 import { logger } from '../logger.js';
 
 // const KAFKA_INFRA_TOPICS = [
@@ -99,29 +102,6 @@ export const parseValue = async (raw: Buffer): Promise<ParsedValue> => {
   }
 };
 
-export const markPasswordsRequired = (
-  data: KCConfigInfos,
-  suppliedConfig: Record<string, string>
-): void => {
-  for (const c of data.configs) {
-    if (c.definition.type !== 'PASSWORD') continue;
-    if (c.definition.name.includes('ssl')) continue;
-    if (suppliedConfig[c.definition.name]) continue;
-    const label = c.definition.display_name;
-    if (c.value === null) {
-      c.value = {
-        name: c.definition.name,
-        value: null,
-        errors: [`${label} is required`],
-        visible: true,
-        recommended_values: [],
-      };
-    } else if (c.value.errors.length === 0) {
-      c.value.errors = [`${label} is required`];
-    }
-  }
-};
-
 export const extractDatabaseConnectivityInfo = () => {};
 
 export const withProxiedError = async <T>(
@@ -143,4 +123,16 @@ export const withProxiedError = async <T>(
       return { error: 'Failed to reach Kafka Connect' };
     }
   }
+};
+
+export const filterOnlySourceConnectors = <
+  T extends KCConnectorsResponseVariantsWithInfo
+>(
+  response: KCConnectorsResponse<T>
+): KCConnectorsResponse<T> => {
+  return Object.fromEntries(
+    Object.entries(response).filter(
+      ([_, entry]) => entry.info.type === 'source'
+    )
+  ) as KCConnectorsResponse<T>;
 };

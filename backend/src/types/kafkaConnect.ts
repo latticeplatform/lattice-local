@@ -52,7 +52,7 @@ export interface KCConfigValueInfo {
 }
 
 export interface KCConfigInfo {
-  definition: KCConfigKeyInfo;
+  definition?: KCConfigKeyInfo;
   value: KCConfigValueInfo | null;
 }
 
@@ -109,10 +109,44 @@ export interface KCConnectorExpandedEntry {
   autofilled_keys: string[];
 }
 
-export type KCConnectorsExpandedResponse = Record<string, KCConnectorExpandedEntry>;
+type KCConnectorResponse<T> = Record<string, T>;
+
+type KCConnectorResponseMap = {
+  list: string[];
+
+  info: KCConnectorResponse<{
+    info: KCConnectorInfo;
+  }>;
+
+  status: KCConnectorResponse<{
+    status: KCConnectorStateInfo;
+  }>;
+
+  'info-status': KCConnectorResponse<{
+    info: KCConnectorInfo;
+    status: KCConnectorStateInfo;
+  }>;
+
+  'info-status-autofilled':
+    KCConnectorResponse<KCConnectorExpandedEntry>;
+};
+
+export type KCConnectorsResponse<
+  T extends keyof KCConnectorResponseMap
+> = KCConnectorResponseMap[T];
+
+export type KCConnectorsResponseVariantsWithInfo = {
+  [K in keyof KCConnectorResponseMap]:
+  KCConnectorResponseMap[K] extends Record<
+      string,
+      { info: any }
+    >
+    ? K
+    : never;
+}[keyof KCConnectorResponseMap];
 
 export interface KafkaConnectService {
-  getConnectors: () => Promise<KCConnectorsExpandedResponse>;
+  getConnectors: () => Promise<KCConnectorsResponse<'info-status-autofilled'>>;
   getConnector: (name: string) => Promise<KCConnectorExpandedEntry>;
   createConnector: (body: Record<string, unknown>) => Promise<KCConnectorInfo>;
   deleteConnector: (name: string) => Promise<void>;

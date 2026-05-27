@@ -42,6 +42,9 @@ export const UNIVERSAL_HIDDEN: string[] = [
   'transaction.boundary',
   'transaction.boundary.interval.ms',
   'offsets.storage.topic',
+
+  // Redundant with UI topic selection
+  'topics.regex'
 ];
 
 /** Field name prefixes hidden for all connectors (catches all sub-fields automatically). */

@@ -1,7 +1,7 @@
 import type {
   KCConnectorExpandedEntry,
   KCConnectorInfo,
-  KCConnectorsExpandedResponse,
+  KCConnectorsResponse,
   KCConnectorStateInfo,
   KCPluginInfo,
   KCConfigKeyInfo,
@@ -10,10 +10,12 @@ import type {
 import { config } from '../config.js';
 import axios from 'axios';
 import {
-  applyDefaults,
+  applyDefaults, filterOnlySourceConnectors,
   getAutofilledKeys,
   isFieldHidden,
-  markPasswordsRequired,
+  markConnectorRequired,
+  PLUGIN_REQUIRED,
+  CONNECTOR_DEFAULTS,
 } from '../utils/index.js';
 import { connectLogger } from '../logger.js';
 
@@ -21,17 +23,18 @@ const CONNECT_URL = config.kafkaConnect.url;
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
 const kafkaConnectService = {
-  getConnectors: async (): Promise<KCConnectorsExpandedResponse> => {
+  getConnectors: async (): Promise<KCConnectorsResponse<'info-status-autofilled'>> => {
     connectLogger.debug('fetching all connectors');
-    const { data } = await axios.get<KCConnectorsExpandedResponse>(
+    const { data } = await axios.get<KCConnectorsResponse<'info-status'>>(
       `${CONNECT_URL}/connectors?expand=info&expand=status`
     );
-    for (const entry of Object.values(data)) {
+    const autofilledResponse: KCConnectorsResponse<'info-status-autofilled'> = {}
+    for (const [name, entry] of Object.entries(data)) {
       const connectorClass = entry.info.config['connector.class'] ?? '';
-      entry.autofilled_keys = getAutofilledKeys(connectorClass);
+      autofilledResponse[name] = {...entry, autofilled_keys: getAutofilledKeys(connectorClass)};
     }
     connectLogger.debug({ count: Object.keys(data).length }, 'connectors fetched');
-    return data;
+    return autofilledResponse;
   },
 
   getConnector: async (name: string): Promise<KCConnectorExpandedEntry> => {
@@ -100,7 +103,15 @@ const kafkaConnectService = {
     const { data } = await axios.get<KCConfigKeyInfo[]>(
       `${CONNECT_URL}/connector-plugins/${pluginClass}/config`
     );
-    return data.filter((def) => !isFieldHidden(pluginClass, def.name));
+    const requiredFields = PLUGIN_REQUIRED[pluginClass] ?? [];
+    const defaults = CONNECTOR_DEFAULTS[pluginClass] ?? {};
+    return data
+      .filter((def) => !isFieldHidden(pluginClass, def.name))
+      .map((def) => ({
+        ...def,
+        required: def.required || requiredFields.includes(def.name),
+        default_value: defaults[def.name] ?? def.default_value,
+      }));
   },
 
   validatePluginConfig: async (
@@ -114,8 +125,11 @@ const kafkaConnectService = {
       configWithDefaults,
       { headers: JSON_HEADERS }
     );
-    data.configs = data.configs.filter((c) => !isFieldHidden(pluginClass, c.definition.name));
-    markPasswordsRequired(data, configWithDefaults);
+    
+    connectLogger.debug({ pluginClass, errorCount: data.error_count }, 'plugin config validated');
+
+    data.configs = data.configs.filter((c) => c.definition && !isFieldHidden(pluginClass, c.definition.name));
+    markConnectorRequired(pluginClass, data, configWithDefaults);
     data.error_count = data.configs.filter((c) => (c.value?.errors.length ?? 0) > 0).length;
     connectLogger.debug({ pluginClass, errorCount: data.error_count }, 'plugin config validated');
     return data;
@@ -123,10 +137,11 @@ const kafkaConnectService = {
 
   getTopics: async (): Promise<Record<string, { topics: string[] }>> => {
     connectLogger.debug('fetching active topics');
-    const { data: connectors } = await axios.get<string[]>(`${CONNECT_URL}/connectors`);
+    const { data: connectors } = await axios.get<KCConnectorsResponse<'info'>>(`${CONNECT_URL}/connectors?expand=info`);
     const topics: Record<string, { topics: string[] }> = {};
+    const filteredConnectors = filterOnlySourceConnectors(connectors);
     await Promise.all(
-      connectors.map(async (connector) => {
+      Object.keys(filteredConnectors).map(async (connector) => {
         const { data } = await axios.get<Record<string, { topics: string[] }>>(
           `${CONNECT_URL}/connectors/${connector}/topics`
         );
