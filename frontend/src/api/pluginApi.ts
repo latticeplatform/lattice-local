@@ -1,5 +1,6 @@
 import { request } from '../utils';
 import type { ConfigDefinition, ConnectorPlugin, ValidationResult } from '../types';
+
 interface PluginApi {
   fetchAll: () => Promise<ConnectorPlugin[]>;
   fetchConfig: (pluginClass: string) => Promise<ConfigDefinition[]>;
@@ -36,4 +37,5 @@ const createPluginApi = (): PluginApi => {
 
   return { fetchAll, fetchConfig, validateConfig };
 };
+
 export default createPluginApi;

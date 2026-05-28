@@ -1,10 +1,7 @@
 import express, { type Response } from 'express';
 import axios from 'axios';
 import avsc from 'avsc';
-import type {
-  KCConnectorsResponse,
-  KCConnectorsResponseVariantsWithInfo
-} from '../types/index.js';
+import type { KCConnectorsResponse, KCConnectorsResponseVariantsWithInfo } from '../types/index.js';
 import { logger } from '../logger.js';
 
 // const KAFKA_INFRA_TOPICS = [
@@ -32,10 +29,8 @@ export const fetchSchema = async (
   if (existingSchema) return existingSchema;
   const schemaUrl = `${SCHEMA_REGISTRY_URL}/ids/globalIds/${String(schemaId)}`;
   const response = await axios.get<unknown>(schemaUrl);
-  const schemaType =
-    (response.headers['x-registry-artifacttype'] as string | undefined) ?? 'AVRO';
-  const schema =
-    typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
+  const schemaType = (response.headers['x-registry-artifacttype'] as string | undefined) ?? 'AVRO';
+  const schema = typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
   const result = { schema, schemaType };
   schemaCache.set(schemaId, result);
   return result;
@@ -125,14 +120,10 @@ export const withProxiedError = async <T>(
   }
 };
 
-export const filterOnlySourceConnectors = <
-  T extends KCConnectorsResponseVariantsWithInfo
->(
+export const filterOnlySourceConnectors = <T extends KCConnectorsResponseVariantsWithInfo>(
   response: KCConnectorsResponse<T>
 ): KCConnectorsResponse<T> => {
   return Object.fromEntries(
-    Object.entries(response).filter(
-      ([_, entry]) => entry.info.type === 'source'
-    )
+    Object.entries(response).filter(([, entry]) => entry.info.type === 'source')
   ) as KCConnectorsResponse<T>;
 };

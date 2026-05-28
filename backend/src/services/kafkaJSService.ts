@@ -44,7 +44,9 @@ const extractFields = (rawFields: Record<string, unknown>[]): SchemaField[] =>
     ...(typeof f.name === 'string' && f.field !== undefined && { logicalType: f.name }),
     ...(f.default !== undefined && { default: f.default }),
     ...(typeof f.doc === 'string' && { doc: f.doc }),
-    ...(Array.isArray(f.fields) && { fields: extractFields(f.fields as Record<string, unknown>[]) }),
+    ...(Array.isArray(f.fields) && {
+      fields: extractFields(f.fields as Record<string, unknown>[]),
+    }),
   }));
 
 const extractSchemaShape = (
@@ -62,7 +64,9 @@ const extractSchemaShape = (
     ...(typeof rec.name === 'string' && { name: rec.name }),
     ...(typeof rec.namespace === 'string' && { namespace: rec.namespace }),
     ...(typeof rec.doc === 'string' && { doc: rec.doc }),
-    ...(Array.isArray(rec.fields) && { fields: extractFields(rec.fields as Record<string, unknown>[]) }),
+    ...(Array.isArray(rec.fields) && {
+      fields: extractFields(rec.fields as Record<string, unknown>[]),
+    }),
   };
 };
 
@@ -95,7 +99,9 @@ const kafkaJSService: KafkaJSService = {
       }));
     }),
 
-  createTopics: (topics: { topic: string; numPartitions?: number; replicationFactor?: number }[]) => {
+  createTopics: (
+    topics: { topic: string; numPartitions?: number; replicationFactor?: number }[]
+  ) => {
     kafkaLogger.info({ topics: topics.map((t) => t.topic) }, 'creating topics');
     return withAdmin((a) =>
       a.createTopics({
@@ -158,7 +164,10 @@ const kafkaJSService: KafkaJSService = {
             if (Buffer.isBuffer(globalIdBuf) && globalIdBuf.length === 8) {
               const schemaId = Number(globalIdBuf.readBigInt64BE(0));
               const { schema: raw, schemaType } = await fetchSchema(schemaId);
-              kafkaLogger.debug({ topic: topicName, schemaId, schemaType }, 'schema resolved via apicurio header');
+              kafkaLogger.debug(
+                { topic: topicName, schemaId, schemaType },
+                'schema resolved via apicurio header'
+              );
               resolveSchema({
                 source: 'apicurio',
                 schemaId,
@@ -180,7 +189,10 @@ const kafkaJSService: KafkaJSService = {
               return;
             }
             const raw = JSON.stringify(parsed.schema);
-            kafkaLogger.debug({ topic: topicName, format: parsed.format }, 'schema resolved via wire format');
+            kafkaLogger.debug(
+              { topic: topicName, format: parsed.format },
+              'schema resolved via wire format'
+            );
             resolveSchema(
               parsed.format === 'apicurio'
                 ? {

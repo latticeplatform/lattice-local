@@ -15,7 +15,6 @@ const APICURIO_CONVERTERS = {
   'value.converter.apicurio.registry.auto-register': 'true',
 };
 
-
 const TOPIC_CREATION_DEFAULTS = {
   'topic.creation.default.replication.factor': '-1',
   'topic.creation.default.partitions': '-1',
@@ -101,8 +100,8 @@ export const CONNECTOR_DEFAULTS: Record<string, Record<string, string>> = {
     'transforms.unwrap.delete.handling.mode': 'rewrite',
     'transforms.unwrap.add.fields': 'op,source.ts_ms:source_ts_ms',
     'transforms.unwrap.add.fields.prefix': '',
-    'exactlyOnce': 'false',
-    'ssl': 'false',
+    exactlyOnce: 'false',
+    ssl: 'false',
     'tasks.max': '1',
   },
 

@@ -44,7 +44,7 @@ export const UNIVERSAL_HIDDEN: string[] = [
   'offsets.storage.topic',
 
   // Redundant with UI topic selection
-  'topics.regex'
+  'topics.regex',
 ];
 
 /** Field name prefixes hidden for all connectors (catches all sub-fields automatically). */

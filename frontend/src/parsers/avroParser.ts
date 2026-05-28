@@ -4,8 +4,9 @@ import type { Extracted, FieldRow, SchemaParser } from '../types';
 const typeInfo = (type: AvroType): { label: string; nullable: boolean } => {
   if (typeof type === 'string') return { label: type, nullable: false };
   if (Array.isArray(type)) {
-    const nonNull = type.filter((t) => t !== 'null');
-    const inner = nonNull.length === 1 ? typeInfo(nonNull[0]) : { label: 'union', nullable: false };
+    const nonNulls = type.filter((t) => t !== 'null');
+    const nonNullWithValue = nonNulls[0]
+    const inner = nonNullWithValue ? typeInfo(nonNullWithValue) : { label: 'union', nullable: false };
     return { ...inner, nullable: type.includes('null') };
   }
   if (type.type === 'record') return { label: type.name, nullable: false };

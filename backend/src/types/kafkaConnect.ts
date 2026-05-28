@@ -127,20 +127,17 @@ type KCConnectorResponseMap = {
     status: KCConnectorStateInfo;
   }>;
 
-  'info-status-autofilled':
-    KCConnectorResponse<KCConnectorExpandedEntry>;
+  'info-status-autofilled': KCConnectorResponse<KCConnectorExpandedEntry>;
 };
 
-export type KCConnectorsResponse<
-  T extends keyof KCConnectorResponseMap
-> = KCConnectorResponseMap[T];
+export type KCConnectorsResponse<T extends keyof KCConnectorResponseMap> =
+  KCConnectorResponseMap[T];
 
 export type KCConnectorsResponseVariantsWithInfo = {
-  [K in keyof KCConnectorResponseMap]:
-  KCConnectorResponseMap[K] extends Record<
-      string,
-      { info: any }
-    >
+  [K in keyof KCConnectorResponseMap]: KCConnectorResponseMap[K] extends Record<
+    string,
+    { info: KCConnectorInfo }
+  >
     ? K
     : never;
 }[keyof KCConnectorResponseMap];

@@ -10,7 +10,8 @@ import type {
 import { config } from '../config.js';
 import axios from 'axios';
 import {
-  applyDefaults, filterOnlySourceConnectors,
+  applyDefaults,
+  filterOnlySourceConnectors,
   getAutofilledKeys,
   isFieldHidden,
   markConnectorRequired,
@@ -28,10 +29,10 @@ const kafkaConnectService = {
     const { data } = await axios.get<KCConnectorsResponse<'info-status'>>(
       `${CONNECT_URL}/connectors?expand=info&expand=status`
     );
-    const autofilledResponse: KCConnectorsResponse<'info-status-autofilled'> = {}
+    const autofilledResponse: KCConnectorsResponse<'info-status-autofilled'> = {};
     for (const [name, entry] of Object.entries(data)) {
       const connectorClass = entry.info.config['connector.class'] ?? '';
-      autofilledResponse[name] = {...entry, autofilled_keys: getAutofilledKeys(connectorClass)};
+      autofilledResponse[name] = { ...entry, autofilled_keys: getAutofilledKeys(connectorClass) };
     }
     connectLogger.debug({ count: Object.keys(data).length }, 'connectors fetched');
     return autofilledResponse;
@@ -53,7 +54,10 @@ const kafkaConnectService = {
 
   createConnector: async (body: Record<string, unknown>): Promise<KCConnectorInfo> => {
     const mergedConfig = applyDefaults((body.config as Record<string, string> | undefined) ?? {});
-    connectLogger.info({ connector: body.name, class: mergedConfig['connector.class'] }, 'creating connector');
+    connectLogger.info(
+      { connector: body.name, class: mergedConfig['connector.class'] },
+      'creating connector'
+    );
     const { data } = await axios.post<KCConnectorInfo>(
       `${CONNECT_URL}/connectors`,
       { ...body, config: mergedConfig },
@@ -125,10 +129,12 @@ const kafkaConnectService = {
       configWithDefaults,
       { headers: JSON_HEADERS }
     );
-    
+
     connectLogger.debug({ pluginClass, errorCount: data.error_count }, 'plugin config validated');
 
-    data.configs = data.configs.filter((c) => c.definition && !isFieldHidden(pluginClass, c.definition.name));
+    data.configs = data.configs.filter(
+      (c) => c.definition && !isFieldHidden(pluginClass, c.definition.name)
+    );
     markConnectorRequired(pluginClass, data, configWithDefaults);
     data.error_count = data.configs.filter((c) => (c.value?.errors.length ?? 0) > 0).length;
     connectLogger.debug({ pluginClass, errorCount: data.error_count }, 'plugin config validated');
@@ -137,7 +143,9 @@ const kafkaConnectService = {
 
   getTopics: async (): Promise<Record<string, { topics: string[] }>> => {
     connectLogger.debug('fetching active topics');
-    const { data: connectors } = await axios.get<KCConnectorsResponse<'info'>>(`${CONNECT_URL}/connectors?expand=info`);
+    const { data: connectors } = await axios.get<KCConnectorsResponse<'info'>>(
+      `${CONNECT_URL}/connectors?expand=info`
+    );
     const topics: Record<string, { topics: string[] }> = {};
     const filteredConnectors = filterOnlySourceConnectors(connectors);
     await Promise.all(

@@ -11,12 +11,10 @@ export const PLUGIN_REQUIRED: Record<string, string[]> = {
     // the topic name contains a dot. Explicitly required to avoid "databaseName can not be null".
     'sink.database',
     'topics',
-    'mongodb.connection.string'
+    'mongodb.connection.string',
   ],
 
-  'io.debezium.connector.jdbc.JdbcSinkConnector': [
-    'connection.url',
-  ],
+  'io.debezium.connector.jdbc.JdbcSinkConnector': ['connection.url'],
 
   'com.clickhouse.kafka.connect.ClickHouseSinkConnector': [
     'hostname',
@@ -25,7 +23,6 @@ export const PLUGIN_REQUIRED: Record<string, string[]> = {
     'username',
     'password',
     'topics',
-    
   ],
 
   // ── Debezium Sources ────────────────────────────────────────────────────────
@@ -55,10 +52,7 @@ export const PLUGIN_REQUIRED: Record<string, string[]> = {
     'topic.prefix',
   ],
 
-  'io.debezium.connector.mongodb.MongoDbConnector': [
-    'mongodb.connection.string',
-    'topic.prefix',
-  ],
+  'io.debezium.connector.mongodb.MongoDbConnector': ['mongodb.connection.string', 'topic.prefix'],
 
   'io.debezium.connector.oracle.OracleConnector': [
     'database.hostname',
@@ -78,10 +72,7 @@ export const PLUGIN_REQUIRED: Record<string, string[]> = {
     'topic.prefix',
   ],
 
-  'io.debezium.connector.db2as400.As400RpcConnector': [
-    'database.hostname',
-    'topic.prefix',
-  ],
+  'io.debezium.connector.db2as400.As400RpcConnector': ['database.hostname', 'topic.prefix'],
 
   'io.debezium.connector.cockroachdb.CockroachDBConnector': [
     'database.hostname',
@@ -89,10 +80,7 @@ export const PLUGIN_REQUIRED: Record<string, string[]> = {
     'topic.prefix',
   ],
 
-  'io.debezium.connector.vitess.VitessConnector': [
-    'vitess.keyspace',
-    'topic.prefix',
-  ],
+  'io.debezium.connector.vitess.VitessConnector': ['vitess.keyspace', 'topic.prefix'],
 
   'io.debezium.connector.spanner.SpannerConnector': [
     'gcp.spanner.project.id',

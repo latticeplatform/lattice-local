@@ -19,8 +19,9 @@ const LOGICAL_TYPES: Record<string, string> = {
 const typeLabel = (type: AvroType): string => {
   if (typeof type === 'string') return type;
   if (Array.isArray(type)) {
-    const nonNull = type.filter((t) => t !== 'null');
-    return nonNull.length === 1 ? typeLabel(nonNull[0]) : 'union';
+    const nonNulls = type.filter((t) => t !== 'null');
+    const nonNUllWithValue = nonNulls[0]
+    return nonNUllWithValue ? typeLabel(nonNUllWithValue) : 'union';
   }
   if (type.type === 'record') return type.name;
   const connectName = type['connect.name'];
