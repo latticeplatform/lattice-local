@@ -34,8 +34,23 @@ const createTopicApi = (): TopicApi => {
   const deleteGroup = (name: string): Promise<void> =>
     voidRequest(`/topic-groups/${encodeURIComponent(name)}`, { method: 'DELETE' });
 
-  const fetchSchema = (topicName: string): Promise<TopicSchemaResult> =>
-    request<TopicSchemaResult>(`/admin/topics/${encodeURIComponent(topicName)}/schema`);
+  const schemaCache = new Map<string, Promise<TopicSchemaResult>>();
+
+  const fetchSchema = (topicName: string): Promise<TopicSchemaResult> => {
+    const cached = schemaCache.get(topicName);
+    if (cached === undefined) {
+      const promise = request<TopicSchemaResult>(
+        `/admin/topics/${encodeURIComponent(topicName)}/schema`
+      ).catch((err: unknown) => {
+        schemaCache.delete(topicName);
+        throw err;
+      });
+      schemaCache.set(topicName, promise);
+      return promise
+    } else {
+      return cached
+    }
+  };
 
   return {
     fetchAll,

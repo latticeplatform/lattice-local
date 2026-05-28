@@ -96,10 +96,10 @@ const TopicDetails: FC<TopicDetailsProps> = ({
         ) : null}
       </div>
 
-      <div className="detail-section">
-        <p className="detail-section-title">Data Stream</p>
-        {}
-      </div>
+      {/*<div className="detail-section">*/}
+      {/*  <p className="detail-section-title">Data Stream</p>*/}
+      {/*  {}*/}
+      {/*</div>*/}
     </ModalShell>
   );
 };

@@ -1,14 +1,17 @@
-import { type Consumer, Kafka, type KafkaConfig } from "kafkajs";
-import { config } from "../config.js";
-import { parseValue } from "../utils/index.js";
-import type { KafkaJSService, SchemaResult } from "../types/index.js";
+import { type Consumer, Kafka, type KafkaConfig } from 'kafkajs';
+import { config } from '../config.js';
+import { fetchSchema, parseValue } from '../utils/index.js';
+import type { KafkaJSService, SchemaField, SchemaResult } from '../types/index.js';
+import { kafkaLogger } from '../logger.js';
 
 const kafka = new Kafka({
   clientId: config.kafka.clientId,
   brokers: config.kafka.brokers,
 } satisfies KafkaConfig);
 
-const withAdmin = async <T>(fn: (admin: ReturnType<typeof kafka.admin>) => Promise<T>): Promise<T> => {
+const withAdmin = async <T>(
+  fn: (admin: ReturnType<typeof kafka.admin>) => Promise<T>
+): Promise<T> => {
   const admin = kafka.admin();
   await admin.connect();
   try {
@@ -18,7 +21,9 @@ const withAdmin = async <T>(fn: (admin: ReturnType<typeof kafka.admin>) => Promi
   }
 };
 
-const withProducer = async <T>(fn: (producer: ReturnType<typeof kafka.producer>) => Promise<T>): Promise<T> => {
+const withProducer = async <T>(
+  fn: (producer: ReturnType<typeof kafka.producer>) => Promise<T>
+): Promise<T> => {
   const producer = kafka.producer();
   await producer.connect();
   try {
@@ -28,25 +33,66 @@ const withProducer = async <T>(fn: (producer: ReturnType<typeof kafka.producer>)
   }
 };
 
+const extractFields = (rawFields: Record<string, unknown>[]): SchemaField[] =>
+  rawFields.map((f) => ({
+    // Avro uses f.name; Debezium uses f.field (f.name is its logical type)
+    name: String(f.field ?? f.name ?? ''),
+    type: f.type,
+    ...(typeof f.optional === 'boolean' && { optional: f.optional }),
+    // Avro logicalType sits on the type object; Debezium puts it in f.name when f.field exists
+    ...(typeof f.logicalType === 'string' && { logicalType: f.logicalType }),
+    ...(typeof f.name === 'string' && f.field !== undefined && { logicalType: f.name }),
+    ...(f.default !== undefined && { default: f.default }),
+    ...(typeof f.doc === 'string' && { doc: f.doc }),
+    ...(Array.isArray(f.fields) && {
+      fields: extractFields(f.fields as Record<string, unknown>[]),
+    }),
+  }));
+
+const extractSchemaShape = (
+  rawSchema: string
+): { name?: string; namespace?: string; doc?: string; fields?: SchemaField[] } => {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(rawSchema);
+  } catch {
+    return {};
+  }
+  if (typeof parsed !== 'object' || parsed === null) return {};
+  const rec = parsed as Record<string, unknown>;
+  return {
+    ...(typeof rec.name === 'string' && { name: rec.name }),
+    ...(typeof rec.namespace === 'string' && { namespace: rec.namespace }),
+    ...(typeof rec.doc === 'string' && { doc: rec.doc }),
+    ...(Array.isArray(rec.fields) && {
+      fields: extractFields(rec.fields as Record<string, unknown>[]),
+    }),
+  };
+};
+
 const kafkaJSService: KafkaJSService = {
+  listTopics: () => {
+    kafkaLogger.debug('listing topics');
+    return withAdmin((a) => a.listTopics());
+  },
 
-  listTopics: () =>
-    withAdmin((a) => a.listTopics()),
-
-  getTopicMetadata: (topicName: string) =>
-    withAdmin((a) =>
+  getTopicMetadata: (topicName: string) => {
+    kafkaLogger.debug({ topic: topicName }, 'fetching topic metadata');
+    return withAdmin((a) =>
       a.fetchTopicMetadata({ topics: [topicName] }).then((r) => r.topics[0] ?? null)
-    ),
+    );
+  },
 
   getTopicOffsets: (topicName: string) =>
     withAdmin(async (a) => {
+      kafkaLogger.debug({ topic: topicName }, 'fetching topic offsets');
       const [latest, earliest] = await Promise.all([
         a.fetchTopicOffsets(topicName),
         a.fetchTopicOffsetsByTimestamp(topicName, -2),
       ]);
       return latest.map((p) => ({
         partition: p.partition,
-        earliest: earliest.find((e) => e.partition === p.partition)?.offset ?? "0",
+        earliest: earliest.find((e) => e.partition === p.partition)?.offset ?? '0',
         latest: p.offset,
         high: p.high,
         low: p.low,
@@ -55,8 +101,9 @@ const kafkaJSService: KafkaJSService = {
 
   createTopics: (
     topics: { topic: string; numPartitions?: number; replicationFactor?: number }[]
-  ) =>
-    withAdmin((a) =>
+  ) => {
+    kafkaLogger.info({ topics: topics.map((t) => t.topic) }, 'creating topics');
+    return withAdmin((a) =>
       a.createTopics({
         topics: topics.map((t) => ({
           topic: t.topic,
@@ -64,61 +111,103 @@ const kafkaJSService: KafkaJSService = {
           replicationFactor: t.replicationFactor ?? 1,
         })),
       })
-    ),
+    );
+  },
 
-  deleteTopic: (topicName: string) =>
-    withAdmin((a) => a.deleteTopics({ topics: [topicName] })),
+  deleteTopic: (topicName: string) => {
+    kafkaLogger.info({ topic: topicName }, 'deleting topic');
+    return withAdmin((a) => a.deleteTopics({ topics: [topicName] }));
+  },
 
-  describeCluster: () => withAdmin((a) => a.describeCluster()),
+  describeCluster: () => {
+    kafkaLogger.debug('describing cluster');
+    return withAdmin((a) => a.describeCluster());
+  },
 
-  produce: (
-    topic: string,
-    messages: { key?: string; value: string; partition?: number }[]
-  ) => withProducer((p) => p.send({ topic, messages })),
-
+  produce: (topic: string, messages: { key?: string; value: string; partition?: number }[]) => {
+    kafkaLogger.info({ topic, count: messages.length }, 'producing messages');
+    return withProducer((p) => p.send({ topic, messages }));
+  },
 
   peekTopicSchema: async (topicName: string): Promise<SchemaResult> => {
+    kafkaLogger.debug({ topic: topicName }, 'peeking topic schema');
     const consumer = kafka.consumer({
-      groupId: `__schema-peek-${topicName}-${Date.now()}`,
+      groupId: `__schema-peek-${topicName}-${String(Date.now())}`,
     });
 
     let resolveSchema!: (v: SchemaResult) => void;
     let rejectSchema!: (e: Error) => void;
-    const pending = new Promise<SchemaResult>((rs, rj) => { resolveSchema = rs; rejectSchema = rj; });
+    const pending = new Promise<SchemaResult>((rs, rj) => {
+      resolveSchema = rs;
+      rejectSchema = rj;
+    });
 
-    const timeout = setTimeout(
-      () => rejectSchema(new Error("Timed out — topic may be empty")),
-      10_000
-    );
+    const timeout = setTimeout(() => {
+      rejectSchema(new Error('Timed out — topic may be empty'));
+    }, 10_000);
 
     try {
       await consumer.connect();
       await consumer.subscribe({ topic: topicName, fromBeginning: true });
 
       let handled = false;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       await consumer.run({
-        eachMessage: async ({ message }: { message: any }) => {
+        eachMessage: async ({ message }) => {
           if (handled) return;
           handled = true;
           clearTimeout(timeout);
 
-          const raw = message.value as Buffer | null;
-          if (!raw) { rejectSchema(new Error("Message has no value")); return; }
-
           try {
-            const parsed = await parseValue(raw);
-            if (parsed.format === "json" || parsed.format === "string") {
-              rejectSchema(new Error("Message has no schema (plain JSON or unencoded string)"));
+            // Apicurio v2: schema ID is in the header as an 8-byte big-endian global ID
+            const globalIdBuf = message.headers?.['apicurio.value.globalId'];
+            if (Buffer.isBuffer(globalIdBuf) && globalIdBuf.length === 8) {
+              const schemaId = Number(globalIdBuf.readBigInt64BE(0));
+              const { schema: raw, schemaType } = await fetchSchema(schemaId);
+              kafkaLogger.debug(
+                { topic: topicName, schemaId, schemaType },
+                'schema resolved via apicurio header'
+              );
+              resolveSchema({
+                source: 'apicurio',
+                schemaId,
+                schemaType,
+                ...extractSchemaShape(raw),
+                raw,
+              });
               return;
             }
+
+            // Fallback: Confluent wire format or Debezium JSON embedded in the value
+            if (!message.value) {
+              rejectSchema(new Error('Message has no value'));
+              return;
+            }
+            const parsed = await parseValue(message.value);
+            if (parsed.format === 'json' || parsed.format === 'string') {
+              rejectSchema(new Error('Message has no schema (plain JSON or unencoded string)'));
+              return;
+            }
+            const raw = JSON.stringify(parsed.schema);
+            kafkaLogger.debug(
+              { topic: topicName, format: parsed.format },
+              'schema resolved via wire format'
+            );
             resolveSchema(
-              parsed.format === "apicurio"
-                ? { source: "apicurio", schemaId: parsed.schemaId, schemaType: parsed.schemaType, schema: parsed.schema }
-                : { source: "debezium-json", schema: parsed.schema }
+              parsed.format === 'apicurio'
+                ? {
+                    source: 'apicurio',
+                    schemaId: parsed.schemaId,
+                    schemaType: parsed.schemaType,
+                    ...extractSchemaShape(raw),
+                    raw,
+                  }
+                : { source: 'debezium-json', ...extractSchemaShape(raw), raw }
             );
           } catch (e) {
-            rejectSchema(e instanceof Error ? e : new Error(String(e)));
+            const err = e instanceof Error ? e : new Error(String(e));
+            kafkaLogger.error({ topic: topicName, err }, 'schema peek failed');
+            rejectSchema(err);
           }
         },
       });
@@ -136,20 +225,56 @@ const kafkaJSService: KafkaJSService = {
   // lifecycle — call .run() to receive messages and .disconnect() to stop.
   // This is intentional: the stream lives as long as the SSE connection does.
   // ---------------------------------------------------------------------------3
-  createStreamConsumer: async (
-    topicName: string,
-    fromBeginning: boolean
-  ): Promise<Consumer> => {
+  createStreamConsumer: async (topicName: string, fromBeginning: boolean): Promise<Consumer> => {
+    kafkaLogger.info({ topic: topicName, fromBeginning }, 'creating stream consumer');
     const consumer = kafka.consumer({
-      groupId: `__stream-${topicName}-${Date.now()}`,
+      groupId: `__stream-${topicName}-${String(Date.now())}`,
     });
     await consumer.connect();
     await consumer.subscribe({ topic: topicName, fromBeginning });
     return consumer;
-  }
+  },
+
+  parseStreamMessage: async (partition, message) => {
+    let value: unknown = null;
+    let schema: unknown = undefined;
+    let schemaId: number | undefined;
+
+    if (message.value !== null) {
+      const rawValue = message.value;
+      const parsed = await parseValue(rawValue).catch(() => ({
+        format: 'string' as const,
+        payload: rawValue.toString('utf-8'),
+      }));
+      value = parsed.payload;
+      if (parsed.format === 'apicurio') {
+        schemaId = parsed.schemaId;
+        schema = parsed.schema;
+      } else if (parsed.format === 'debezium-json') {
+        schema = parsed.schema;
+      }
+    }
+
+    let key: unknown = null;
+    if (message.key !== null) {
+      const rawKey = message.key;
+      const parsedKey = await parseValue(rawKey).catch(() => ({
+        format: 'string' as const,
+        payload: rawKey.toString('utf-8'),
+      }));
+      key = parsedKey.payload;
+    }
+
+    return {
+      offset: message.offset,
+      partition,
+      key,
+      timestamp: message.timestamp,
+      schemaId,
+      schema,
+      value,
+    };
+  },
 };
 
 export default kafkaJSService;
-
-
-

@@ -2,10 +2,6 @@ import { vi, describe, it, expect, beforeEach } from 'vitest';
 
 vi.mock('axios', () => ({
   default: {
-    get: vi.fn(),
-    post: vi.fn(),
-    put: vi.fn(),
-    delete: vi.fn(),
     isAxiosError: vi.fn(),
   },
 }));
@@ -14,11 +10,29 @@ import axios from 'axios';
 import express from 'express';
 import request from 'supertest';
 import createKafkaConnectRouter from '../routes/kafkaConnectRouter.js';
+import type { KafkaConnectService } from '../types';
 
-const buildApp = () => {
+const makeService = (overrides: Partial<KafkaConnectService> = {}): KafkaConnectService =>
+  ({
+    getConnectors: vi.fn(),
+    getConnector: vi.fn(),
+    createConnector: vi.fn(),
+    deleteConnector: vi.fn(),
+    pauseConnector: vi.fn(),
+    resumeConnector: vi.fn(),
+    restartConnector: vi.fn(),
+    restartTask: vi.fn(),
+    getPlugins: vi.fn(),
+    getPluginConfig: vi.fn(),
+    validatePluginConfig: vi.fn(),
+    getTopics: vi.fn(),
+    ...overrides,
+  }) as unknown as KafkaConnectService;
+
+const buildApp = (service: KafkaConnectService) => {
   const app = express();
   app.use(express.json());
-  app.use('/', createKafkaConnectRouter());
+  app.use('/', createKafkaConnectRouter(service));
   return app;
 };
 
@@ -26,89 +40,82 @@ describe('POST /connectors', () => {
   beforeEach(() => vi.resetAllMocks());
 
   it('returns 400 when connector.class is missing', async () => {
-    const res = await request(buildApp()).post('/connectors').send({ name: 'test', config: {} });
+    const res = await request(buildApp(makeService()))
+      .post('/connectors')
+      .send({ name: 'test', config: {} });
     expect(res.status).toBe(400);
     expect(res.body.error).toMatch(/connector\.class/);
-    expect(axios.post).not.toHaveBeenCalled();
   });
 
   it('returns 400 when config is absent from the body', async () => {
-    const res = await request(buildApp()).post('/connectors').send({ name: 'test' });
+    const res = await request(buildApp(makeService())).post('/connectors').send({ name: 'test' });
     expect(res.status).toBe(400);
   });
 
-  it('merges Avro converter defaults for the Postgres connector before forwarding', async () => {
-    vi.mocked(axios.post).mockResolvedValueOnce({ data: { name: 'test', config: {}, tasks: [], type: 'source' } });
-
-    await request(buildApp()).post('/connectors').send({
-      name: 'test',
-      config: { 'connector.class': 'io.debezium.connector.postgresql.PostgresConnector', 'database.hostname': 'pg' },
-    });
-
-    expect(axios.post).toHaveBeenCalledOnce();
-    const [, sentBody] = vi.mocked(axios.post).mock.calls[0]!;
-    const config = (sentBody as { config: Record<string, string> }).config;
-    expect(config['key.converter']).toBe('io.apicurio.registry.utils.converter.AvroConverter');
-    expect(config['key.converter.apicurio.registry.auto-register']).toBe('true');
-    expect(config['database.hostname']).toBe('pg');
-  });
-
-  it('merges unwrap transform defaults for the ClickHouse connector', async () => {
-    vi.mocked(axios.post).mockResolvedValueOnce({ data: {} });
-
-    await request(buildApp()).post('/connectors').send({
-      name: 'sink',
-      config: { 'connector.class': 'com.clickhouse.kafka.connect.ClickHouseSinkConnector' },
-    });
-
-    const [, sentBody] = vi.mocked(axios.post).mock.calls[0]!;
-    const config = (sentBody as { config: Record<string, string> }).config;
-    expect(config['transforms']).toBe('unwrap');
-    expect(config['transforms.unwrap.type']).toBe('io.debezium.transforms.ExtractNewRecordState');
-  });
-
-  it('returns 502 when Kafka Connect is unreachable', async () => {
-    vi.mocked(axios.post).mockRejectedValueOnce(new Error('ECONNREFUSED'));
-    vi.mocked(axios.isAxiosError).mockReturnValue(false);
-
-    const res = await request(buildApp()).post('/connectors').send({
+  it('delegates to service.createConnector with the request body and returns 201', async () => {
+    const body = {
       name: 'test',
       config: { 'connector.class': 'io.debezium.connector.postgresql.PostgresConnector' },
+    };
+    const result = { name: 'test', config: {}, tasks: [], type: 'source' };
+    const svc = makeService({ createConnector: vi.fn().mockResolvedValueOnce(result) });
+    const res = await request(buildApp(svc)).post('/connectors').send(body);
+    expect(res.status).toBe(201);
+    expect(svc.createConnector).toHaveBeenCalledWith(body);
+    expect(res.body).toEqual(result);
+  });
+
+  it('returns 502 when service throws a non-axios error', async () => {
+    vi.mocked(axios.isAxiosError).mockReturnValue(false);
+    const svc = makeService({
+      createConnector: vi.fn().mockRejectedValueOnce(new Error('ECONNREFUSED')),
     });
+    const res = await request(buildApp(svc))
+      .post('/connectors')
+      .send({
+        name: 'test',
+        config: { 'connector.class': 'io.debezium.connector.postgresql.PostgresConnector' },
+      });
     expect(res.status).toBe(502);
   });
 
-  it('passes through Kafka Connect error status and body', async () => {
-    const connectError = { isAxiosError: true, response: { status: 409, data: { error_code: 409, message: 'already exists' } } };
-    vi.mocked(axios.post).mockRejectedValueOnce(connectError);
+  it('proxies Kafka Connect error status and body', async () => {
+    const connectError = {
+      isAxiosError: true,
+      response: { status: 409, data: { error_code: 409, message: 'already exists' } },
+    };
     vi.mocked(axios.isAxiosError).mockReturnValue(true);
-
-    const res = await request(buildApp()).post('/connectors').send({
-      name: 'test',
-      config: { 'connector.class': 'io.debezium.connector.postgresql.PostgresConnector' },
-    });
+    const svc = makeService({ createConnector: vi.fn().mockRejectedValueOnce(connectError) });
+    const res = await request(buildApp(svc))
+      .post('/connectors')
+      .send({
+        name: 'test',
+        config: { 'connector.class': 'io.debezium.connector.postgresql.PostgresConnector' },
+      });
     expect(res.status).toBe(409);
+    expect(res.body).toEqual({ error_code: 409, message: 'already exists' });
   });
 });
 
 describe('GET /connectors', () => {
   beforeEach(() => vi.resetAllMocks());
 
-  it('includes autofilled_keys for each connector in the response', async () => {
-    vi.mocked(axios.get).mockResolvedValueOnce({
-      data: {
-        'pg-connector': {
-          info: { config: { 'connector.class': 'io.debezium.connector.postgresql.PostgresConnector' }, type: 'source' },
-          status: { connector: { state: 'RUNNING' }, tasks: [] },
+  it('returns the service result as JSON', async () => {
+    const connectors = {
+      'pg-connector': {
+        info: { name: 'pg-connector', config: {}, tasks: [], type: 'source' },
+        status: {
+          name: 'pg-connector',
+          type: 'source',
+          connector: { state: 'RUNNING', worker_id: '' },
+          tasks: [],
         },
+        autofilled_keys: ['key.converter', 'key.converter.apicurio.registry.auto-register'],
       },
-    });
-
-    const res = await request(buildApp()).get('/connectors');
+    };
+    const svc = makeService({ getConnectors: vi.fn().mockResolvedValueOnce(connectors) });
+    const res = await request(buildApp(svc)).get('/connectors');
     expect(res.status).toBe(200);
-    const keys: string[] = res.body['pg-connector'].autofilled_keys;
-    expect(keys).toContain('key.converter');
-    expect(keys).toContain('key.converter.apicurio.registry.auto-register');
-    expect(keys).not.toContain('transforms');
+    expect(res.body).toEqual(connectors);
   });
 });

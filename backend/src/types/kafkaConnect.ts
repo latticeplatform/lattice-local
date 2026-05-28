@@ -52,7 +52,7 @@ export interface KCConfigValueInfo {
 }
 
 export interface KCConfigInfo {
-  definition: KCConfigKeyInfo;
+  definition?: KCConfigKeyInfo;
   value: KCConfigValueInfo | null;
 }
 
@@ -103,11 +103,59 @@ export interface KCConnectorStateInfo {
   tasks: KCTaskState[];
 }
 
-
 export interface KCConnectorExpandedEntry {
   info: KCConnectorInfo;
   status: KCConnectorStateInfo;
   autofilled_keys: string[];
 }
 
-export type KCConnectorsExpandedResponse = Record<string, KCConnectorExpandedEntry>;
+type KCConnectorResponse<T> = Record<string, T>;
+
+type KCConnectorResponseMap = {
+  list: string[];
+
+  info: KCConnectorResponse<{
+    info: KCConnectorInfo;
+  }>;
+
+  status: KCConnectorResponse<{
+    status: KCConnectorStateInfo;
+  }>;
+
+  'info-status': KCConnectorResponse<{
+    info: KCConnectorInfo;
+    status: KCConnectorStateInfo;
+  }>;
+
+  'info-status-autofilled': KCConnectorResponse<KCConnectorExpandedEntry>;
+};
+
+export type KCConnectorsResponse<T extends keyof KCConnectorResponseMap> =
+  KCConnectorResponseMap[T];
+
+export type KCConnectorsResponseVariantsWithInfo = {
+  [K in keyof KCConnectorResponseMap]: KCConnectorResponseMap[K] extends Record<
+    string,
+    { info: KCConnectorInfo }
+  >
+    ? K
+    : never;
+}[keyof KCConnectorResponseMap];
+
+export interface KafkaConnectService {
+  getConnectors: () => Promise<KCConnectorsResponse<'info-status-autofilled'>>;
+  getConnector: (name: string) => Promise<KCConnectorExpandedEntry>;
+  createConnector: (body: Record<string, unknown>) => Promise<KCConnectorInfo>;
+  deleteConnector: (name: string) => Promise<void>;
+  pauseConnector: (name: string) => Promise<void>;
+  resumeConnector: (name: string) => Promise<void>;
+  restartConnector: (name: string) => Promise<void>;
+  restartTask: (name: string, taskId: string) => Promise<void>;
+  getPlugins: () => Promise<KCPluginInfo[]>;
+  getPluginConfig: (pluginClass: string) => Promise<KCConfigKeyInfo[]>;
+  validatePluginConfig: (
+    pluginClass: string,
+    inputConfig: Record<string, string>
+  ) => Promise<KCConfigInfos>;
+  getTopics: () => Promise<Record<string, { topics: string[] }>>;
+}

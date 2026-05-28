@@ -1,7 +1,7 @@
 import express from 'express';
 import request from 'supertest';
 import { describe, it, expect, vi } from 'vitest';
-import type { KafkaJSService } from '../types/index.js';
+import type { KafkaJSService } from '../types';
 import createKafkaJSTopicRouter from '../routes/kafkaJSTopicRouter.js';
 
 const makeService = (overrides: Partial<KafkaJSService> = {}): KafkaJSService =>
@@ -34,7 +34,9 @@ describe('GET /', () => {
   });
 
   it('returns 500 when the service throws', async () => {
-    const service = makeService({ listTopics: vi.fn().mockRejectedValue(new Error('broker error')) });
+    const service = makeService({
+      listTopics: vi.fn().mockRejectedValue(new Error('broker error')),
+    });
     const res = await request(buildApp(service)).get('/');
     expect(res.status).toBe(500);
   });
@@ -113,7 +115,9 @@ describe('DELETE /:name', () => {
   });
 
   it('returns 500 when the service throws', async () => {
-    const service = makeService({ deleteTopic: vi.fn().mockRejectedValue(new Error('cannot delete')) });
+    const service = makeService({
+      deleteTopic: vi.fn().mockRejectedValue(new Error('cannot delete')),
+    });
     const res = await request(buildApp(service)).delete('/my-topic');
     expect(res.status).toBe(500);
   });

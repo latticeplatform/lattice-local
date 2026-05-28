@@ -1,7 +1,7 @@
 import express from 'express';
 import request from 'supertest';
 import { describe, it, expect, vi } from 'vitest';
-import type { KafkaJSService } from '../types/index.js';
+import type { KafkaJSService } from '../types';
 import createKafkaJSRouter from '../routes/kafkaJSRouter.js';
 
 const makeService = (overrides: Partial<KafkaJSService> = {}): KafkaJSService =>
@@ -27,14 +27,22 @@ const buildApp = (service: KafkaJSService) => {
 
 describe('GET /brokers', () => {
   it('returns cluster info from the service', async () => {
-    const cluster = { brokers: [{ nodeId: 1, host: 'b1', port: 9092 }], controller: 1, clusterId: 'abc' };
-    const res = await request(buildApp(makeService({ describeCluster: vi.fn().mockResolvedValue(cluster) }))).get('/brokers');
+    const cluster = {
+      brokers: [{ nodeId: 1, host: 'b1', port: 9092 }],
+      controller: 1,
+      clusterId: 'abc',
+    };
+    const res = await request(
+      buildApp(makeService({ describeCluster: vi.fn().mockResolvedValue(cluster) }))
+    ).get('/brokers');
     expect(res.status).toBe(200);
     expect(res.body).toEqual(cluster);
   });
 
   it('returns 500 when the service throws', async () => {
-    const res = await request(buildApp(makeService({ describeCluster: vi.fn().mockRejectedValue(new Error('Kafka down')) }))).get('/brokers');
+    const res = await request(
+      buildApp(makeService({ describeCluster: vi.fn().mockRejectedValue(new Error('Kafka down')) }))
+    ).get('/brokers');
     expect(res.status).toBe(500);
     expect(res.body.error).toBe('Kafka down');
   });

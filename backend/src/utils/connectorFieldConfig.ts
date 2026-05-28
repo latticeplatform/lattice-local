@@ -42,14 +42,13 @@ export const UNIVERSAL_HIDDEN: string[] = [
   'transaction.boundary',
   'transaction.boundary.interval.ms',
   'offsets.storage.topic',
+
+  // Redundant with UI topic selection
+  'topics.regex',
 ];
 
 /** Field name prefixes hidden for all connectors (catches all sub-fields automatically). */
-export const UNIVERSAL_HIDDEN_PREFIXES: string[] = [
-  'sasl.',
-  'ssl.',
-  'openlineage.',
-];
+export const UNIVERSAL_HIDDEN_PREFIXES: string[] = ['sasl.', 'ssl.', 'openlineage.'];
 
 // ---------------------------------------------------------------------------
 // Debezium-common hidden — shared by all 12 Debezium source connectors
@@ -115,7 +114,6 @@ export const DEBEZIUM_COMMON_HIDDEN: string[] = [
 // ---------------------------------------------------------------------------
 
 export const PLUGIN_HIDDEN: Record<string, string[]> = {
-
   // ── Sinks ──────────────────────────────────────────────────────────────
 
   'com.clickhouse.kafka.connect.ClickHouseSinkConnector': [
@@ -399,7 +397,7 @@ export const PLUGIN_HIDDEN: Record<string, string[]> = {
 
 /** Returns true if a field should be hidden from the frontend for a given connector class. */
 export function isFieldHidden(connectorClass: string, fieldName: string): boolean {
-  if (UNIVERSAL_HIDDEN_PREFIXES.some(p => fieldName.startsWith(p))) return true;
+  if (UNIVERSAL_HIDDEN_PREFIXES.some((p) => fieldName.startsWith(p))) return true;
   if (UNIVERSAL_HIDDEN.includes(fieldName)) return true;
   return (PLUGIN_HIDDEN[connectorClass] ?? []).includes(fieldName);
 }

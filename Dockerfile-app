@@ -1,0 +1,31 @@
+FROM node:lts-alpine3.23 AS builder
+
+# build the app
+
+WORKDIR /app
+
+COPY backend/package*.json ./backend/
+RUN npm --prefix ./backend install
+
+COPY frontend/package*.json ./frontend/
+RUN npm --prefix ./frontend install
+
+COPY backend/ ./backend/
+COPY frontend/ ./frontend/
+
+RUN npm --prefix ./backend run build:prod
+
+# deploy prod image
+FROM node:lts-alpine3.23 AS runner
+
+WORKDIR /app
+
+COPY --from=builder /app/backend/package*.json ./
+RUN npm install --omit=dev
+
+COPY --from=builder /app/backend/dist ./dist
+
+CMD ["node", "./dist/app.js"]
+
+
+

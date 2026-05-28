@@ -1,4 +1,4 @@
-import type { Consumer, ITopicMetadata, RecordMetadata } from "kafkajs";
+import type { Consumer, ITopicMetadata, KafkaMessage, RecordMetadata } from 'kafkajs';
 
 export interface CreateTopicConfig {
   topic: string;
@@ -34,10 +34,45 @@ export interface ClusterDescription {
   clusterId: string;
 }
 
-// Discriminated union for peekTopicSchema
+export interface StreamMessageEvent {
+  offset: string;
+  partition: number;
+  key: unknown;
+  timestamp: string;
+  schemaId?: number;
+  schema?: unknown;
+  value: unknown;
+}
+
+export interface SchemaField {
+  name: string;
+  type: unknown;
+  optional?: boolean;
+  logicalType?: string;
+  default?: unknown;
+  doc?: string;
+  fields?: SchemaField[];
+}
+
 export type SchemaResult =
-  | { source: "apicurio"; schemaId: number; schemaType: string; schema: unknown }
-  | { source: "debezium-json"; schema: unknown };
+  | {
+      source: 'apicurio';
+      schemaId: number;
+      schemaType: string;
+      name?: string;
+      namespace?: string;
+      doc?: string;
+      fields?: SchemaField[];
+      raw: string;
+    }
+  | {
+      source: 'debezium-json';
+      name?: string;
+      namespace?: string;
+      doc?: string;
+      fields?: SchemaField[];
+      raw: string;
+    };
 
 export interface KafkaJSService {
   // Topics
@@ -56,4 +91,9 @@ export interface KafkaJSService {
   // Schema / Stream (consumer-based)
   peekTopicSchema: (topicName: string) => Promise<SchemaResult>;
   createStreamConsumer: (topicName: string, fromBeginning: boolean) => Promise<Consumer>;
+  parseStreamMessage: (partition: number, message: KafkaMessage) => Promise<StreamMessageEvent>;
+}
+
+export interface KafkaTopicMessageWithValue {
+  value: Buffer;
 }

@@ -54,6 +54,7 @@ const connectionReducer = (state: ConnectState, action: ConnectAction): ConnectS
       return { ...state, loading: false };
 
     case 'CONNECTOR_CREATED': {
+      console.log('CONNECTOR_CREATED: ', action);
       const { entry } = action;
       return entry.info.type === 'source'
         ? { ...state, collectors: [...state.collectors, entry] }
@@ -61,18 +62,23 @@ const connectionReducer = (state: ConnectState, action: ConnectAction): ConnectS
     }
 
     case 'CONNECTOR_DELETED':
+      console.log('CONNECTOR_DELETED: ', action);
       return updateBoth(state, (entries) => entries.filter((e) => e.info.name !== action.name));
 
     case 'CONNECTOR_PAUSED':
+      console.log('CONNECTOR_PAUSED: ', action);
       return updateBoth(state, (entries) => setConnectorStatus(entries, action.name, 'PAUSED'));
 
     case 'CONNECTOR_RESUMED':
+      console.log('CONNECTOR_RESUMED: ', action);
       return updateBoth(state, (entries) => setConnectorStatus(entries, action.name, 'RUNNING'));
 
     case 'CONNECTOR_RESTARTED':
+      console.log('CONNECTOR_RESTARTED: ', action);
       return updateBoth(state, (entries) => setConnectorStatus(entries, action.name, 'RUNNING'));
 
     case 'TASK_RESTARTED':
+      console.log('TASK_RESTARTED: ', action);
       return updateBoth(state, (entries) =>
         setTaskStatus(entries, action.connectorName, action.taskId, 'RUNNING')
       );

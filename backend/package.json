@@ -1,6 +1,6 @@
 {
-  "name": "sample-node-app",
-  "version": "1.0.0",
+  "name": "lattice-platform",
+  "version": "1.1.0",
   "description": "",
   "type": "module",
   "engines": {
@@ -8,15 +8,24 @@
   },
   "scripts": {
     "dev": "tsx watch src/app.ts",
-    "build": "tsc",
-    "start": "node dist/app.js",
+    "dev:ui": "npm --prefix ../frontend run dev",
+    "dev:full": "npm run dev:kafka & npm run dev:producers & npm run dev:consumers & npm run dev:ui & npm run dev",
+    "dev:consumers": "docker compose -f ../example-services/consumers/dummy-clickhouse/docker-compose.yml -f ../example-services/consumers/dummy-mongo/docker-compose.yml up -d",
+    "dev:producers": "docker compose -f ../example-services/producers/dummy-postgres/docker-compose.yml up -d",
+    "dev:kafka": "docker compose -f ../docker/Compose.yaml up -d",
+    "build": "rm -rf ./dist && tsc",
+    "build:ui": "npm --prefix ../frontend install && npm --prefix ../frontend run build",
+    "bundle:ui": "rm -rf ./dist/public && cp -r ../frontend/dist ./dist/public",
+    "build:prod": "npm run build:ui && npm run build && npm run bundle:ui",
+    "start": "node ./dist/app.js",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "format:clean": "npm run format && npm run lint"
   },
-  "author": "",
+  "author": "Kessler Mentele",
   "license": "ISC",
   "dependencies": {
     "avsc": "^5.7.9",
@@ -25,7 +34,10 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "kafkajs": "^2.2.4",
-    "pg": "^8.21.0"
+    "pg": "^8.21.0",
+    "pino": "^10.3.1",
+    "pino-http": "^11.0.0",
+    "pino-pretty": "^13.1.3"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -33,6 +45,7 @@
     "@types/express": "^5.0.6",
     "@types/node": "^25.9.0",
     "@types/pg": "^8.20.0",
+    "@types/pino-http": "^5.8.4",
     "@types/supertest": "^7.2.0",
     "eslint": "^10.4.0",
     "globals": "^17.6.0",

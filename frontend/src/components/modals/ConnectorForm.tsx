@@ -46,23 +46,12 @@ const ConnectorForm: FC<ConnectorFormProps> = ({ plugin, onClose, onCreated }) =
   }, []);
 
   useEffect(() => {
-    void Promise.all([
-      dispatch({ type: 'PLUGIN_FETCH_CONFIG', pluginClass: plugin.class }),
-      dispatch({
-        type: 'PLUGIN_VALIDATE_CONFIG',
-        pluginClass: plugin.class,
-        config: { 'connector.class': plugin.class },
-      }),
-    ])
-      .then(([defs, emptyValidation]) => {
-        const values = getNonNullValuesFromValidation(emptyValidation);
+    void dispatch({ type: 'PLUGIN_FETCH_CONFIG', pluginClass: plugin.class })
+      .then((defs) => {
         setDefinitions(defs);
-        setDerivedRequired(
-          new Set(values.filter((value) => value.errors.length > 0).map((value) => value.name))
-        );
+        setDerivedRequired(new Set(defs.filter((d) => d.required).map((d) => d.name)));
       })
       .catch((e: unknown) => {
-        console.log(e);
         toast.push(e instanceof Error ? e.message : 'Failed to load plugin config');
         onClose();
       })
@@ -146,8 +135,8 @@ const ConnectorForm: FC<ConnectorFormProps> = ({ plugin, onClose, onCreated }) =
             title={`${String(optionalDefs.length)} optional fields`}
           >
             <IoSettingsOutline />
+            {enabledOptional.size > 0 && <span className="gear-badge">{enabledOptional.size}</span>}
           </button>
-          {enabledOptional.size > 0 && <span className="gear-badge">{enabledOptional.size}</span>}
         </>
       }
       panel={

@@ -38,7 +38,7 @@ const SchemaDoc: FC<{ result: TopicSchemaResult }> = ({ result }) => {
       </div>
 
       {raw || !extracted ? (
-        <pre className="detail-schema-block">{JSON.stringify(result.schema, null, 2)}</pre>
+        <pre className="detail-schema-block">{result.raw}</pre>
       ) : (
         <div className="schema-table-wrap">
           <table className="schema-table">
