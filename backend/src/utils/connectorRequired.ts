@@ -31,6 +31,7 @@ export const PLUGIN_REQUIRED: Record<string, string[]> = {
     'database.hostname',
     'database.dbname',
     'database.password',
+    'database.user',
     'topic.prefix',
   ],
 

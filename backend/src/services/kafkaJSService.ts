@@ -144,7 +144,7 @@ const kafkaJSService: KafkaJSService = {
 
     const timeout = setTimeout(() => {
       rejectSchema(new Error('Timed out — topic may be empty'));
-    }, 10_000);
+    }, 10000);
 
     try {
       await consumer.connect();

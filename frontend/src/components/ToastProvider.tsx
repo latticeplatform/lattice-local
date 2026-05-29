@@ -12,7 +12,7 @@ const ToastProvider: FC<PropsWithChildren> = ({ children }) => {
 
   const push = useCallback(
     (message: string, type: ToastType = 'error') => {
-      const id = crypto.randomUUID();
+      const id = Math.random().toString(36).substring(2, 9);
       setToasts((prev) => [...prev, { id, message, type }]);
       setTimeout(() => {
         dismiss(id);
