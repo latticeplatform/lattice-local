@@ -1,7 +1,6 @@
 import { useState, useCallback, type FC, useEffect } from 'react';
 import { IoSettingsOutline } from 'react-icons/io5';
 import type {
-  ConnectorPlugin,
   ConfigDefinition,
   ValidationResult,
   ValidationFieldResultValue,
@@ -16,7 +15,7 @@ import { groupByKey } from '../../utils';
 import GearPanel from '../GearPanel.tsx';
 
 interface ConnectorFormProps {
-  plugin: ConnectorPlugin;
+  pluginClass: string;
   onClose: () => void;
   onCreated: () => void;
 }
@@ -27,7 +26,7 @@ const getNonNullValuesFromValidation = (
   return results.configs.map((result) => result.value).filter((value) => value !== null);
 };
 
-const ConnectorForm: FC<ConnectorFormProps> = ({ plugin, onClose, onCreated }) => {
+const ConnectorForm: FC<ConnectorFormProps> = ({ pluginClass, onClose, onCreated }) => {
   const [definitions, setDefinitions] = useState<ConfigDefinition[]>([]);
   const [derivedRequired, setDerivedRequired] = useState<Set<string>>(new Set());
   const [values, setValues] = useState<Record<string, string>>({});
@@ -46,7 +45,7 @@ const ConnectorForm: FC<ConnectorFormProps> = ({ plugin, onClose, onCreated }) =
   }, []);
 
   useEffect(() => {
-    void dispatch({ type: 'PLUGIN_FETCH_CONFIG', pluginClass: plugin.class })
+    void dispatch({ type: 'PLUGIN_FETCH_CONFIG', pluginClass })
       .then((defs) => {
         setDefinitions(defs);
         setDerivedRequired(new Set(defs.filter((d) => d.required).map((d) => d.name)));
@@ -58,15 +57,15 @@ const ConnectorForm: FC<ConnectorFormProps> = ({ plugin, onClose, onCreated }) =
       .finally(() => {
         setLoading(false);
       });
-  }, [plugin.class, toast, onClose, dispatch]);
+  }, [pluginClass, toast, onClose, dispatch]);
 
   const handleSubmit = async () => {
     setSubmitting(true);
     try {
-      const config = { ...values, 'connector.class': plugin.class };
+      const config = { ...values, 'connector.class': pluginClass };
 
       const validationResult = getNonNullValuesFromValidation(
-        await dispatch({ type: 'PLUGIN_VALIDATE_CONFIG', pluginClass: plugin.class, config })
+        await dispatch({ type: 'PLUGIN_VALIDATE_CONFIG', pluginClass, config })
       );
 
       const newErrors: Record<string, string[]> = {};
@@ -117,11 +116,11 @@ const ConnectorForm: FC<ConnectorFormProps> = ({ plugin, onClose, onCreated }) =
   const optionalDefs = baseDefs.filter((d) => !derivedRequired.has(d.name));
   const activeDefs = [...requiredDefs, ...optionalDefs.filter((d) => enabledOptional.has(d.name))];
   const grouped = groupByKey(activeDefs, (d) => d.group ?? 'General');
-  const shortName = plugin.class.split('.').pop();
+  const shortName = pluginClass.split('.').pop();
 
   return (
     <ModalShell
-      title={`New ${shortName ?? plugin.class}`}
+      title={`New ${shortName ?? pluginClass}`}
       onClose={onClose}
       headerActions={
         <>

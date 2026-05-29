@@ -14,9 +14,12 @@ const apiActionReducer = async (
   dispatch: Dispatch<ConnectAction>
 ): Promise<unknown> => {
   switch (action.type) {
-    case 'CONNECTOR_FETCH':
-      console.log("CONNECTOR_CREATE: ", action.name);
-      return connectorApi.fetch(action.name);
+    case 'CONNECTOR_FETCH': {
+      console.log("CONNECTOR_FETCH: ", action.name);
+      const entry = await connectorApi.fetch(action.name);
+      dispatch({ type: 'CONNECTOR_UPDATED', name: action.name, entry });
+      return entry;
+    }
 
     case 'CONNECTOR_CREATE': {
       console.log("CONNECTOR_CREATE: ", action.name);

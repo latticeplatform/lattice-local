@@ -1,5 +1,4 @@
 import { useState, type FC } from 'react';
-import type { ConnectorEntry } from '../../types';
 import { useToast } from '../../context/ToastContext.tsx';
 import { useConnect } from '../../context/ConnectContext.tsx';
 import ModalShell from './ModalShell.tsx';
@@ -10,23 +9,24 @@ import TaskDisplay from '../TaskDisplay.tsx';
 import DetailSection from '../DetailSection.tsx';
 
 interface ConnectorDetailsProps {
-  entry: ConnectorEntry;
+  name: string;
   onClose: () => void;
 }
 
-const ConnectorDetails: FC<ConnectorDetailsProps> = ({ entry, onClose }) => {
-  const [localEntry, setLocalEntry] = useState(entry);
+const ConnectorDetails: FC<ConnectorDetailsProps> = ({ name, onClose }) => {
   const [pendingDelete, setPendingDelete] = useState(false);
   const [busy, setBusy] = useState(false);
   const toast = useToast();
-  const { dispatch, refresh } = useConnect();
+  const { collectors, sinks, dispatch, refresh } = useConnect();
 
-  const { connector, tasks, type } = localEntry.status;
-  const configEntries = Object.entries(localEntry.info.config).filter(
+  const entry = [...collectors, ...sinks].find((e) => e.info.name === name);
+  if (!entry) return null;
+
+  const { connector, tasks, type } = entry.status;
+  const configEntries = Object.entries(entry.info.config).filter(
     ([k]) => k !== 'connector.class'
   );
   const isPaused = connector.state === 'PAUSED';
-  const name = localEntry.info.name;
 
   const runAndClose = async (action: () => Promise<void>) => {
     setBusy(true);
@@ -45,8 +45,7 @@ const ConnectorDetails: FC<ConnectorDetailsProps> = ({ entry, onClose }) => {
     setBusy(true);
     try {
       await dispatch({ type: 'CONNECTOR_RESTART', name });
-      const refreshed = await dispatch({ type: 'CONNECTOR_FETCH', name });
-      setLocalEntry(refreshed);
+      await dispatch({ type: 'CONNECTOR_FETCH', name });
       refresh();
     } catch (e) {
       toast.push(e instanceof Error ? e.message : 'Restart failed');
@@ -132,7 +131,7 @@ const ConnectorDetails: FC<ConnectorDetailsProps> = ({ entry, onClose }) => {
       {tasks.length > 0 &&
         <DetailSection title={`Tasks (${String(tasks.length)})`}>
           {tasks.map((task) => (
-            <TaskDisplay key={task.id} task={task} connectorName={localEntry.info.name} />
+            <TaskDisplay key={task.id} task={task} connectorName={name} />
           ))}
         </DetailSection>
       }

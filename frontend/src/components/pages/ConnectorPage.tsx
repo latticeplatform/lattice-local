@@ -1,6 +1,5 @@
 import { useState, type FC } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import type { ConnectorPlugin } from '../../types';
 import './Page.css';
 import ConnectorForm from '../modals/ConnectorForm.tsx';
 import ConnectorDetails from '../modals/ConnectorDetails.tsx';
@@ -16,7 +15,7 @@ interface ConnectorPageProps {
 const ConnectorPage: FC<ConnectorPageProps> = ({ type }) => {
   const { collectors, sinks, plugins, loading, refresh } = useConnect();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [selectedPlugin, setSelectedPlugin] = useState<ConnectorPlugin | null>(null);
+  const [selectedPlugin, setSelectedPlugin] = useState<string | null>(null);
 
   const entries = type === 'source' ? collectors : sinks;
   const validPlugins = plugins?.filter((p) => p.type === type) ?? [];
@@ -33,9 +32,6 @@ const ConnectorPage: FC<ConnectorPageProps> = ({ type }) => {
   }));
 
   const detailsName = searchParams.get('details');
-  const selectedEntry = detailsName
-    ? (entries.find((e) => e.info.name === detailsName) ?? null)
-    : null;
 
   const closeDetails = () => {
     setSearchParams((prev) => {
@@ -58,14 +54,14 @@ const ConnectorPage: FC<ConnectorPageProps> = ({ type }) => {
           ...plugin,
           cardType: 'plugin' as const,
           onClick: () => {
-            setSelectedPlugin(plugin);
+            setSelectedPlugin(plugin.class);
           },
         }))}
       />
-      {selectedEntry && <ConnectorDetails entry={selectedEntry} onClose={closeDetails} />}
+      {detailsName && <ConnectorDetails name={detailsName} onClose={closeDetails} />}
       {selectedPlugin && (
         <ConnectorForm
-          plugin={selectedPlugin}
+          pluginClass={selectedPlugin}
           onClose={() => {
             setSelectedPlugin(null);
           }}
