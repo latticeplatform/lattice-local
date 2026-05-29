@@ -15,6 +15,8 @@ interface ConnectorDetailsProps {
 
 const ConnectorDetails: FC<ConnectorDetailsProps> = ({ name, onClose }) => {
   const [pendingDelete, setPendingDelete] = useState(false);
+  const [pendingEdits, setPendingEdits] = useState<Record<string, string>>({});
+  const [editingKeys, setEditingKeys] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState(false);
   const toast = useToast();
   const { collectors, sinks, dispatch, refresh } = useConnect();
@@ -27,6 +29,7 @@ const ConnectorDetails: FC<ConnectorDetailsProps> = ({ name, onClose }) => {
     ([k]) => k !== 'connector.class'
   );
   const isPaused = connector.state === 'PAUSED';
+  const hasPendingEdits = Object.keys(pendingEdits).length > 0;
 
   const runAndClose = async (action: () => Promise<void>) => {
     setBusy(true);
@@ -36,6 +39,20 @@ const ConnectorDetails: FC<ConnectorDetailsProps> = ({ name, onClose }) => {
       onClose();
     } catch (e) {
       toast.push(e instanceof Error ? e.message : 'Action failed');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleSave = async () => {
+    setBusy(true);
+    try {
+      await dispatch({ type: 'CONNECTOR_PATCH', name, config: pendingEdits });
+      setPendingEdits({});
+      setEditingKeys(new Set());
+      toast.push('Config saved', 'success');
+    } catch (e) {
+      toast.push(e instanceof Error ? e.message : 'Save failed');
     } finally {
       setBusy(false);
     }
@@ -104,22 +121,35 @@ const ConnectorDetails: FC<ConnectorDetailsProps> = ({ name, onClose }) => {
             )}
           </div>
           <div className="detail-footer-right">
-            <button className="btn btn-ghost" onClick={() => void handleRestart()} disabled={busy}>
-              {busy ? 'Restarting…' : 'Restart'}
-            </button>
-            <button
-              className="btn btn-primary"
-              onClick={() =>
-                void runAndClose(() =>
-                  isPaused
-                    ? dispatch({ type: 'CONNECTOR_RESUME', name })
-                    : dispatch({ type: 'CONNECTOR_PAUSE', name })
-                )
-              }
-              disabled={busy}
-            >
-              {isPaused ? 'Resume' : 'Pause'}
-            </button>
+            {hasPendingEdits ? (
+              <>
+                <button className="btn btn-ghost" onClick={() => { setPendingEdits({}); setEditingKeys(new Set()); }} disabled={busy}>
+                  Discard
+                </button>
+                <button className="btn btn-coral" onClick={() => void handleSave()} disabled={busy}>
+                  {busy ? 'Saving…' : 'Save'}
+                </button>
+              </>
+            ) : (
+              <>
+                <button className="btn btn-ghost" onClick={() => void handleRestart()} disabled={busy}>
+                  {busy ? 'Restarting…' : 'Restart'}
+                </button>
+                <button
+                  className="btn btn-primary"
+                  onClick={() =>
+                    void runAndClose(() =>
+                      isPaused
+                        ? dispatch({ type: 'CONNECTOR_RESUME', name })
+                        : dispatch({ type: 'CONNECTOR_PAUSE', name })
+                    )
+                  }
+                  disabled={busy}
+                >
+                  {isPaused ? 'Resume' : 'Pause'}
+                </button>
+              </>
+            )}
           </div>
         </>
       }
@@ -139,7 +169,19 @@ const ConnectorDetails: FC<ConnectorDetailsProps> = ({ name, onClose }) => {
       <DetailSection title={`Config (${String(configEntries.length)} keys)`}>
         <div className="detail-config">
           {configEntries.map(([key, value]) => (
-            <ConfigDetailRow key={key} name={key} value={value}/>
+            <ConfigDetailRow
+              key={key}
+              name={key}
+              value={pendingEdits[key] ?? value}
+              editable={!entry.autofilled_keys.includes(key)}
+              editing={editingKeys.has(key)}
+              onChange={(v) => { setPendingEdits((prev) => ({ ...prev, [key]: v })); }}
+              onEditStart={() => { setEditingKeys((prev) => new Set([...prev, key])); }}
+              onEditCancel={() => {
+                setEditingKeys((prev) => { const next = new Set(prev); next.delete(key); return next; });
+                setPendingEdits((prev) => { const next = { ...prev }; delete next[key]; return next; });
+              }}
+            />
           ))}
         </div>
       </DetailSection>

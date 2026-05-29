@@ -24,6 +24,7 @@ export interface ConnectorInfo {
 export interface ConnectorEntry {
   info: ConnectorInfo;
   status: ConnectorStatus;
+  autofilled_keys: string[];
 }
 
 export type ConnectorsResponse = Record<string, ConnectorEntry>;
