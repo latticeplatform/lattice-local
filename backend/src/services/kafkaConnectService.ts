@@ -5,7 +5,7 @@ import type {
   KCConnectorStateInfo,
   KCPluginInfo,
   KCConfigKeyInfo,
-  KCConfigInfos,
+  KCConfigInfos, KafkaConnectService,
 } from '../types/index.js';
 import { config } from '../config.js';
 import axios from 'axios';
@@ -23,7 +23,7 @@ import { connectLogger } from '../logger.js';
 const CONNECT_URL = config.kafkaConnect.url;
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
-const kafkaConnectService = {
+const kafkaConnectService:KafkaConnectService = {
   getConnectors: async (): Promise<KCConnectorsResponse<'info-status-autofilled'>> => {
     connectLogger.debug('fetching all connectors');
     const { data } = await axios.get<KCConnectorsResponse<'info-status'>>(
@@ -158,6 +158,17 @@ const kafkaConnectService = {
     );
     return topics;
   },
+
+  patchConnector: async (name:string, body: Record<string, string>): Promise<KCConnectorInfo> => {
+    connectLogger.info({connector: name, patch:body}, 'patching config')
+    const { data } = await axios.patch<KCConnectorInfo>(
+      `${CONNECT_URL}/connectors/${name}`,
+      body,
+      {headers: JSON_HEADERS}
+    );
+    connectLogger.info({ responseData: data }, 'connect response')
+    return data;
+  }
 };
 
 export default kafkaConnectService;
