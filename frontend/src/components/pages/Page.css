@@ -103,10 +103,10 @@
   background: #4ade80;
 }
 .dot[data-state='PAUSED'] {
-  background: #fb923c;
+  background: var(--accent2);
 }
 .dot[data-state='FAILED'] {
-  background: #f87171;
+  background: var(--error);
 }
 .dot[data-state='UNASSIGNED'] {
   background: var(--slate);
@@ -156,8 +156,8 @@
 }
 
 .error {
-  color: #f87171;
-  border: 1px solid #f87171;
+  color: var(--error);
+  border: 1px solid var(--error);
 }
 
 .group-list {

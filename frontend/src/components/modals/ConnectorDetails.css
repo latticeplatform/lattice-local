@@ -66,8 +66,9 @@
 }
 
 .detail-task-restart:hover:not(:disabled) {
-  border-color: var(--accent-border);
-  color: var(--accent);
+  border-color: var(--accent2);
+  background: color-mix(in srgb, var(--accent2) 4%, transparent);
+  color: var(--accent2);
 }
 
 .detail-task-restart:disabled {
@@ -98,6 +99,7 @@
 }
 
 .detail-config-row {
+  position: relative;
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
   gap: 16px;
@@ -123,6 +125,46 @@
   color: var(--text-h);
   overflow-wrap: break-word;
   word-break: break-all;
+  padding-right: 18px;
+}
+
+.detail-config-input {
+  font-family: var(--mono), 'monospace';
+  font-size: 12px;
+  color: var(--text-h);
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 24px 1px 6px;
+  width: 100%;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.detail-config-input:focus {
+  border-color: color-mix(in srgb, var(--accent2) 45%, transparent);
+}
+
+.detail-config-edit-btn {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 2px;
+  cursor: pointer;
+  color: var(--text);
+  opacity: 1;
+  transition: opacity 0.15s, color 0.15s;
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.detail-config-edit-btn:hover {
+  color: var(--accent2);
 }
 
 .detail-footer-left {
@@ -149,7 +191,7 @@
 }
 
 .detail-link:hover {
-  color: var(--coral);
+  color: var(--accent2);
 }
 
 .detail-schema-meta {
