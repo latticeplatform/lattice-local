@@ -5,6 +5,7 @@ import { useConnect } from '../../context/ConnectContext.tsx';
 import ModalShell from './ModalShell.tsx';
 import SchemaDoc from '../schema/SchemaDoc.tsx';
 import './ConnectorDetails.css';
+import DetailSection from '../DetailSection.tsx';
 
 interface TopicDetailsProps {
   name: string;
@@ -46,18 +47,17 @@ const TopicDetails: FC<TopicDetailsProps> = ({
       headerActions={<span className="badge">topic</span>}
       onClose={onClose}
     >
-      <div className="detail-section">
-        <p className="detail-section-title">Source Connector</p>
+
+      <DetailSection title={'Source Connector'}>
         <button
           className="detail-link"
           onClick={() => void navigate(`/collect?details=${encodeURIComponent(sourceConnector)}`)}
         >
           {sourceConnector}
         </button>
-      </div>
+      </DetailSection>
 
-      <div className="detail-section">
-        <p className="detail-section-title">Subscribers ({subscribingSinks.length})</p>
+      <DetailSection title={`Subscribers (${String(subscribingSinks.length)})`}>
         {subscribingSinks.length === 0 ? (
           <span className="detail-state" style={{ color: 'var(--text)' }}>
             No sinks subscribed to this topic
@@ -79,10 +79,9 @@ const TopicDetails: FC<TopicDetailsProps> = ({
             </div>
           ))
         )}
-      </div>
+      </DetailSection>
 
-      <div className="detail-section">
-        <p className="detail-section-title">Schema</p>
+      <DetailSection title={'Schema'}>
         {schemaLoading ? (
           <span className="detail-state" style={{ color: 'var(--text)' }}>
             Loading schema…
@@ -94,12 +93,8 @@ const TopicDetails: FC<TopicDetailsProps> = ({
         ) : schema ? (
           <SchemaDoc result={schema} />
         ) : null}
-      </div>
+      </DetailSection>
 
-      {/*<div className="detail-section">*/}
-      {/*  <p className="detail-section-title">Data Stream</p>*/}
-      {/*  {}*/}
-      {/*</div>*/}
     </ModalShell>
   );
 };

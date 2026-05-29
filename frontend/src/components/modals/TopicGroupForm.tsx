@@ -3,6 +3,7 @@ import type { TopicGroup } from '../../types';
 import ModalShell from './ModalShell.tsx';
 import { useToast } from '../../context/ToastContext.tsx';
 import { useConnect } from '../../context/ConnectContext.tsx';
+import DetailSection from '../DetailSection.tsx';
 
 interface TopicGroupFormProps {
   editingGroup: TopicGroup | null;
@@ -135,8 +136,7 @@ const TopicGroupForm: FC<TopicGroupFormProps> = ({
         </>
       }
     >
-      <div className="detail-section">
-        <p className="detail-section-title">Name</p>
+      <DetailSection title={'Name'}>
         <input
           className="group-name-input"
           type="text"
@@ -146,9 +146,10 @@ const TopicGroupForm: FC<TopicGroupFormProps> = ({
           }}
           placeholder="Group name"
         />
-      </div>
-      <div className="detail-section">
-        <p className="detail-section-title">Topics ({form.topics.length} selected)</p>
+      </DetailSection>
+
+      <DetailSection title={`Topics (${String(form.topics.length)} selected)`}>
+        <p className="detail-section-title"></p>
         {availableTopics.length === 0 ? (
           <span style={{ fontSize: 13, color: 'var(--text)' }}>No topics available</span>
         ) : (
@@ -167,7 +168,8 @@ const TopicGroupForm: FC<TopicGroupFormProps> = ({
             ))}
           </div>
         )}
-      </div>
+      </DetailSection>
+
     </ModalShell>
   );
 };
