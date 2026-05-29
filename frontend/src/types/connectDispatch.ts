@@ -17,6 +17,7 @@ export type ConnectDispatchAction =
   | { type: 'CONNECTOR_RESUME'; name: string }
   | { type: 'CONNECTOR_RESTART'; name: string }
   | { type: 'CONNECTOR_RESTART_TASK'; name: string; taskId: number }
+  | { type: 'CONNECTOR_PATCH'; name: string; config: Record<string, string>}
   // Plugin
   | { type: 'PLUGIN_FETCH_CONFIG'; pluginClass: string }
   | { type: 'PLUGIN_VALIDATE_CONFIG'; pluginClass: string; config: Record<string, string> }
@@ -35,6 +36,7 @@ export interface ActionResultMap {
   CONNECTOR_RESUME: undefined;
   CONNECTOR_RESTART: undefined;
   CONNECTOR_RESTART_TASK: undefined;
+  CONNECTOR_PATCH: ConnectorEntry;
   PLUGIN_FETCH_CONFIG: ConfigDefinition[];
   PLUGIN_VALIDATE_CONFIG: ValidationResult;
   TOPIC_FETCH_GROUPS: TopicGroup[];

@@ -55,6 +55,13 @@ const apiActionReducer = async (
       dispatch({ type: 'TASK_RESTARTED', connectorName: action.name, taskId: action.taskId });
       return;
 
+    case 'CONNECTOR_PATCH': {
+      console.log("CONNECTOR_PATCH: ", action.name);
+      const entry = await connectorApi.patch(action.name, action.config);
+      dispatch({ type: 'CONNECTOR_UPDATED', name:action.name, entry})
+      return entry;
+    }
+
     case 'PLUGIN_FETCH_CONFIG':
       console.log("PLUGIN_FETCH_CONFIG: ", action.pluginClass);
       return pluginApi.fetchConfig(action.pluginClass);

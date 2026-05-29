@@ -4,8 +4,14 @@ export type ConnectorType = 'source' | 'sink';
 export interface ConnectorStatus {
   name: string;
   connector: { state: ConnectorState; worker_id: string };
-  tasks: Array<{ id: number; state: ConnectorState; worker_id: string }>;
+  tasks: ConnectorTask[];
   type: ConnectorType;
+}
+
+export interface ConnectorTask {
+  id: number;
+  state: ConnectorState;
+  worker_id: string;
 }
 
 export interface ConnectorInfo {
@@ -164,4 +170,5 @@ export type ConnectAction =
   | { type: 'CONNECTOR_PAUSED'; name: string }
   | { type: 'CONNECTOR_RESUMED'; name: string }
   | { type: 'CONNECTOR_RESTARTED'; name: string }
+  | { type: 'CONNECTOR_UPDATED'; name: string; entry: ConnectorEntry }
   | { type: 'TASK_RESTARTED'; connectorName: string; taskId: number };

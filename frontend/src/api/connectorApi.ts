@@ -10,6 +10,7 @@ interface ConnectorApi {
   restart: (name: string) => Promise<void>;
   restartTask: (name: string, taskId: number) => Promise<void>;
   create: (name: string, config: Record<string, string>) => Promise<ConnectorEntry>;
+  patch: (name: string, config: Record<string, string>) => Promise<ConnectorEntry>;
 }
 
 const createConnectorApi = (): ConnectorApi => {
@@ -52,6 +53,14 @@ const createConnectorApi = (): ConnectorApi => {
     });
   };
 
-  return { fetch, fetchAll, remove, pause, resume, restart, restartTask, create };
+  const patch = (name:string, config:Record<string, string> ):Promise<ConnectorEntry> => {
+    return request<ConnectorEntry>(`/connectors/${encodeURIComponent(name)}/config`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(config),
+    })
+  }
+
+  return { fetch, fetchAll, remove, pause, resume, restart, restartTask, create, patch };
 };
 export default createConnectorApi;
