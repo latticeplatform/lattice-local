@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import './Page.css';
 import ConnectorForm from '../modals/ConnectorForm.tsx';
 import ConnectorDetails from '../modals/ConnectorDetails.tsx';
-import { useConnect } from '../../context/ConnectContext.tsx';
+import useConnect from '../../hooks/useConnect.ts';
 import CardSection from '../CardSection.tsx';
 import type { CardsData } from '../../types';
 import { capitalize } from '../../utils';

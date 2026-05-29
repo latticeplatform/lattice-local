@@ -1,6 +1,6 @@
 import { type FC } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useConnect } from '../../context/ConnectContext.tsx';
+import useConnect from '../../hooks/useConnect.ts';
 import CardSection from '../CardSection.tsx';
 import type { TopicCardProps } from '../../types';
 import type { ConnectorEntry } from '../../types';

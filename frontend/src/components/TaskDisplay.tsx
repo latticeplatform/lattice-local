@@ -1,8 +1,8 @@
 import { type FC, useState } from 'react';
 import StatusRow from './StatusRow.tsx';
-import { useConnect } from '../context/ConnectContext.tsx';
+import useConnect from '../hooks/useConnect.ts';
 import type { ConnectorTask } from '../types';
-import { useToast } from '../context/ToastContext.tsx';
+import useToast from '../hooks/useToast.ts';
 
 
 interface TaskDisplayProps {

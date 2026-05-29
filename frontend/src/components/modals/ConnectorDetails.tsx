@@ -1,6 +1,6 @@
 import { useState, type FC } from 'react';
-import { useToast } from '../../context/ToastContext.tsx';
-import { useConnect } from '../../context/ConnectContext.tsx';
+import useToast from '../../hooks/useToast.ts';
+import useConnect from '../../hooks/useConnect.ts';
 import ModalShell from './ModalShell.tsx';
 import './ConnectorDetails.css';
 import StatusRow from '../StatusRow.tsx';

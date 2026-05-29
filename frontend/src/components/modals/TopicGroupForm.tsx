@@ -1,8 +1,8 @@
 import { useState, type FC } from 'react';
 import type { TopicGroup } from '../../types';
 import ModalShell from './ModalShell.tsx';
-import { useToast } from '../../context/ToastContext.tsx';
-import { useConnect } from '../../context/ConnectContext.tsx';
+import useToast from '../../hooks/useToast.ts';
+import useConnect from '../../hooks/useConnect.ts';
 import DetailSection from '../DetailSection.tsx';
 
 interface TopicGroupFormProps {

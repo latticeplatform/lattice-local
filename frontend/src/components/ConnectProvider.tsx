@@ -8,7 +8,7 @@ import {
 } from 'react';
 import connectionReducer from '../reducers/connectionReducer.ts';
 import { initialState } from '../constants.ts';
-import { useToast } from '../context/ToastContext.tsx';
+import useToast from '../hooks/useToast.ts';
 import type { ActionResultMap, ConnectDispatchAction } from '../types';
 import apiActionReducer from '../reducers/apiActionReducer.ts';
 import createConnectorApi from '../api/connectorApi.ts';

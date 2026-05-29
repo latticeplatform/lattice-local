@@ -5,8 +5,8 @@ import type {
   ValidationResult,
   ValidationFieldResultValue,
 } from '../../types';
-import { useToast } from '../../context/ToastContext.tsx';
-import { useConnect } from '../../context/ConnectContext.tsx';
+import useToast from '../../hooks/useToast.ts';
+import useConnect from '../../hooks/useConnect.ts';
 import ModalShell from './ModalShell.tsx';
 import './ConnectorForm.css';
 import FormField from '../FormField.tsx';
