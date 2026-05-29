@@ -7,11 +7,15 @@ import { TiFlowSwitch } from 'react-icons/ti';
 import { FaPlug } from 'react-icons/fa6';
 import { FaArrowRightToBracket } from 'react-icons/fa6';
 import ComposePage from './components/pages/ComposePage.tsx';
+import Logo from './api/Logo.tsx';
+import ThemeToggle from './components/ThemeToggle.tsx';
 
 const App: FC = () => {
   return (
     <>
+      <ThemeToggle/>
       <section id="center">
+        <Logo />
         <h1 className="title">
           <i>lattice</i>
         </h1>
