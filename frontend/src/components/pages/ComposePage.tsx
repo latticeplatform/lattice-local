@@ -1,15 +1,15 @@
-import { type FC } from 'react';
+import { useEffect, type FC } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import useConnect from '../../hooks/useConnect.ts';
+import useModal from '../../hooks/useModal.ts';
 import CardSection from '../CardSection.tsx';
 import type { TopicCardProps } from '../../types';
-import type { ConnectorEntry } from '../../types';
-import TopicDetails from '../modals/TopicDetails.tsx';
 // import TopicGroupsSection from '../TopicGroupsSection.tsx';
 import './Page.css';
 
 const ComposePage: FC = () => {
-  const { topics, sinks, loading, refresh } = useConnect();
+  const { topics, loading, refresh } = useConnect();
+  const { open } = useModal();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const topicIndex = Object.entries(topics).flatMap(([connector, { topics: names }]) =>
@@ -21,53 +21,29 @@ const ComposePage: FC = () => {
     name,
     sourceConnector,
     onClick: () => {
-      setSearchParams((prev) => {
-        prev.set('details', name);
-        return prev;
-      });
+      open({ kind: 'topic-details', name, sourceConnector });
     },
   }));
-
   const detailsName = searchParams.get('details');
-  const selectedTopic = detailsName
-    ? (topicIndex.find((t) => t.name === detailsName) ?? null)
-    : null;
-
-  const closeDetails = () => {
-    setSearchParams((prev) => {
-      prev.delete('details');
-      return prev;
-    });
-  };
-
-  const getSubscribingSinks = (topicName: string): ConnectorEntry[] =>
-    sinks.filter((sink) => {
-      const topicsRegex = sink.info.config['topics.regex'];
-      if (topicsRegex) {
-        try {
-          return new RegExp(topicsRegex).test(topicName);
-        } catch {
-          return false;
-        }
+  useEffect(() => {
+    if (detailsName) {
+      const topic = topicIndex.find((t) => t.name === detailsName);
+      if (topic) {
+        open({ kind: 'topic-details', name: topic.name, sourceConnector: topic.sourceConnector });
+        setSearchParams(
+          (prev) => {
+            prev.delete('details');
+            return prev;
+          },
+          { replace: true }
+        );
       }
-      return (sink.info.config['topics'] ?? '')
-        .split(',')
-        .map((t) => t.trim())
-        .includes(topicName);
-    });
+    }
+  }, [detailsName, open, setSearchParams]);
 
   return (
     <div className="page">
       <CardSection title="Topics" onRefresh={refresh} loading={loading} data={topicCards} />
-      {/*<TopicGroupsSection availableTopics={topicIndex.map((t) => t.name)} />*/}
-      {selectedTopic && (
-        <TopicDetails
-          name={selectedTopic.name}
-          sourceConnector={selectedTopic.sourceConnector}
-          subscribingSinks={getSubscribingSinks(selectedTopic.name)}
-          onClose={closeDetails}
-        />
-      )}
     </div>
   );
 };

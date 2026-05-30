@@ -10,18 +10,27 @@ import DetailSection from '../DetailSection.tsx';
 interface TopicDetailsProps {
   name: string;
   sourceConnector: string;
-  subscribingSinks: ConnectorEntry[];
   onClose: () => void;
 }
 
-const TopicDetails: FC<TopicDetailsProps> = ({
-  name,
-  sourceConnector,
-  subscribingSinks,
-  onClose,
-}) => {
+const TopicDetails: FC<TopicDetailsProps> = ({ name, sourceConnector, onClose }) => {
   const navigate = useNavigate();
-  const { dispatch } = useConnect();
+  const { sinks, dispatch } = useConnect();
+
+  const subscribingSinks: ConnectorEntry[] = sinks.filter((sink) => {
+    const topicsRegex = sink.info.config['topics.regex'];
+    if (topicsRegex) {
+      try {
+        return new RegExp(topicsRegex).test(name);
+      } catch {
+        return false;
+      }
+    }
+    return (sink.info.config['topics'] ?? '')
+      .split(',')
+      .map((t) => t.trim())
+      .includes(name);
+  });
   const [schema, setSchema] = useState<TopicSchemaResult | null>(null);
   const [schemaLoading, setSchemaLoading] = useState(true);
   const [schemaError, setSchemaError] = useState<string | null>(null);
@@ -47,7 +56,6 @@ const TopicDetails: FC<TopicDetailsProps> = ({
       headerActions={<span className="badge">topic</span>}
       onClose={onClose}
     >
-
       <DetailSection title={'Source Connector'}>
         <button
           className="detail-link"
@@ -94,7 +102,6 @@ const TopicDetails: FC<TopicDetailsProps> = ({
           <SchemaDoc result={schema} />
         ) : null}
       </DetailSection>
-
     </ModalShell>
   );
 };

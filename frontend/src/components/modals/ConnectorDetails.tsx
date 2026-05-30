@@ -71,6 +71,16 @@ const ConnectorDetails: FC<ConnectorDetailsProps> = ({ name, onClose }) => {
     }
   };
 
+  const handleCancelEdit = (key: string) => {
+    setEditingKeys((prev) => {
+      const next = new Set(prev);
+      next.delete(key);
+      return next;
+    });
+    setPendingEdits((prev) =>
+      Object.fromEntries(Object.entries(prev).filter(([oldKey]) => oldKey !== key))
+    );
+  };
 
   return (
     <ModalShell
@@ -123,7 +133,14 @@ const ConnectorDetails: FC<ConnectorDetailsProps> = ({ name, onClose }) => {
           <div className="detail-footer-right">
             {hasPendingEdits ? (
               <>
-                <button className="btn btn-ghost" onClick={() => { setPendingEdits({}); setEditingKeys(new Set()); }} disabled={busy}>
+                <button
+                  className="btn btn-ghost"
+                  onClick={() => {
+                    setPendingEdits({});
+                    setEditingKeys(new Set());
+                  }}
+                  disabled={busy}
+                >
                   Discard
                 </button>
                 <button className="btn btn-coral" onClick={() => void handleSave()} disabled={busy}>
@@ -132,7 +149,11 @@ const ConnectorDetails: FC<ConnectorDetailsProps> = ({ name, onClose }) => {
               </>
             ) : (
               <>
-                <button className="btn btn-ghost" onClick={() => void handleRestart()} disabled={busy}>
+                <button
+                  className="btn btn-ghost"
+                  onClick={() => void handleRestart()}
+                  disabled={busy}
+                >
                   {busy ? 'Restarting…' : 'Restart'}
                 </button>
                 <button
@@ -158,13 +179,13 @@ const ConnectorDetails: FC<ConnectorDetailsProps> = ({ name, onClose }) => {
         <StatusRow state={connector.state} workerId={connector.worker_id} />
       </DetailSection>
 
-      {tasks.length > 0 &&
+      {tasks.length > 0 && (
         <DetailSection title={`Tasks (${String(tasks.length)})`}>
           {tasks.map((task) => (
             <TaskDisplay key={task.id} task={task} connectorName={name} />
           ))}
         </DetailSection>
-      }
+      )}
 
       <DetailSection title={`Config (${String(configEntries.length)} keys)`}>
         <div className="detail-config">
@@ -175,11 +196,14 @@ const ConnectorDetails: FC<ConnectorDetailsProps> = ({ name, onClose }) => {
               value={pendingEdits[key] ?? value}
               editable={!entry.autofilled_keys.includes(key)}
               editing={editingKeys.has(key)}
-              onChange={(v) => { setPendingEdits((prev) => ({ ...prev, [key]: v })); }}
-              onEditStart={() => { setEditingKeys((prev) => new Set([...prev, key])); }}
+              onChange={(v) => {
+                setPendingEdits((prev) => ({ ...prev, [key]: v }));
+              }}
+              onEditStart={() => {
+                setEditingKeys((prev) => new Set([...prev, key]));
+              }}
               onEditCancel={() => {
-                setEditingKeys((prev) => { const next = new Set(prev); next.delete(key); return next; });
-                setPendingEdits((prev) => { const next = { ...prev }; delete next[key]; return next; });
+                handleCancelEdit(key);
               }}
             />
           ))}

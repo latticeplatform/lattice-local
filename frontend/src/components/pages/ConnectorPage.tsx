@@ -1,8 +1,7 @@
-import { useState, type FC } from 'react';
+import { useEffect, type FC } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import './Page.css';
-import ConnectorForm from '../modals/ConnectorForm.tsx';
-import ConnectorDetails from '../modals/ConnectorDetails.tsx';
+import useModal from '../../hooks/useModal.ts';
 import useConnect from '../../hooks/useConnect.ts';
 import CardSection from '../CardSection.tsx';
 import type { CardsData } from '../../types';
@@ -14,8 +13,8 @@ interface ConnectorPageProps {
 
 const ConnectorPage: FC<ConnectorPageProps> = ({ type }) => {
   const { collectors, sinks, plugins, loading, refresh } = useConnect();
+  const { open } = useModal();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [selectedPlugin, setSelectedPlugin] = useState<string | null>(null);
 
   const entries = type === 'source' ? collectors : sinks;
   const validPlugins = plugins?.filter((p) => p.type === type) ?? [];
@@ -24,21 +23,23 @@ const ConnectorPage: FC<ConnectorPageProps> = ({ type }) => {
     cardType: type,
     entry,
     onClick: () => {
-      setSearchParams((prev) => {
-        prev.set('details', entry.info.name);
-        return prev;
-      });
+      open({ kind: 'connector-details', name: entry.info.name });
     },
   }));
 
   const detailsName = searchParams.get('details');
-
-  const closeDetails = () => {
-    setSearchParams((prev) => {
-      prev.delete('details');
-      return prev;
-    });
-  };
+  useEffect(() => {
+    if (detailsName) {
+      open({ kind: 'connector-details', name: detailsName });
+      setSearchParams(
+        (prev) => {
+          prev.delete('details');
+          return prev;
+        },
+        { replace: true }
+      );
+    }
+  }, [detailsName, open, setSearchParams]);
 
   return (
     <div className="page">
@@ -54,20 +55,10 @@ const ConnectorPage: FC<ConnectorPageProps> = ({ type }) => {
           ...plugin,
           cardType: 'plugin' as const,
           onClick: () => {
-            setSelectedPlugin(plugin.class);
+            open({ kind: 'connector-form', pluginClass: plugin.class });
           },
         }))}
       />
-      {detailsName && <ConnectorDetails name={detailsName} onClose={closeDetails} />}
-      {selectedPlugin && (
-        <ConnectorForm
-          pluginClass={selectedPlugin}
-          onClose={() => {
-            setSelectedPlugin(null);
-          }}
-          onCreated={refresh}
-        />
-      )}
     </div>
   );
 };

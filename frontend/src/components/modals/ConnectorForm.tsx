@@ -17,7 +17,6 @@ import GearPanel from '../GearPanel.tsx';
 interface ConnectorFormProps {
   pluginClass: string;
   onClose: () => void;
-  onCreated: () => void;
 }
 
 const getNonNullValuesFromValidation = (
@@ -26,7 +25,7 @@ const getNonNullValuesFromValidation = (
   return results.configs.map((result) => result.value).filter((value) => value !== null);
 };
 
-const ConnectorForm: FC<ConnectorFormProps> = ({ pluginClass, onClose, onCreated }) => {
+const ConnectorForm: FC<ConnectorFormProps> = ({ pluginClass, onClose }) => {
   const [definitions, setDefinitions] = useState<ConfigDefinition[]>([]);
   const [derivedRequired, setDerivedRequired] = useState<Set<string>>(new Set());
   const [values, setValues] = useState<Record<string, string>>({});
@@ -37,7 +36,7 @@ const ConnectorForm: FC<ConnectorFormProps> = ({ pluginClass, onClose, onCreated
   const [enabledOptional, setEnabledOptional] = useState<Set<string>>(new Set());
 
   const toast = useToast();
-  const { dispatch } = useConnect();
+  const { dispatch, refresh } = useConnect();
 
   const setValue = useCallback((name: string, value: string) => {
     setValues((prev) => ({ ...prev, [name]: value }));
@@ -102,7 +101,7 @@ const ConnectorForm: FC<ConnectorFormProps> = ({ pluginClass, onClose, onCreated
       await dispatch({ type: 'CONNECTOR_CREATE', name: values['name'] ?? '', config });
 
       toast.push('Connector created successfully', 'success');
-      onCreated();
+      refresh();
       onClose();
     } catch (e) {
       toast.push(e instanceof Error ? e.message : 'Unknown error');
