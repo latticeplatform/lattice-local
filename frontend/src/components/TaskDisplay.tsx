@@ -4,14 +4,13 @@ import useConnect from '../hooks/useConnect.ts';
 import type { ConnectorTask } from '../types';
 import useToast from '../hooks/useToast.ts';
 
-
 interface TaskDisplayProps {
   connectorName: string;
   task: ConnectorTask;
 }
 
-const TaskDisplay:FC<TaskDisplayProps> = ({connectorName, task}) => {
-  const [ restartingTaskId, setRestartingTaskId ] = useState<number | null>(null);
+const TaskDisplay: FC<TaskDisplayProps> = ({ connectorName, task }) => {
+  const [restartingTaskId, setRestartingTaskId] = useState<number | null>(null);
   const { dispatch, refresh } = useConnect();
 
   const isRestarting = restartingTaskId === task.id;
@@ -44,7 +43,6 @@ const TaskDisplay:FC<TaskDisplayProps> = ({connectorName, task}) => {
       </button>
     </div>
   );
-
 };
 
 export default TaskDisplay;

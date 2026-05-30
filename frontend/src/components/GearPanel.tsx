@@ -32,9 +32,7 @@ const GearPanel: FC<GearPanelProps> = ({
         const next = new Set(prev);
         if (next.has(def.name)) {
           next.delete(def.name);
-          setValues((v) =>
-            Object.fromEntries(Object.entries(v).filter(([k]) => k !== def.name))
-          );
+          setValues((v) => Object.fromEntries(Object.entries(v).filter(([k]) => k !== def.name)));
         } else {
           next.add(def.name);
           const defaultValue = def.default_value;

@@ -1,10 +1,6 @@
 import { useState, useCallback, type FC, useEffect } from 'react';
 import { IoSettingsOutline } from 'react-icons/io5';
-import type {
-  ConfigDefinition,
-  ValidationResult,
-  ValidationFieldResultValue,
-} from '../../types';
+import type { ConfigDefinition, ValidationResult, ValidationFieldResultValue } from '../../types';
 import useToast from '../../hooks/useToast.ts';
 import useConnect from '../../hooks/useConnect.ts';
 import ModalShell from './ModalShell.tsx';

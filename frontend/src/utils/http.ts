@@ -1,6 +1,10 @@
-const delay = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms));
+const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
-export const withRetry = async <T>(fn: () => Promise<T>, attempts = 3, delayMs = 1000): Promise<T> => {
+export const withRetry = async <T>(
+  fn: () => Promise<T>,
+  attempts = 3,
+  delayMs = 1000
+): Promise<T> => {
   for (let i = 0; i < attempts; i++) {
     await delay(delayMs);
     try {
@@ -10,7 +14,7 @@ export const withRetry = async <T>(fn: () => Promise<T>, attempts = 3, delayMs =
     }
   }
   throw new Error('unreachable');
-}
+};
 
 export const request = async <T>(url: string, options?: RequestInit): Promise<T> => {
   const res = await fetch(`/api${url}`, options);

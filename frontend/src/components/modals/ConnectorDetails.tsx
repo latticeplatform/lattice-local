@@ -25,9 +25,7 @@ const ConnectorDetails: FC<ConnectorDetailsProps> = ({ name, onClose }) => {
   if (!entry) return null;
 
   const { connector, tasks, type } = entry.status;
-  const configEntries = Object.entries(entry.info.config).filter(
-    ([k]) => k !== 'connector.class'
-  );
+  const configEntries = Object.entries(entry.info.config).filter(([k]) => k !== 'connector.class');
   const isPaused = connector.state === 'PAUSED';
   const hasPendingEdits = Object.keys(pendingEdits).length > 0;
 

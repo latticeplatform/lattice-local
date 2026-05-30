@@ -53,13 +53,13 @@ const createConnectorApi = (): ConnectorApi => {
     });
   };
 
-  const patch = (name:string, config:Record<string, string> ):Promise<ConnectorEntry> => {
+  const patch = (name: string, config: Record<string, string>): Promise<ConnectorEntry> => {
     return request<ConnectorEntry>(`/connectors/${encodeURIComponent(name)}/config`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(config),
-    })
-  }
+    });
+  };
 
   return { fetch, fetchAll, remove, pause, resume, restart, restartTask, create, patch };
 };

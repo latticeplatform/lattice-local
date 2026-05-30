@@ -33,15 +33,14 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  transition:
-          background 200ms ease;
+  transition: background 200ms ease;
 
   @media (max-width: 1024px) {
     font-size: 16px;
   }
 }
 
-:root[data-theme="dark"] {
+:root[data-theme='dark'] {
   --text: color-mix(in srgb, var(--slate) 60%, var(--cream));
   --text-h: var(--cream);
   --bg: var(--navy);
@@ -100,4 +99,3 @@ h2 {
 p {
   margin: 0;
 }
-

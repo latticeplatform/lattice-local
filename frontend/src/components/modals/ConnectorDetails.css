@@ -156,7 +156,9 @@
   cursor: pointer;
   color: var(--text);
   opacity: 1;
-  transition: opacity 0.15s, color 0.15s;
+  transition:
+    opacity 0.15s,
+    color 0.15s;
   display: flex;
   align-items: center;
   font-size: 16px;

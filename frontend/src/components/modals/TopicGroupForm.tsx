@@ -169,7 +169,6 @@ const TopicGroupForm: FC<TopicGroupFormProps> = ({
           </div>
         )}
       </DetailSection>
-
     </ModalShell>
   );
 };

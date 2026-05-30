@@ -1,7 +1,7 @@
 import type { FC } from 'react';
 import { SENSITIVE_KEYS } from '../constants.ts';
 import { FaEdit } from 'react-icons/fa';
-import { FaXmark} from 'react-icons/fa6';
+import { FaXmark } from 'react-icons/fa6';
 
 interface ConfigDetailRowProps {
   name: string;

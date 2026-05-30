@@ -107,8 +107,7 @@ const createKafkaConnectRouter = (service: KafkaConnectService): Router => {
   router.patch('/connectors/:name/config', async (req, res) => {
     res.json(
       await withProxiedError(
-        () =>
-          service.patchConnector(req.params.name, req.body as Record<string, string>),
+        () => service.patchConnector(req.params.name, req.body as Record<string, string>),
         res
       )
     );

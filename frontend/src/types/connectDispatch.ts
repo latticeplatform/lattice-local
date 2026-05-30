@@ -17,7 +17,7 @@ export type ConnectDispatchAction =
   | { type: 'CONNECTOR_RESUME'; name: string }
   | { type: 'CONNECTOR_RESTART'; name: string }
   | { type: 'CONNECTOR_RESTART_TASK'; name: string; taskId: number }
-  | { type: 'CONNECTOR_PATCH'; name: string; config: Record<string, string>}
+  | { type: 'CONNECTOR_PATCH'; name: string; config: Record<string, string> }
   // Plugin
   | { type: 'PLUGIN_FETCH_CONFIG'; pluginClass: string }
   | { type: 'PLUGIN_VALIDATE_CONFIG'; pluginClass: string; config: Record<string, string> }
