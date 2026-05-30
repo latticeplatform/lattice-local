@@ -1,4 +1,4 @@
-import type { ConnectorEntry, ConnectorsResponse } from '../types';
+import type { ConnectorEntry, ConnectorInfo, ConnectorsResponse } from '../types';
 import { request, voidRequest, withRetry } from '../utils';
 
 interface ConnectorApi {
@@ -10,7 +10,7 @@ interface ConnectorApi {
   restart: (name: string) => Promise<void>;
   restartTask: (name: string, taskId: number) => Promise<void>;
   create: (name: string, config: Record<string, string>) => Promise<ConnectorEntry>;
-  patch: (name: string, config: Record<string, string>) => Promise<ConnectorEntry>;
+  patch: (name: string, config: Record<string, string>) => Promise<ConnectorInfo>;
 }
 
 const createConnectorApi = (): ConnectorApi => {
@@ -53,8 +53,8 @@ const createConnectorApi = (): ConnectorApi => {
     });
   };
 
-  const patch = (name: string, config: Record<string, string>): Promise<ConnectorEntry> => {
-    return request<ConnectorEntry>(`/connectors/${encodeURIComponent(name)}/config`, {
+  const patch = (name: string, config: Record<string, string>): Promise<ConnectorInfo> => {
+    return request<ConnectorInfo>(`/connectors/${encodeURIComponent(name)}/config`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(config),

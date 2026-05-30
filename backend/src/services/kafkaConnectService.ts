@@ -162,7 +162,7 @@ const kafkaConnectService: KafkaConnectService = {
 
   patchConnector: async (name: string, body: Record<string, string>): Promise<KCConnectorInfo> => {
     connectLogger.info({ connector: name, patch: body }, 'patching config');
-    const { data } = await axios.patch<KCConnectorInfo>(`${CONNECT_URL}/connectors/${name}`, body, {
+    const { data } = await axios.patch<KCConnectorInfo>(`${CONNECT_URL}/connectors/${name}/config`, body, {
       headers: JSON_HEADERS,
     });
     connectLogger.info({ responseData: data }, 'connect response');

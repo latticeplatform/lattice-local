@@ -36,7 +36,7 @@ export interface ActionResultMap {
   CONNECTOR_RESUME: undefined;
   CONNECTOR_RESTART: undefined;
   CONNECTOR_RESTART_TASK: undefined;
-  CONNECTOR_PATCH: ConnectorEntry;
+  CONNECTOR_PATCH: undefined;
   PLUGIN_FETCH_CONFIG: ConfigDefinition[];
   PLUGIN_VALIDATE_CONFIG: ValidationResult;
   TOPIC_FETCH_GROUPS: TopicGroup[];
