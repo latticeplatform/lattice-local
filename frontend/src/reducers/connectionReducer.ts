@@ -81,7 +81,7 @@ const connectionReducer = (state: ConnectState, action: ConnectAction): ConnectS
       console.log('CONNECTOR_UPDATED: ', action);
       const { entry } = action;
       return updateBoth(state, (entries) =>
-        entries.map((e) => (e.info.name === action.name ? entry : e))
+        entries.map((e) => (e.info.name === action.name ? { ...e, ...entry } : e))
       );
     }
 

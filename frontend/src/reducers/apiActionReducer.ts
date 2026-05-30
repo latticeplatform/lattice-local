@@ -60,9 +60,9 @@ const apiActionReducer = async (
 
     case 'CONNECTOR_PATCH': {
       console.log('CONNECTOR_PATCH: ', action.name);
-      const entry = await connectorApi.patch(action.name, action.config);
-      dispatch({ type: 'CONNECTOR_UPDATED', name: action.name, entry });
-      return entry;
+      const newInfo = await connectorApi.patch(action.name, action.config);
+      dispatch({ type: 'CONNECTOR_UPDATED', name: action.name, entry: { info: newInfo } });
+      return;
     }
 
     case 'PLUGIN_FETCH_CONFIG':

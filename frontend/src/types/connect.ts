@@ -171,5 +171,5 @@ export type ConnectAction =
   | { type: 'CONNECTOR_PAUSED'; name: string }
   | { type: 'CONNECTOR_RESUMED'; name: string }
   | { type: 'CONNECTOR_RESTARTED'; name: string }
-  | { type: 'CONNECTOR_UPDATED'; name: string; entry: ConnectorEntry }
+  | { type: 'CONNECTOR_UPDATED'; name: string; entry: Partial<ConnectorEntry> }
   | { type: 'TASK_RESTARTED'; connectorName: string; taskId: number };
