@@ -7,3 +7,5 @@ export const initialState: ConnectState = {
   topics: {},
   loading: true,
 };
+
+export const SENSITIVE_KEYS = /password|secret|credential|token|api[._-]?key/i;

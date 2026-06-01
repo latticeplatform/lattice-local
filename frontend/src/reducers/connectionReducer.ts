@@ -77,6 +77,14 @@ const connectionReducer = (state: ConnectState, action: ConnectAction): ConnectS
       console.log('CONNECTOR_RESTARTED: ', action);
       return updateBoth(state, (entries) => setConnectorStatus(entries, action.name, 'RUNNING'));
 
+    case 'CONNECTOR_UPDATED': {
+      console.log('CONNECTOR_UPDATED: ', action);
+      const { entry } = action;
+      return updateBoth(state, (entries) =>
+        entries.map((e) => (e.info.name === action.name ? { ...e, ...entry } : e))
+      );
+    }
+
     case 'TASK_RESTARTED':
       console.log('TASK_RESTARTED: ', action);
       return updateBoth(state, (entries) =>

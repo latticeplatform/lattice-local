@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, type FC } from 'react';
 import type { ConfigDefinition, TopicGroup } from '../types';
-import { useConnect } from '../context/ConnectContext.tsx';
+import useConnect from '../hooks/useConnect.ts';
 
 interface TopicSelectorFieldProps {
   def: ConfigDefinition;

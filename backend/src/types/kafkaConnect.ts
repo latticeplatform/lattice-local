@@ -146,6 +146,7 @@ export interface KafkaConnectService {
   getConnectors: () => Promise<KCConnectorsResponse<'info-status-autofilled'>>;
   getConnector: (name: string) => Promise<KCConnectorExpandedEntry>;
   createConnector: (body: Record<string, unknown>) => Promise<KCConnectorInfo>;
+  patchConnector: (name: string, body: Record<string, string>) => Promise<KCConnectorInfo>;
   deleteConnector: (name: string) => Promise<void>;
   pauseConnector: (name: string) => Promise<void>;
   resumeConnector: (name: string) => Promise<void>;

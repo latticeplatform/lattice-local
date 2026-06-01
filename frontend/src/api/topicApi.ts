@@ -46,9 +46,9 @@ const createTopicApi = (): TopicApi => {
         throw err;
       });
       schemaCache.set(topicName, promise);
-      return promise
+      return promise;
     } else {
-      return cached
+      return cached;
     }
   };
 

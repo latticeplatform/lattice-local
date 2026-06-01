@@ -20,7 +20,7 @@ const typeLabel = (type: AvroType): string => {
   if (typeof type === 'string') return type;
   if (Array.isArray(type)) {
     const nonNulls = type.filter((t) => t !== 'null');
-    const nonNUllWithValue = nonNulls[0]
+    const nonNUllWithValue = nonNulls[0];
     return nonNUllWithValue ? typeLabel(nonNUllWithValue) : 'union';
   }
   if (type.type === 'record') return type.name;
@@ -35,7 +35,10 @@ const typeLabel = (type: AvroType): string => {
 const resolveRecord = (type: AvroType): AvroRecordType | null => {
   if (typeof type === 'string') return null;
   if (Array.isArray(type)) {
-    for (const t of type) { const r = resolveRecord(t); if (r) return r; }
+    for (const t of type) {
+      const r = resolveRecord(t);
+      if (r) return r;
+    }
     return null;
   }
   return type.type === 'record' ? type : null;

@@ -139,7 +139,7 @@
 }
 
 .required-mark {
-  color: #f87171;
+  color: var(--accent2);
   margin-left: 3px;
 }
 
@@ -174,12 +174,12 @@
 .form-field input.has-error,
 .form-field select.has-error,
 .form-field textarea.has-error {
-  border-color: #f87171;
+  border-color: var(--error);
 }
 
 .field-error {
   font-size: 12px;
-  color: #f87171;
+  color: var(--error);
 }
 
 .topic-selector {
@@ -189,7 +189,7 @@
 }
 
 .topic-selector--error {
-  border-color: #f87171;
+  border-color: var(--error);
 }
 
 .topic-selector-section {

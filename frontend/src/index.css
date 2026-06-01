@@ -2,21 +2,22 @@
   /* Palette */
   --violet: #8884ff;
   --slate: #808782;
-  --navy: #11233b;
+  --navy: #0d1b2e;
   --cream: #ffead0;
   --coral: #eb8258;
 
   /* Semantic — light mode */
-  --text: var(--slate);
-  --text-h: var(--navy);
-  --bg: var(--cream);
-  --border: color-mix(in srgb, var(--slate) 28%, var(--cream));
-  --code-bg: color-mix(in srgb, var(--slate) 10%, var(--cream));
-  --accent: var(--violet);
-  --accent2: var(--coral);
-  --accent-bg: color-mix(in srgb, var(--violet) 12%, transparent);
-  --accent-border: color-mix(in srgb, var(--violet) 45%, transparent);
-  --social-bg: color-mix(in srgb, var(--slate) 8%, var(--cream));
+  --text: color-mix(in srgb, var(--slate) 50%, var(--navy));
+  --text-h: color-mix(in srgb, var(--violet) 50%, var(--navy));
+  --bg: color-mix(in srgb, var(--violet) 10%, var(--cream));
+  --border: color-mix(in srgb, var(--violet) 28%, var(--cream));
+  --code-bg: color-mix(in srgb, var(--violet) 10%, var(--cream));
+  --accent: var(--coral);
+  --accent2: var(--violet);
+  --error: #ed4545;
+  --accent-bg: color-mix(in srgb, var(--coral) 12%, transparent);
+  --accent-border: color-mix(in srgb, var(--coral) 45%, transparent);
+  --social-bg: color-mix(in srgb, var(--violet) 15%, var(--cream));
   --shadow:
     color-mix(in srgb, var(--navy) 12%, transparent) 0 10px 15px -3px,
     color-mix(in srgb, var(--navy) 6%, transparent) 0 4px 6px -2px;
@@ -32,30 +33,27 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background 200ms ease;
 
   @media (max-width: 1024px) {
     font-size: 16px;
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: color-mix(in srgb, var(--slate) 60%, var(--cream));
-    --text-h: var(--cream);
-    --bg: var(--navy);
-    --border: color-mix(in srgb, var(--slate) 25%, var(--navy));
-    --code-bg: color-mix(in srgb, var(--slate) 12%, var(--navy));
-    --accent-bg: color-mix(in srgb, var(--violet) 15%, transparent);
-    --accent-border: color-mix(in srgb, var(--violet) 45%, transparent);
-    --social-bg: color-mix(in srgb, var(--slate) 10%, var(--navy));
-    --shadow:
-      color-mix(in srgb, var(--navy) 60%, transparent) 0 10px 15px -3px,
-      color-mix(in srgb, var(--navy) 35%, transparent) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
+:root[data-theme='dark'] {
+  --text: color-mix(in srgb, var(--slate) 60%, var(--cream));
+  --text-h: var(--cream);
+  --bg: var(--navy);
+  --border: color-mix(in srgb, var(--slate) 25%, var(--navy));
+  --code-bg: color-mix(in srgb, var(--slate) 12%, var(--navy));
+  --accent: var(--violet);
+  --accent2: var(--coral);
+  --accent-bg: color-mix(in srgb, var(--violet) 15%, transparent);
+  --accent-border: color-mix(in srgb, var(--violet) 45%, transparent);
+  --social-bg: color-mix(in srgb, var(--slate) 10%, var(--navy));
+  --shadow:
+    color-mix(in srgb, var(--navy) 60%, transparent) 0 10px 15px -3px,
+    color-mix(in srgb, var(--navy) 35%, transparent) 0 4px 6px -2px;
 }
 
 #root {
@@ -100,19 +98,4 @@ h2 {
 }
 p {
   margin: 0;
-}
-
-code,
-.counter {
-  font-family: var(--mono), 'monospace';
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-}
-
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
 }

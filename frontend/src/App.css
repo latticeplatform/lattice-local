@@ -1,9 +1,35 @@
+.theme-toggle {
+  position: fixed;
+  top: 16px;
+  right: 20px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 8px;
+  cursor: pointer;
+  color: var(--text);
+  font-size: 18px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  transition:
+    color 0.15s,
+    border-color 0.15s;
+  z-index: 100;
+}
+
+.theme-toggle:hover {
+  color: var(--accent2);
+  border-color: var(--accent2);
+}
+
 #center {
+  display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 25px;
-  place-content: center;
-  place-items: center;
   flex-grow: 1;
+  padding: 40px 0;
 
   @media (max-width: 1024px) {
     padding: 32px 20px 24px;
@@ -23,15 +49,14 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
 }
 
 #navbutton .button {
   width: 8rem;
   height: 8rem;
   border-radius: 16px;
-  border: 1px solid var(--border);
-  background: var(--bg);
+  border: 0px solid var(--border);
+  background: transparent;
   color: var(--accent);
   cursor: pointer;
   display: flex;
@@ -40,12 +65,13 @@
   font-size: 28px;
   transition:
     background 150ms ease,
-    border-color 150ms ease;
+    border-color 150ms ease,
+    color 200ms ease;
 }
 
 #navbutton .button:hover {
-  border-color: var(--accent-border);
-  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  color: var(--accent2);
+  /*background: color-mix(in srgb, var(--accent) 18%, transparent);*/
 }
 
 #navbutton .button:active {
@@ -60,6 +86,7 @@
 
 .page-transition {
   display: grid;
+  width: 100%;
   animation: page-grow 420ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 

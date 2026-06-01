@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, type FC } from 'react';
 import type { TopicGroup } from '../types';
-import { useToast } from '../context/ToastContext.tsx';
-import { useConnect } from '../context/ConnectContext.tsx';
+import useToast from '../hooks/useToast.ts';
+import useConnect from '../hooks/useConnect.ts';
 import TopicGroupForm from './modals/TopicGroupForm.tsx';
 
 interface TopicGroupsSectionProps {

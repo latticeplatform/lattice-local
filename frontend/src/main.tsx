@@ -6,6 +6,7 @@ import './index.css';
 import App from './App.tsx';
 import ToastProvider from './components/ToastProvider.tsx';
 import ConnectProvider from './components/ConnectProvider.tsx';
+import ModalProvider from './components/ModalProvider.tsx';
 
 const rootEl = document.getElementById('root');
 if (!rootEl) throw new Error('Root element #root not found');
@@ -14,7 +15,9 @@ createRoot(rootEl).render(
     <BrowserRouter>
       <ToastProvider>
         <ConnectProvider>
-          <App />
+          <ModalProvider>
+            <App />
+          </ModalProvider>
         </ConnectProvider>
       </ToastProvider>
     </BrowserRouter>
