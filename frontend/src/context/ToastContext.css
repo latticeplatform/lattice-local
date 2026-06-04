@@ -57,9 +57,9 @@
 }
 
 .toast--error {
-  --progress-color: #f87171;
-  background: color-mix(in srgb, #f87171 12%, var(--bg));
-  border-color: color-mix(in srgb, #f87171 40%, transparent);
+  --progress-color: var(--error);
+  background: color-mix(in srgb, var(--error) 12%, var(--bg));
+  border-color: color-mix(in srgb, var(--error) 40%, transparent);
   color: var(--text-h);
 }
 
@@ -71,9 +71,9 @@
 }
 
 .toast--warning {
-  --progress-color: var(--coral);
-  background: color-mix(in srgb, var(--coral) 12%, var(--bg));
-  border-color: color-mix(in srgb, var(--coral) 40%, transparent);
+  --progress-color: var(--accent2);
+  background: color-mix(in srgb, var(--accent2) 12%, var(--bg));
+  border-color: color-mix(in srgb, var(--accent2) 40%, transparent);
   color: var(--text-h);
 }
 

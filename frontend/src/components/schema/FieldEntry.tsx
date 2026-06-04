@@ -37,7 +37,10 @@ const FieldEntry: FC<{ row: FieldRow; depth: number }> = ({ row, depth }) => {
         </td>
         {row.doc && <td className="schema-cell schema-cell--doc">{row.doc}</td>}
       </tr>
-      {open && (row.children ?? []).map((child) => <FieldEntry key={child.name} row={child} depth={depth + 1} />)}
+      {open &&
+        (row.children ?? []).map((child) => (
+          <FieldEntry key={child.name} row={child} depth={depth + 1} />
+        ))}
     </>
   );
 };

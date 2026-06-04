@@ -1,26 +1,36 @@
 import { useEffect, useState, type FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { ConnectorEntry, TopicSchemaResult } from '../../types';
-import { useConnect } from '../../context/ConnectContext.tsx';
+import useConnect from '../../hooks/useConnect.ts';
 import ModalShell from './ModalShell.tsx';
 import SchemaDoc from '../schema/SchemaDoc.tsx';
 import './ConnectorDetails.css';
+import DetailSection from '../DetailSection.tsx';
 
 interface TopicDetailsProps {
   name: string;
   sourceConnector: string;
-  subscribingSinks: ConnectorEntry[];
   onClose: () => void;
 }
 
-const TopicDetails: FC<TopicDetailsProps> = ({
-  name,
-  sourceConnector,
-  subscribingSinks,
-  onClose,
-}) => {
+const TopicDetails: FC<TopicDetailsProps> = ({ name, sourceConnector, onClose }) => {
   const navigate = useNavigate();
-  const { dispatch } = useConnect();
+  const { sinks, dispatch } = useConnect();
+
+  const subscribingSinks: ConnectorEntry[] = sinks.filter((sink) => {
+    const topicsRegex = sink.info.config['topics.regex'];
+    if (topicsRegex) {
+      try {
+        return new RegExp(topicsRegex).test(name);
+      } catch {
+        return false;
+      }
+    }
+    return (sink.info.config['topics'] ?? '')
+      .split(',')
+      .map((t) => t.trim())
+      .includes(name);
+  });
   const [schema, setSchema] = useState<TopicSchemaResult | null>(null);
   const [schemaLoading, setSchemaLoading] = useState(true);
   const [schemaError, setSchemaError] = useState<string | null>(null);
@@ -46,18 +56,16 @@ const TopicDetails: FC<TopicDetailsProps> = ({
       headerActions={<span className="badge">topic</span>}
       onClose={onClose}
     >
-      <div className="detail-section">
-        <p className="detail-section-title">Source Connector</p>
+      <DetailSection title={'Source Connector'}>
         <button
           className="detail-link"
           onClick={() => void navigate(`/collect?details=${encodeURIComponent(sourceConnector)}`)}
         >
           {sourceConnector}
         </button>
-      </div>
+      </DetailSection>
 
-      <div className="detail-section">
-        <p className="detail-section-title">Subscribers ({subscribingSinks.length})</p>
+      <DetailSection title={`Subscribers (${String(subscribingSinks.length)})`}>
         {subscribingSinks.length === 0 ? (
           <span className="detail-state" style={{ color: 'var(--text)' }}>
             No sinks subscribed to this topic
@@ -79,10 +87,9 @@ const TopicDetails: FC<TopicDetailsProps> = ({
             </div>
           ))
         )}
-      </div>
+      </DetailSection>
 
-      <div className="detail-section">
-        <p className="detail-section-title">Schema</p>
+      <DetailSection title={'Schema'}>
         {schemaLoading ? (
           <span className="detail-state" style={{ color: 'var(--text)' }}>
             Loading schema…
@@ -94,12 +101,7 @@ const TopicDetails: FC<TopicDetailsProps> = ({
         ) : schema ? (
           <SchemaDoc result={schema} />
         ) : null}
-      </div>
-
-      {/*<div className="detail-section">*/}
-      {/*  <p className="detail-section-title">Data Stream</p>*/}
-      {/*  {}*/}
-      {/*</div>*/}
+      </DetailSection>
     </ModalShell>
   );
 };
