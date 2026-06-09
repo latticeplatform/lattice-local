@@ -54,7 +54,7 @@ INSERT INTO orders (product_id, quantity ) VALUES (1, 1);
 Lattice provides both Clickhouse and MongoDB example databases to consume events.
 - Navigate to the `backend` directory
 - Run `npm run dev:consumers`
-- 
+
 ### Open a ClickHouse shell
 ```bash
 docker exec -it clickhouse clickhouse-client \
