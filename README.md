@@ -6,7 +6,9 @@
 
 Lattice is an open-source framework designed for fast and consistent data propagation in your CDC pipelines. Built to handle real-time data, you can have infrastructure running in a matter of minutes.
 
-For more information, check out our case study: [Lattice Platform Case Study](https://latticeplatform.io)
+For more information, check out our case study: [Lattice Platform Case Study](https://latticeplatform.io/introduction)
+
+For information on using the UI check out the [UI Guide](https://latticeplatform.io/using-lattice)
 
 ---
 
